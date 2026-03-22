@@ -30,7 +30,10 @@ export default function RootLayout({ children }) {
       lang="en"
       className={`${cormorant.variable} ${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full bg-[#0a1810] text-pink-50 flex flex-col">
+      <body
+        className="min-h-full flex flex-col bg-slate-950 font-sans text-stone-100"
+        suppressHydrationWarning
+      >
         {children}
       </body>
     </html>

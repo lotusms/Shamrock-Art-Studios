@@ -1,19 +1,6 @@
 @import "tailwindcss";
 
-/* Fun girly shamrock: electric lime + mint green + hot pink — not serious forest */
-:root {
-  --background: #0a1810;
-  --foreground: #fff1f7;
-  --card: rgba(20, 50, 36, 0.65);
-  --border: rgba(190, 242, 100, 0.35);
-  --accent-lime: #bef264;
-  --accent-pink: #f472b6;
-  --accent-mint: #34d399;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-serif: var(--font-display), ui-serif, Georgia, "Times New Roman", serif;
   --font-mono: var(--font-geist-mono);
@@ -27,16 +14,34 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Dark slate base + soft cool/warm light (Tailwind palette tokens only). */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
   background-image:
-    radial-gradient(circle at 15% 0%, rgba(190, 242, 100, 0.22), transparent 38%),
-    radial-gradient(circle at 90% 15%, rgba(244, 114, 182, 0.16), transparent 32%),
-    radial-gradient(circle at 70% 90%, rgba(52, 211, 153, 0.14), transparent 36%),
-    radial-gradient(circle at 0% 70%, rgba(167, 243, 208, 0.1), transparent 40%),
-    linear-gradient(180deg, rgba(14, 35, 26, 0.96), rgba(8, 22, 16, 1));
+    radial-gradient(
+      circle at 15% 0%,
+      color-mix(in oklch, var(--color-slate-500) 18%, transparent),
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 90% 15%,
+      color-mix(in oklch, var(--color-slate-600) 14%, transparent),
+      transparent 34%
+    ),
+    radial-gradient(
+      circle at 70% 90%,
+      color-mix(in oklch, var(--color-amber-500) 8%, transparent),
+      transparent 38%
+    ),
+    radial-gradient(
+      circle at 0% 70%,
+      color-mix(in oklch, var(--color-slate-400) 9%, transparent),
+      transparent 42%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in oklch, var(--color-slate-950) 94%, var(--color-slate-900)),
+      var(--color-slate-950)
+    );
 }
 
 @layer base {
@@ -104,16 +109,15 @@ body {
     animation: aura-3 20s ease-in-out infinite reverse;
   }
 
-  /* Lime → pink → mint candy shimmer */
   .text-gradient-hero {
     background-image: linear-gradient(
       118deg,
-      #ecfccb 0%,
-      #bef264 18%,
-      #fda4af 38%,
-      #ffffff 58%,
-      #4ade80 85%,
-      #f472b6 100%
+      var(--color-stone-100) 0%,
+      var(--color-amber-200) 22%,
+      var(--color-slate-200) 42%,
+      var(--color-white) 58%,
+      var(--color-sky-200) 82%,
+      var(--color-amber-300) 100%
     );
     background-size: 220% auto;
     -webkit-background-clip: text;
@@ -125,9 +129,9 @@ body {
   .text-gradient-hero-subtle {
     background-image: linear-gradient(
       105deg,
-      #d9f99d 0%,
-      #fbcfe8 45%,
-      #a7f3d0 100%
+      var(--color-slate-300) 0%,
+      var(--color-stone-200) 40%,
+      var(--color-sky-100) 100%
     );
     -webkit-background-clip: text;
     background-clip: text;
