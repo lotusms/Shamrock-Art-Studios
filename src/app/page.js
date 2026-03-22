@@ -80,7 +80,7 @@ export default function Home() {
   const heroWork = featuredWorks[0];
 
   return (
-    <main className="relative z-10 overflow-hidden">
+    <main className="relative z-10 overflow-hidden pt-[4.25rem]">
       {/* Subtle film grain + depth */}
       <div
         aria-hidden
@@ -121,10 +121,10 @@ export default function Home() {
             </p>
 
             <div className="mt-8 flex flex-col gap-4 sm:flex-row">
-              <Button href="#collection" variant="primary">
+              <Button href="/work" variant="primary">
                 Explore collection
               </Button>
-              <Button href="#about" variant="secondary">
+              <Button href="/about" variant="secondary">
                 View studio notes
               </Button>
             </div>

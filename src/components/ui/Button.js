@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const baseClasses =
   "inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-semibold transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 active:scale-[0.98]";
 
@@ -17,6 +19,14 @@ export default function Button({
   const classes = `${baseClasses} ${variantClasses[variant] ?? variantClasses.primary} ${className}`.trim();
 
   if (href) {
+    const internal = href.startsWith("/") && !href.startsWith("//");
+    if (internal) {
+      return (
+        <Link href={href} className={classes}>
+          {children}
+        </Link>
+      );
+    }
     return (
       <a href={href} className={classes}>
         {children}
