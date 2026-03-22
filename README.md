@@ -1,5 +1,7 @@
 # Shamrock Art Studio
 
+> **Repo root:** This folder (`shamrock-art-studio/`) is the Git and Next.js project root. The parent `Shamrock Art Studio/` folder is only a disk wrapper (like `Volair/volair/`).
+
 Starter app built with [Next.js](https://nextjs.org), React, Tailwind CSS, and Firebase using `pnpm`.
 
 ## Getting Started
