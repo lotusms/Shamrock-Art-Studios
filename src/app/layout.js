@@ -1,4 +1,5 @@
 import { Cormorant_Garamond, Geist, Geist_Mono } from "next/font/google";
+import CartProvider from "@/components/CartProvider";
 import ScrollToTopOnLoad from "@/components/ScrollToTopOnLoad";
 import SiteHeader from "@/components/SiteHeader";
 import "./globals.css";
@@ -36,9 +37,11 @@ export default function RootLayout({ children }) {
         className="min-h-full flex flex-col bg-slate-950 font-sans text-stone-100"
         suppressHydrationWarning
       >
-        <ScrollToTopOnLoad />
-        <SiteHeader />
-        {children}
+        <CartProvider>
+          <ScrollToTopOnLoad />
+          <SiteHeader />
+          {children}
+        </CartProvider>
       </body>
     </html>
   );

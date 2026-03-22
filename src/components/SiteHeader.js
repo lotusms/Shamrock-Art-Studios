@@ -3,12 +3,16 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useState } from "react";
+import { useCart } from "@/context/CartContext";
 import { mainNav } from "@/config/nav";
 
-function NavLink({ href, label, onNavigate, className = "" }) {
+function NavLink({ href, label, prefix, onNavigate, className = "" }) {
   const pathname = usePathname();
-  const active =
-    href === "/" ? pathname === "/" : pathname === href;
+  const active = prefix
+    ? pathname === href || pathname.startsWith(`${href}/`)
+    : href === "/"
+      ? pathname === "/"
+      : pathname === href;
 
   return (
     <Link
@@ -25,6 +29,39 @@ function NavLink({ href, label, onNavigate, className = "" }) {
         }`}
         aria-hidden
       />
+    </Link>
+  );
+}
+
+function CartNavLink({ onNavigate }) {
+  const { itemCount } = useCart();
+  return (
+    <Link
+      href="/cart"
+      onClick={() => onNavigate?.()}
+      className="group relative flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-stone-300 transition hover:border-amber-400/35 hover:bg-white/[0.07] hover:text-stone-100"
+      aria-label={`Shopping cart${itemCount ? `, ${itemCount} items` : ""}`}
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        className="h-5 w-5"
+        aria-hidden
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
+        />
+      </svg>
+      {itemCount > 0 ? (
+        <span className="min-w-[1.25rem] rounded-full bg-amber-400/90 px-1.5 text-center text-[0.65rem] font-bold tabular-nums text-slate-950">
+          {itemCount > 99 ? "99+" : itemCount}
+        </span>
+      ) : null}
     </Link>
   );
 }
@@ -68,10 +105,17 @@ export default function SiteHeader() {
           className="hidden items-center gap-9 md:flex"
         >
           {mainNav.map((item) => (
-            <NavLink key={item.href} href={item.href} label={item.label} />
+            <NavLink
+              key={item.href}
+              href={item.href}
+              label={item.label}
+              prefix={item.prefix}
+            />
           ))}
         </nav>
 
+        <div className="flex items-center gap-3">
+          <CartNavLink onNavigate={close} />
         <button
           type="button"
           className="flex h-11 w-11 flex-col items-center justify-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] text-stone-100 transition hover:border-amber-400/30 hover:bg-white/[0.07] md:hidden"
@@ -96,6 +140,7 @@ export default function SiteHeader() {
             }`}
           />
         </button>
+        </div>
       </div>
 
       <div
