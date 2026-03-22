@@ -1,0 +1,130 @@
+@import "tailwindcss";
+
+:root {
+  --background: #140916;
+  --foreground: #f8edf6;
+  --card: rgba(47, 20, 44, 0.72);
+  --border: rgba(244, 186, 220, 0.18);
+  --accent: #f3a6cf;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-serif: var(--font-display), ui-serif, Georgia, "Times New Roman", serif;
+  --font-mono: var(--font-geist-mono);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  background-image:
+    radial-gradient(circle at top, rgba(243, 166, 207, 0.2), transparent 28%),
+    radial-gradient(circle at right, rgba(196, 151, 255, 0.14), transparent 30%),
+    linear-gradient(180deg, rgba(44, 16, 39, 0.98), rgba(20, 9, 22, 1));
+}
+
+/* Keep link defaults inside @layer base so Tailwind utilities (e.g. text-rose-950) win */
+@layer base {
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+}
+
+/* Ambient motion for background orbs */
+@keyframes aura-1 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.75;
+  }
+  50% {
+    transform: translate(6%, -10%) scale(1.12);
+    opacity: 1;
+  }
+}
+
+@keyframes aura-2 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.65;
+  }
+  50% {
+    transform: translate(-8%, 6%) scale(1.08);
+    opacity: 0.95;
+  }
+}
+
+@keyframes aura-3 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.55;
+  }
+  50% {
+    transform: translate(5%, 8%) scale(1.06);
+    opacity: 0.85;
+  }
+}
+
+@keyframes shimmer-line {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+@layer utilities {
+  .animate-aura-1 {
+    animation: aura-1 18s ease-in-out infinite;
+  }
+
+  .animate-aura-2 {
+    animation: aura-2 24s ease-in-out infinite;
+  }
+
+  .animate-aura-3 {
+    animation: aura-3 20s ease-in-out infinite reverse;
+  }
+
+  .text-gradient-hero {
+    background-image: linear-gradient(
+      115deg,
+      #ffe4f3 0%,
+      #f0abfc 35%,
+      #fcd34d 70%,
+      #fda4af 100%
+    );
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: shimmer-line 10s linear infinite;
+  }
+
+  .text-gradient-hero-subtle {
+    background-image: linear-gradient(
+      105deg,
+      #fbcfe8 0%,
+      #e9d5ff 50%,
+      #fef3c7 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
