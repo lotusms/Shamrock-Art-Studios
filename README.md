@@ -53,7 +53,11 @@ const app = getFirebaseApp();
 
 ## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Import the GitHub repo in [Vercel](https://vercel.com/new).
+2. **Framework:** Next.js (auto-detected). **Install command:** `pnpm install` (used automatically when `pnpm-lock.yaml` is present).
+3. **Environment variables:** In the project → Settings → Environment Variables, add every key from `.env.local.example` (same `NEXT_PUBLIC_*` names). `.env.local` is not committed; production builds need these in Vercel if you use Firebase on the client.
+4. Deploy. Build command is `pnpm build` via the `build` script in `package.json`.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-# Shamrock-Art-Studios
+If the build fails, open the full log and check the first **Error** line—often it’s a missing env var, Node version, or lint/type error. This repo pins Node `>=20.9.0` and `pnpm` via `packageManager` in `package.json` for consistent CI/Vercel installs.
+
+- [Next.js on Vercel](https://vercel.com/docs/frameworks/nextjs)
