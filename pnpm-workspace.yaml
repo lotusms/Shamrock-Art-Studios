@@ -1,3 +1,7 @@
+# Single-package app: root must be listed or pnpm install fails with "packages field missing or empty"
+packages:
+  - "."
+
 ignoredBuiltDependencies:
   - sharp
   - unrs-resolver
