@@ -11,7 +11,8 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
+  scrollbar-gutter: stable;
 }
 
 /* Dark slate base + soft cool/warm light (Tailwind palette tokens only). */

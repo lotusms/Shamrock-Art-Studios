@@ -1,4 +1,5 @@
 import { Cormorant_Garamond, Geist, Geist_Mono } from "next/font/google";
+import ScrollToTopOnLoad from "@/components/ScrollToTopOnLoad";
 import "./globals.css";
 
 /** Elegant serif for headings — softer, more feminine art-gallery feel */
@@ -34,6 +35,7 @@ export default function RootLayout({ children }) {
         className="min-h-full flex flex-col bg-slate-950 font-sans text-stone-100"
         suppressHydrationWarning
       >
+        <ScrollToTopOnLoad />
         {children}
       </body>
     </html>
