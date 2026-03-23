@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Keep Turbopack explicit for Next.js 16+ build compatibility on Vercel.
+  turbopack: {},
   // External / network volumes often break native file watchers; polling keeps HMR reliable.
   webpack: (config, { dev }) => {
     if (dev) {
