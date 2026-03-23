@@ -5,27 +5,22 @@ export default function PageLayout({
   title,
   subtitle,
   children,
-  width = "default",
+  width: _width = "default",
 }) {
-  const max =
-    width === "wide"
-      ? "max-w-5xl"
-      : width === "full"
-        ? "max-w-7xl"
-        : "max-w-3xl";
+  const layoutWidth = "max-w-7xl";
 
   return (
-    <main className="relative z-10 min-h-[calc(100vh-4.25rem)] overflow-hidden">
+    <main className="relative z-10 w-full min-w-0">
       <div
         aria-hidden
-        className="pointer-events-none fixed inset-0 z-[2] opacity-[0.04] mix-blend-overlay"
+        className="pointer-events-none fixed inset-0 z-2 opacity-[0.04] mix-blend-overlay"
         style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
         }}
       />
       <InnerPageBackdrop />
       <div
-        className={`relative z-10 mx-auto w-full px-6 pb-28 pt-[calc(4.25rem+3rem)] sm:px-10 lg:px-12 ${max}`}
+        className={`relative z-10 mx-auto w-full px-6 pb-28 pt-29 sm:px-10 lg:px-12 ${layoutWidth}`}
       >
         {eyebrow ? (
           <p className="text-xs uppercase tracking-[0.32em] text-slate-400">
@@ -36,7 +31,7 @@ export default function PageLayout({
           {title}
         </h1>
         {subtitle ? (
-          <p className="mt-4 max-w-2xl text-lg leading-relaxed text-stone-300/95 sm:text-xl">
+          <p className="mt-4 max-w-full text-lg leading-relaxed text-stone-300/95 sm:text-xl lg:max-w-[75%]">
             {subtitle}
           </p>
         ) : null}

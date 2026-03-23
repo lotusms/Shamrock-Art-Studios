@@ -3,16 +3,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import AddToCartButton from "@/components/AddToCartButton";
 import PageLayout from "@/components/PageLayout";
-import { getAllSlugs, getProductBySlug } from "@/data/products";
+import { getCatalogProductBySlug } from "@/lib/printful/catalog";
 import { formatUsd } from "@/lib/money";
 
-export function generateStaticParams() {
-  return getAllSlugs().map((slug) => ({ slug }));
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  const product = await getCatalogProductBySlug(slug);
   if (!product) return { title: "Work not found" };
   return {
     title: `${product.title} | Shop | Shamrock Art Studio`,
@@ -22,7 +20,7 @@ export async function generateMetadata({ params }) {
 
 export default async function ProductPage({ params }) {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  const product = await getCatalogProductBySlug(slug);
   if (!product) notFound();
 
   return (
@@ -33,7 +31,7 @@ export default async function ProductPage({ params }) {
 
       <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14">
         <div className="relative overflow-hidden rounded-4xl border-2 border-slate-600/40 bg-slate-900/50 shadow-2xl shadow-slate-950/40">
-          <div className="relative aspect-[4/5] w-full">
+          <div className="relative aspect-4/5 w-full">
             <Image
               src={product.image}
               alt={`${product.title} by ${product.artist}`}

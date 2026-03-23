@@ -75,14 +75,22 @@ export default function SiteHeader() {
   const [open, setOpen] = useState(false);
   const panelId = useId();
 
+  function setScrollLocked(locked) {
+    document.body.style.overflow = locked ? "hidden" : "";
+    document.documentElement.style.overflow = locked ? "hidden" : "";
+  }
+
   useEffect(() => {
-    if (!open) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    setScrollLocked(open);
+
     return () => {
-      document.body.style.overflow = prev;
+      setScrollLocked(false);
     };
   }, [open]);
+
+  useEffect(() => {
+    setScrollLocked(false);
+  }, [pathname]);
 
   useEffect(() => {
     const onKey = (e) => {

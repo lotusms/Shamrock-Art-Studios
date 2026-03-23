@@ -25,12 +25,24 @@ function loadStored() {
   }
 }
 
+function toLineKey(product) {
+  if (product?.variantId) return `v-${product.variantId}`;
+  return `p-${product?.id ?? "unknown"}`;
+}
+
+function normalizeLine(line) {
+  if (line?.lineKey) return line;
+  if (line?.variantId) return { ...line, lineKey: `v-${line.variantId}` };
+  if (line?.productId) return { ...line, lineKey: `p-${line.productId}` };
+  return { ...line, lineKey: `legacy-${Math.random().toString(36).slice(2, 8)}` };
+}
+
 export function CartProvider({ children }) {
   const [lines, setLines] = useState([]);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    setLines(loadStored());
+    setLines(loadStored().map(normalizeLine));
     setReady(true);
   }, []);
 
@@ -45,17 +57,23 @@ export function CartProvider({ children }) {
 
   const addItem = useCallback((product, qty = 1) => {
     setLines((prev) => {
-      const i = prev.findIndex((l) => l.productId === product.id);
+      const lineKey = toLineKey(product);
+      const i = prev.findIndex((l) => l.lineKey === lineKey);
       if (i === -1) {
         return [
           ...prev,
           {
+            lineKey,
             productId: product.id,
+            printfulProductId: product.printfulProductId ?? null,
+            variantId: product.variantId ?? null,
+            externalId: product.externalId ?? null,
             slug: product.slug,
             title: product.title,
             artist: product.artist,
             priceUsd: product.priceUsd,
             image: product.image,
+            sku: product.sku ?? null,
             quantity: qty,
           },
         ];
@@ -69,18 +87,16 @@ export function CartProvider({ children }) {
     });
   }, []);
 
-  const setQuantity = useCallback((productId, quantity) => {
+  const setQuantity = useCallback((lineKey, quantity) => {
     const q = Math.max(0, Math.floor(Number(quantity)));
     setLines((prev) => {
-      if (q === 0) return prev.filter((l) => l.productId !== productId);
-      return prev.map((l) =>
-        l.productId === productId ? { ...l, quantity: q } : l,
-      );
+      if (q === 0) return prev.filter((l) => l.lineKey !== lineKey);
+      return prev.map((l) => (l.lineKey === lineKey ? { ...l, quantity: q } : l));
     });
   }, []);
 
-  const removeLine = useCallback((productId) => {
-    setLines((prev) => prev.filter((l) => l.productId !== productId));
+  const removeLine = useCallback((lineKey) => {
+    setLines((prev) => prev.filter((l) => l.lineKey !== lineKey));
   }, []);
 
   const clearCart = useCallback(() => setLines([]), []);

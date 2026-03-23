@@ -80,7 +80,7 @@ export default function Home() {
   const heroWork = featuredWorks[0];
 
   return (
-    <main className="relative z-10 overflow-hidden pt-[4.25rem]">
+    <main className="relative z-10 overflow-x-hidden pt-17">
       {/* Subtle film grain + depth */}
       <div
         aria-hidden

@@ -30,7 +30,7 @@ export default function AboutPage() {
       eyebrow="Studio"
       title="About"
       subtitle="A gallery without a street address—built for collectors who live in inboxes, mood boards, and full-screen tabs."
-      width="wide"
+      width="full"
     >
       <p className="max-w-3xl text-lg leading-relaxed text-stone-200/95 sm:text-xl sm:leading-8">
         Shamrock Art Studio exists at the intersection of{" "}

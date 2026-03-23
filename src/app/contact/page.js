@@ -18,7 +18,7 @@ export default function ContactPage() {
       eyebrow="Inquiries"
       title="Contact"
       subtitle="Tell us what you’re looking for. We read every message and reply with care—not automation."
-      width="wide"
+      width="full"
     >
       <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12">
         <div className="space-y-6">

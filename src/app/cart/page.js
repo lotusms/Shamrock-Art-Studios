@@ -49,7 +49,7 @@ export default function CartPage() {
         <ul className="space-y-6">
           {lines.map((line) => (
             <li
-              key={line.productId}
+              key={line.lineKey}
               className="flex gap-5 rounded-3xl border-2 border-slate-700/40 bg-slate-900/45 p-4 shadow-lg shadow-slate-950/25 sm:p-5"
             >
               <Link
@@ -83,15 +83,13 @@ export default function CartPage() {
                       min={1}
                       max={99}
                       value={line.quantity}
-                      onChange={(e) =>
-                        setQuantity(line.productId, e.target.value)
-                      }
+                      onChange={(e) => setQuantity(line.lineKey, e.target.value)}
                       className="w-16 rounded-lg border border-slate-600 bg-slate-950/80 px-2 py-1.5 text-center text-sm text-stone-200 tabular-nums focus:border-amber-400/50 focus:outline-none focus:ring-1 focus:ring-amber-400/30"
                     />
                   </label>
                   <button
                     type="button"
-                    onClick={() => removeLine(line.productId)}
+                    onClick={() => removeLine(line.lineKey)}
                     className="text-xs uppercase tracking-[0.2em] text-slate-500 underline decoration-slate-600 underline-offset-4 transition hover:text-amber-200/90"
                   >
                     Remove

@@ -1,6 +1,7 @@
 import { Cormorant_Garamond, Geist, Geist_Mono } from "next/font/google";
 import CartProvider from "@/components/CartProvider";
 import ScrollToTopOnLoad from "@/components/ScrollToTopOnLoad";
+import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 import "./globals.css";
 
@@ -31,16 +32,17 @@ export default function RootLayout({ children }) {
   return (
     <html
       lang="en"
-      className={`${cormorant.variable} ${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${cormorant.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
     >
       <body
-        className="min-h-full flex flex-col bg-slate-950 font-sans text-stone-100"
+        className="flex min-h-dvh flex-col bg-slate-950 font-sans text-stone-100"
         suppressHydrationWarning
       >
         <CartProvider>
           <ScrollToTopOnLoad />
           <SiteHeader />
           {children}
+          <SiteFooter />
         </CartProvider>
       </body>
     </html>

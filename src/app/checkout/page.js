@@ -25,8 +25,10 @@ export default function CheckoutPage() {
   const total = orderTotal(subtotalUsd);
 
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const [form, setForm] = useState({
     email: "",
+    phone: "",
     fullName: "",
     address1: "",
     address2: "",
@@ -71,12 +73,14 @@ export default function CheckoutPage() {
   async function handleSubmit(e) {
     e.preventDefault();
     setSubmitting(true);
+    setSubmitError("");
 
     const orderId = makeOrderId();
     const order = {
       id: orderId,
       createdAt: new Date().toISOString(),
       email: form.email.trim(),
+      phone: form.phone.trim(),
       shippingAddress: {
         fullName: form.fullName.trim(),
         address1: form.address1.trim(),
@@ -88,10 +92,14 @@ export default function CheckoutPage() {
       },
       lines: lines.map((l) => ({
         productId: l.productId,
+        printfulProductId: l.printfulProductId ?? null,
+        variantId: l.variantId ?? null,
+        externalId: l.externalId ?? null,
         slug: l.slug,
         title: l.title,
         artist: l.artist,
         priceUsd: l.priceUsd,
+        sku: l.sku ?? null,
         quantity: l.quantity,
         image: l.image,
       })),
@@ -102,13 +110,42 @@ export default function CheckoutPage() {
     };
 
     try {
-      sessionStorage.setItem(ORDER_STORAGE_KEY, JSON.stringify(order));
-    } catch {
-      /* ignore */
-    }
+      const response = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ order }),
+      });
+      const data = await response.json();
+      if (!response.ok || !data?.ok) {
+        throw new Error(data?.error || "Could not place order.");
+      }
 
-    clearCart();
-    router.push(`/checkout/thank-you?ref=${encodeURIComponent(orderId)}`);
+      const orderWithFulfillment = {
+        ...order,
+        fulfillment: {
+          provider: data.mode === "printful" ? "printful" : "demo",
+          providerOrderId: data.printfulOrderId ?? null,
+          providerStatus: data.printfulStatus ?? null,
+        },
+      };
+
+      try {
+        sessionStorage.setItem(
+          ORDER_STORAGE_KEY,
+          JSON.stringify(orderWithFulfillment),
+        );
+      } catch {
+        /* ignore */
+      }
+
+      clearCart();
+      router.push(`/checkout/thank-you?ref=${encodeURIComponent(orderId)}`);
+    } catch (error) {
+      setSubmitError(
+        error instanceof Error ? error.message : "Could not place order.",
+      );
+      setSubmitting(false);
+    }
   }
 
   const inputClass =
@@ -118,7 +155,7 @@ export default function CheckoutPage() {
     <PageLayout
       eyebrow="Secure checkout"
       title="Checkout"
-      subtitle="Demo flow — connect Stripe or another processor to capture real payments."
+      subtitle="Orders route through Printful when API credentials are set; otherwise checkout runs in local demo mode."
       width="full"
     >
       <form
@@ -138,6 +175,16 @@ export default function CheckoutPage() {
                 autoComplete="email"
                 value={form.email}
                 onChange={(e) => update("email", e.target.value)}
+                className={inputClass}
+              />
+            </label>
+            <label className="mt-4 block text-sm text-slate-400">
+              Phone (for carrier updates)
+              <input
+                type="tel"
+                autoComplete="tel"
+                value={form.phone}
+                onChange={(e) => update("phone", e.target.value)}
                 className={inputClass}
               />
             </label>
@@ -233,11 +280,11 @@ export default function CheckoutPage() {
 
           <section className="rounded-3xl border-2 border-slate-700/40 bg-slate-900/45 p-6 sm:p-8">
             <h2 className="text-xs uppercase tracking-[0.28em] text-amber-300/90">
-              Payment (demo)
+              Payment
             </h2>
             <p className="mt-3 text-sm leading-relaxed text-slate-500">
-              No card is charged. In production, replace this block with Stripe
-              Elements or Checkout Session.
+              This template creates a fulfillment order in Printful. Add Stripe
+              to capture payment before creating shipment.
             </p>
             <label className="mt-6 block text-sm text-slate-400">
               Name on card
@@ -296,7 +343,7 @@ export default function CheckoutPage() {
             <ul className="mt-6 max-h-48 space-y-3 overflow-y-auto text-sm">
               {lines.map((l) => (
                 <li
-                  key={l.productId}
+                  key={l.lineKey}
                   className="flex justify-between gap-3 text-stone-300"
                 >
                   <span className="min-w-0 truncate">
@@ -344,6 +391,11 @@ export default function CheckoutPage() {
             >
               {submitting ? "Placing order…" : "Place order"}
             </button>
+            {submitError ? (
+              <p className="mt-3 rounded-xl border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-xs leading-relaxed text-rose-200">
+                {submitError}
+              </p>
+            ) : null}
             <p className="mt-4 text-center text-xs leading-relaxed text-slate-500">
               By placing this demo order you agree to inspection, crating, and
               final shipping quotes where applicable.

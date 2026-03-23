@@ -46,7 +46,7 @@ function ThankYouContent() {
     <PageLayout
       eyebrow="Confirmed"
       title="Thank you"
-      subtitle="Your order is recorded. In production, you’d email a receipt and trigger fulfillment."
+      subtitle="Your order is recorded and ready for fulfillment."
       width="wide"
     >
       <div className="rounded-4xl border-2 border-emerald-500/25 bg-slate-900/50 p-8 shadow-lg shadow-slate-950/30">
@@ -58,6 +58,17 @@ function ThankYouContent() {
         </p>
         <p className="mt-2 text-sm text-slate-500">
           {new Date(order.createdAt).toLocaleString()}
+        </p>
+        <p className="mt-4 text-xs uppercase tracking-[0.28em] text-slate-500">
+          Fulfillment
+        </p>
+        <p className="mt-2 text-sm text-stone-300">
+          {order.fulfillment?.provider === "printful"
+            ? "Printful connected"
+            : "Demo mode"}
+          {order.fulfillment?.providerOrderId
+            ? ` · ID ${order.fulfillment.providerOrderId}`
+            : ""}
         </p>
       </div>
 
