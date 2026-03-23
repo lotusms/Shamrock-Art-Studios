@@ -1,10 +1,13 @@
 import Link from "next/link";
 
 const footerLinks = [
-  { href: "/work", label: "Work" },
-  { href: "/shop", label: "Shop" },
-  { href: "/about", label: "About" },
-  { href: "/contact", label: "Contact" },
+  { href: "/privacy-policy", label: "Privacy Policy" },
+  { href: "/terms-of-use", label: "Terms of Use" },
+  {
+    href: "mailto:info@lotusmarketingsolutions.com",
+    label: "Technical Support",
+    external: true,
+  },
 ];
 
 export default function SiteFooter() {
@@ -21,13 +24,23 @@ export default function SiteFooter() {
         </div>
         <nav aria-label="Footer" className="flex flex-wrap gap-x-8 gap-y-3">
           {footerLinks.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="text-xs font-medium uppercase tracking-[0.28em] text-slate-500 transition hover:text-amber-200/90"
-            >
-              {item.label}
-            </Link>
+            item.external ? (
+              <a
+                key={item.href}
+                href={item.href}
+                className="text-xs font-medium uppercase tracking-[0.28em] text-slate-500 transition hover:text-amber-200/90"
+              >
+                {item.label}
+              </a>
+            ) : (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="text-xs font-medium uppercase tracking-[0.28em] text-slate-500 transition hover:text-amber-200/90"
+              >
+                {item.label}
+              </Link>
+            )
           ))}
         </nav>
       </div>

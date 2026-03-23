@@ -37,6 +37,25 @@ function normalizeLine(line) {
   return { ...line, lineKey: `legacy-${Math.random().toString(36).slice(2, 8)}` };
 }
 
+function sameLineData(a, b) {
+  return (
+    a.lineKey === b.lineKey &&
+    a.productId === b.productId &&
+    a.printfulProductId === b.printfulProductId &&
+    a.variantId === b.variantId &&
+    a.catalogVariantId === b.catalogVariantId &&
+    a.externalId === b.externalId &&
+    a.slug === b.slug &&
+    a.title === b.title &&
+    a.artist === b.artist &&
+    a.priceUsd === b.priceUsd &&
+    a.image === b.image &&
+    Boolean(a.shippingIncluded) === Boolean(b.shippingIncluded) &&
+    a.sku === b.sku &&
+    a.quantity === b.quantity
+  );
+}
+
 export function CartProvider({ children }) {
   const [lines, setLines] = useState([]);
   const [ready, setReady] = useState(false);
@@ -55,6 +74,69 @@ export function CartProvider({ children }) {
     }
   }, [lines, ready]);
 
+  useEffect(() => {
+    if (!ready || lines.length === 0) return;
+    let active = true;
+
+    async function syncFromCatalog() {
+      try {
+        const response = await fetch("/api/catalog/products", {
+          cache: "no-store",
+        });
+        const data = await response.json();
+        if (!active || !Array.isArray(data?.products)) return;
+
+        const byVariant = new Map(
+          data.products
+            .filter((p) => p?.variantId)
+            .map((p) => [String(p.variantId), p]),
+        );
+
+        setLines((prev) => {
+          const next = prev
+            .map((line) => {
+              if (!line.variantId) return line;
+              const latest = byVariant.get(String(line.variantId));
+              if (!latest) return null;
+              return {
+                ...line,
+                productId: latest.id,
+                printfulProductId: latest.printfulProductId ?? line.printfulProductId ?? null,
+                catalogVariantId: latest.catalogVariantId ?? line.catalogVariantId ?? null,
+                externalId: latest.externalId ?? line.externalId ?? null,
+                slug: latest.slug ?? line.slug,
+                title: latest.title ?? line.title,
+                artist: latest.artist ?? line.artist,
+                priceUsd: Number(latest.priceUsd ?? line.priceUsd),
+                image: latest.image ?? line.image,
+                shippingIncluded:
+                  typeof latest.shippingIncluded === "boolean"
+                    ? latest.shippingIncluded
+                    : Boolean(line.shippingIncluded),
+                sku: latest.sku ?? line.sku ?? null,
+              };
+            })
+            .filter(Boolean);
+
+          if (
+            next.length === prev.length &&
+            next.every((line, i) => sameLineData(line, prev[i]))
+          ) {
+            return prev;
+          }
+          return next;
+        });
+      } catch {
+        // Keep cart usable if catalog sync fails.
+      }
+    }
+
+    syncFromCatalog();
+    return () => {
+      active = false;
+    };
+  }, [ready, lines.length]);
+
   const addItem = useCallback((product, qty = 1) => {
     setLines((prev) => {
       const lineKey = toLineKey(product);
@@ -67,12 +149,14 @@ export function CartProvider({ children }) {
             productId: product.id,
             printfulProductId: product.printfulProductId ?? null,
             variantId: product.variantId ?? null,
+            catalogVariantId: product.catalogVariantId ?? null,
             externalId: product.externalId ?? null,
             slug: product.slug,
             title: product.title,
             artist: product.artist,
             priceUsd: product.priceUsd,
             image: product.image,
+            shippingIncluded: Boolean(product.shippingIncluded),
             sku: product.sku ?? null,
             quantity: qty,
           },

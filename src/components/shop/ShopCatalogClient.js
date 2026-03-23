@@ -7,46 +7,43 @@ import { formatUsd } from "@/lib/money";
 
 function ProductCard({ product }) {
   return (
-    <Link
-      href={`/shop/${product.slug}`}
-      className="group overflow-hidden rounded-4xl border-2 border-slate-700/35 bg-slate-900/40 shadow-lg shadow-slate-950/35 transition duration-500 hover:-translate-y-1 hover:border-amber-400/30 hover:shadow-2xl hover:shadow-slate-950/45"
-    >
-      <div className="relative aspect-4/5 overflow-hidden border-b border-white/5">
+    <Link href={`/shop/${product.slug}`} className="group block w-full">
+      <div className="relative border-2 border-slate-700/35 hover:border-amber-400/30 bg-slate-950/45 shadow-lg shadow-slate-950/35 transition duration-500 hover:-translate-y-1 hover:shadow-2xl hover:shadow-slate-950/45">
         <Image
           src={product.image}
           alt={`${product.title} by ${product.artist}`}
-          fill
+          width={product.imageWidth || 1200}
+          height={product.imageHeight || 1500}
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          className="object-cover transition duration-700 group-hover:scale-[1.04]"
+          className="block h-auto w-full"
         />
-        <div className="absolute inset-0 bg-linear-to-t from-slate-950/90 via-transparent to-transparent opacity-80" />
+        <div className="absolute right-4 top-4 rounded-full border border-amber-300/35 bg-slate-950/70 px-3 py-1.5 text-sm font-semibold tabular-nums text-amber-200 backdrop-blur-sm">
+          {formatUsd(product.priceUsd)}
+        </div>
+        <div className="absolute inset-0 bg-linear-to-t from-slate-950/88 via-slate-950/25 to-transparent opacity-90" />
         <div className="absolute bottom-0 left-0 right-0 p-5">
-          <p className="text-xs uppercase tracking-[0.28em] text-slate-400">
+          <p className="text-xs uppercase tracking-[0.28em] text-slate-300">
             {product.medium}
           </p>
           <p className="mt-2 font-serif text-xl font-medium tracking-[-0.02em] text-stone-100">
             {product.title}
           </p>
-          <p className="mt-1 text-sm text-stone-400">{product.artist}</p>
         </div>
-      </div>
-      <div className="flex items-center justify-between px-5 py-4">
-        <span className="text-sm text-slate-500">{product.edition}</span>
-        <span className="font-semibold tabular-nums text-amber-200/95">
-          {formatUsd(product.priceUsd)}
-        </span>
       </div>
     </Link>
   );
 }
 
 function ProductSkeleton({ delay = 0 }) {
+  const heightClass = delay % 2 === 0 ? "h-[22rem]" : "h-[30rem]";
   return (
     <div
-      className="overflow-hidden rounded-4xl border-2 border-slate-700/35 bg-slate-900/40 shadow-lg shadow-slate-950/35 animate-pulse"
+      className="w-full overflow-hidden rounded-4xl border-2 border-slate-700/35 bg-slate-900/40 shadow-lg shadow-slate-950/35 animate-pulse"
       style={{ animationDelay: `${delay}ms` }}
     >
-      <div className="relative aspect-4/5 overflow-hidden border-b border-white/5 bg-linear-to-br from-slate-800/60 via-slate-900/40 to-slate-800/60" />
+      <div
+        className={`relative overflow-hidden border-b border-white/5 bg-linear-to-br from-slate-800/60 via-slate-900/40 to-slate-800/60 ${heightClass}`}
+      />
       <div className="space-y-3 px-5 py-4">
         <div className="h-3 w-24 rounded-full bg-slate-700/70" />
         <div className="h-5 w-4/5 rounded-full bg-slate-600/60" />
@@ -60,7 +57,7 @@ function EmptyState() {
     <div className="relative overflow-hidden rounded-4xl border-2 border-slate-700/40 bg-linear-to-br from-slate-900/60 via-slate-950/60 to-slate-900/45 p-10 text-center shadow-2xl shadow-slate-950/40">
       <div className="pointer-events-none absolute -left-10 -top-20 h-44 w-44 rounded-full bg-amber-300/12 blur-3xl" />
       <div className="pointer-events-none absolute -right-12 -bottom-20 h-52 w-52 rounded-full bg-sky-300/10 blur-3xl" />
-      <p className="text-xs uppercase tracking-[0.32em] text-slate-400">Soon</p>
+      <p className="text-xs uppercase tracking-[0.32em] text-slate-400">Coming Soon</p>
       <h2 className="mt-3 font-serif text-3xl tracking-[-0.03em] text-stone-100 sm:text-4xl">
         New drops are on the way
       </h2>
@@ -82,6 +79,7 @@ export default function ShopCatalogClient() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [visible, setVisible] = useState(false);
+  const [activeCollection, setActiveCollection] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -115,13 +113,102 @@ export default function ShopCatalogClient() {
     return () => window.clearTimeout(t);
   }, [loading]);
 
+  const collections = useMemo(() => {
+    const names = Array.from(
+      new Set(
+        products
+          .map((p) => String(p.medium || "").trim())
+          .filter(Boolean),
+      ),
+    );
+    return names.sort((a, b) => {
+      if (a === "Canvas") return -1;
+      if (b === "Canvas") return 1;
+      return a.localeCompare(b);
+    });
+  }, [products]);
+
+  const filteredProducts = useMemo(() => {
+    if (!activeCollection) return products;
+    return products.filter((p) => p.medium === activeCollection);
+  }, [products, activeCollection]);
+
+  useEffect(() => {
+    if (!collections.length) {
+      setActiveCollection("");
+      return;
+    }
+    if (!activeCollection || !collections.includes(activeCollection)) {
+      setActiveCollection(collections[0]);
+    }
+  }, [collections, activeCollection]);
+
   const skeletons = useMemo(() => Array.from({ length: 6 }, (_, i) => i), []);
+  const [columnCount, setColumnCount] = useState(1);
+
+  useEffect(() => {
+    function updateColumnCount() {
+      const width = window.innerWidth;
+      if (width >= 1024) {
+        setColumnCount(3);
+      } else if (width >= 640) {
+        setColumnCount(2);
+      } else {
+        setColumnCount(1);
+      }
+    }
+
+    updateColumnCount();
+    window.addEventListener("resize", updateColumnCount);
+    return () => window.removeEventListener("resize", updateColumnCount);
+  }, []);
+
+  const productColumns = useMemo(() => {
+    const cols = Array.from({ length: columnCount }, () => []);
+    const heights = Array.from({ length: columnCount }, () => 0);
+
+    filteredProducts.forEach((product) => {
+      const ratio =
+        Number(product.imageHeight) > 0 && Number(product.imageWidth) > 0
+          ? Number(product.imageHeight) / Number(product.imageWidth)
+          : 1.25;
+      // Estimate card height: image ratio + metadata sections.
+      const estimatedHeight = ratio + 0.42;
+      let target = 0;
+      for (let i = 1; i < heights.length; i += 1) {
+        if (heights[i] < heights[target]) target = i;
+      }
+      cols[target].push(product);
+      heights[target] += estimatedHeight;
+    });
+    return cols;
+  }, [filteredProducts, columnCount]);
+
+  const skeletonColumns = useMemo(() => {
+    const cols = Array.from({ length: columnCount }, () => []);
+    skeletons.forEach((i, idx) => {
+      cols[idx % columnCount].push(i);
+    });
+    return cols;
+  }, [skeletons, columnCount]);
 
   if (loading) {
     return (
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {skeletons.map((i) => (
-          <ProductSkeleton key={i} delay={i * 50} />
+      <div
+        className={`grid gap-6 ${
+          columnCount === 3
+            ? "lg:grid-cols-3"
+            : columnCount === 2
+              ? "sm:grid-cols-2"
+              : "grid-cols-1"
+        }`}
+      >
+        {skeletonColumns.map((column, colIdx) => (
+          <div key={`skeleton-col-${colIdx}`} className="space-y-6">
+            {column.map((i) => (
+              <ProductSkeleton key={i} delay={i * 50} />
+            ))}
+          </div>
         ))}
       </div>
     );
@@ -136,11 +223,55 @@ export default function ShopCatalogClient() {
       {products.length === 0 ? (
         <EmptyState />
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {products.map((p) => (
-            <ProductCard key={p.id} product={p} />
-          ))}
-        </div>
+        <>
+          <div className="mb-6 flex flex-wrap items-center gap-3">
+            {collections.map((name) => {
+              const active = activeCollection === name;
+              const count = products.filter((p) => p.medium === name).length;
+              return (
+                <button
+                  key={name}
+                  type="button"
+                  onClick={() => setActiveCollection(name)}
+                  className={`rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] transition ${
+                    active
+                      ? "border-amber-300/50 bg-amber-300/10 text-amber-100"
+                      : "border-slate-600/50 bg-slate-900/45 text-slate-400 hover:border-slate-400/60 hover:text-stone-200"
+                  }`}
+                >
+                  {name}{" "}
+                  <span className="ml-1 text-[0.65rem] tracking-[0.18em] opacity-80">
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {filteredProducts.length === 0 ? (
+            <div className="rounded-3xl border border-slate-700/45 bg-slate-900/35 px-6 py-10 text-center text-stone-300/85">
+              No products available in this collection yet.
+            </div>
+          ) : (
+            <div
+              className={`grid gap-6 ${
+                columnCount === 3
+                  ? "lg:grid-cols-3"
+                  : columnCount === 2
+                    ? "sm:grid-cols-2"
+                    : "grid-cols-1"
+              }`}
+            >
+              {productColumns.map((column, colIdx) => (
+                <div key={`product-col-${colIdx}`} className="space-y-6">
+                  {column.map((p) => (
+                    <ProductCard key={p.id} product={p} />
+                  ))}
+                </div>
+              ))}
+            </div>
+          )}
+        </>
       )}
     </div>
   );

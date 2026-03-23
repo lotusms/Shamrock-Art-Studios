@@ -2,16 +2,14 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import PageLayout from "@/components/PageLayout";
 import { useCart } from "@/context/CartContext";
 import { formatUsd } from "@/lib/money";
 import {
   orderTotal,
-  shippingForSubtotal,
+  shippingIncludedForLines,
   ORDER_STORAGE_KEY,
-  FREE_SHIPPING_THRESHOLD_USD,
-  SHIPPING_FLAT_USD,
 } from "@/lib/checkout";
 
 function makeOrderId() {
@@ -21,11 +19,9 @@ function makeOrderId() {
 export default function CheckoutPage() {
   const router = useRouter();
   const { lines, ready, subtotalUsd, clearCart } = useCart();
-  const shipping = shippingForSubtotal(subtotalUsd);
-  const total = orderTotal(subtotalUsd);
-
-  const [submitting, setSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState("");
+  const shippingIncluded = shippingIncludedForLines(lines);
+  const [shippingQuoteUsd, setShippingQuoteUsd] = useState(null);
+  const [shippingLoading, setShippingLoading] = useState(false);
   const [form, setForm] = useState({
     email: "",
     phone: "",
@@ -39,6 +35,71 @@ export default function CheckoutPage() {
     cardName: "",
     notes: "",
   });
+
+  const recipient = useMemo(
+    () => ({
+      address1: form.address1,
+      city: form.city,
+      state: form.state,
+      postalCode: form.postalCode,
+      countryCode: form.country,
+    }),
+    [form.address1, form.city, form.state, form.postalCode, form.country],
+  );
+
+  useEffect(() => {
+    if (!ready || lines.length === 0 || shippingIncluded) {
+      setShippingQuoteUsd(shippingIncluded ? 0 : null);
+      return;
+    }
+
+    if (!recipient.countryCode) {
+      setShippingQuoteUsd(null);
+      return;
+    }
+
+    let active = true;
+    setShippingLoading(true);
+    const id = window.setTimeout(async () => {
+      try {
+        const response = await fetch("/api/shipping/quote", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            recipient,
+            lines: lines.map((l) => ({
+              catalogVariantId: l.catalogVariantId,
+              quantity: l.quantity,
+            })),
+          }),
+        });
+        const data = await response.json();
+        if (!active) return;
+        setShippingQuoteUsd(
+          response.ok && data?.ok && Number.isFinite(Number(data.shippingUsd))
+            ? Number(data.shippingUsd)
+            : null,
+        );
+      } catch {
+        if (!active) return;
+        setShippingQuoteUsd(null);
+      } finally {
+        if (!active) return;
+        setShippingLoading(false);
+      }
+    }, 250);
+
+    return () => {
+      active = false;
+      window.clearTimeout(id);
+    };
+  }, [ready, lines, recipient, shippingIncluded]);
+
+  const shipping = shippingIncluded ? 0 : (shippingQuoteUsd ?? 0);
+  const total = orderTotal(subtotalUsd, lines) + (shippingIncluded ? 0 : shipping);
+
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   if (!ready) {
     return (
@@ -94,6 +155,7 @@ export default function CheckoutPage() {
         productId: l.productId,
         printfulProductId: l.printfulProductId ?? null,
         variantId: l.variantId ?? null,
+        catalogVariantId: l.catalogVariantId ?? null,
         externalId: l.externalId ?? null,
         slug: l.slug,
         title: l.title,
@@ -155,7 +217,7 @@ export default function CheckoutPage() {
     <PageLayout
       eyebrow="Secure checkout"
       title="Checkout"
-      subtitle="Orders route through Printful when API credentials are set; otherwise checkout runs in local demo mode."
+      subtitle="Orders route through connected fulfillment when API credentials are set; otherwise checkout runs in local demo mode."
       width="full"
     >
       <form
@@ -283,8 +345,8 @@ export default function CheckoutPage() {
               Payment
             </h2>
             <p className="mt-3 text-sm leading-relaxed text-slate-500">
-              This template creates a fulfillment order in Printful. Add Stripe
-              to capture payment before creating shipment.
+              This template creates a fulfillment order through the connected
+              provider. Add Stripe to capture payment before creating shipment.
             </p>
             <label className="mt-6 block text-sm text-slate-400">
               Name on card
@@ -364,17 +426,20 @@ export default function CheckoutPage() {
               <div className="flex justify-between">
                 <dt className="text-slate-400">Shipping</dt>
                 <dd className="tabular-nums">
-                  {shipping === 0 ? (
+                  {shippingIncluded ? (
                     <span className="text-emerald-400/90">Complimentary</span>
+                  ) : shippingLoading ? (
+                    <span className="text-slate-400">Calculating…</span>
+                  ) : shippingQuoteUsd === null ? (
+                    <span className="text-slate-400">Enter address to calculate</span>
                   ) : (
                     formatUsd(shipping)
                   )}
                 </dd>
               </div>
-              {subtotalUsd < FREE_SHIPPING_THRESHOLD_USD && (
+              {shippingIncluded && (
                 <p className="text-xs text-slate-500">
-                  Flat {formatUsd(SHIPPING_FLAT_USD)} insured under{" "}
-                  {formatUsd(FREE_SHIPPING_THRESHOLD_USD)}.
+                  Shipping is included in product pricing.
                 </p>
               )}
               <div className="flex justify-between border-t border-white/10 pt-4 text-lg font-semibold">

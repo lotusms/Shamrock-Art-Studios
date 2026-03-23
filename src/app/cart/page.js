@@ -7,15 +7,14 @@ import { useCart } from "@/context/CartContext";
 import { formatUsd } from "@/lib/money";
 import {
   orderTotal,
-  shippingForSubtotal,
-  SHIPPING_FLAT_USD,
-  FREE_SHIPPING_THRESHOLD_USD,
+  shippingIncludedForLines,
 } from "@/lib/checkout";
 
 export default function CartPage() {
   const { lines, ready, setQuantity, removeLine, subtotalUsd } = useCart();
-  const shipping = shippingForSubtotal(subtotalUsd);
-  const total = orderTotal(subtotalUsd);
+  const shippingIncluded = shippingIncludedForLines(lines);
+  const shipping = shippingIncluded ? 0 : null;
+  const total = orderTotal(subtotalUsd, lines) + (shipping ?? 0);
 
   if (!ready) {
     return (
@@ -71,7 +70,6 @@ export default function CartPage() {
                 >
                   {line.title}
                 </Link>
-                <p className="mt-1 text-sm text-stone-500">{line.artist}</p>
                 <p className="mt-3 text-sm tabular-nums text-amber-200/90">
                   {formatUsd(line.priceUsd)} each
                 </p>
@@ -117,17 +115,18 @@ export default function CartPage() {
             <div className="flex justify-between gap-4">
               <dt className="text-slate-400">Shipping</dt>
               <dd className="tabular-nums text-stone-200">
-                {shipping === 0 ? (
+                {shippingIncluded ? (
                   <span className="text-emerald-400/90">Complimentary</span>
+                ) : shipping === null ? (
+                  <span className="text-slate-400">Calculated at checkout</span>
                 ) : (
                   formatUsd(shipping)
                 )}
               </dd>
             </div>
-            {subtotalUsd < FREE_SHIPPING_THRESHOLD_USD && (
+            {shippingIncluded && (
               <p className="border-t border-white/5 pt-3 text-xs leading-relaxed text-slate-500">
-                Free insured shipping on orders {formatUsd(FREE_SHIPPING_THRESHOLD_USD)}+.
-                Flat {formatUsd(SHIPPING_FLAT_USD)} below that.
+                Shipping is included in product pricing.
               </p>
             )}
             <div className="flex justify-between gap-4 border-t border-white/10 pt-4 text-base font-semibold">

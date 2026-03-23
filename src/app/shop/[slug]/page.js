@@ -8,6 +8,43 @@ import { formatUsd } from "@/lib/money";
 
 export const dynamic = "force-dynamic";
 
+function renderDescription(text) {
+  const lines = String(text || "")
+    .split("\n")
+    .map((line) => line.trim());
+  const blocks = [];
+  let i = 0;
+
+  while (i < lines.length) {
+    const line = lines[i];
+    if (!line) {
+      i += 1;
+      continue;
+    }
+
+    if (/^(•|-|\*)\s+/.test(line)) {
+      const items = [];
+      while (i < lines.length && /^(•|-|\*)\s+/.test(lines[i])) {
+        items.push(lines[i].replace(/^(•|-|\*)\s+/, "").trim());
+        i += 1;
+      }
+      blocks.push(
+        <ul key={`list-${blocks.length}`} className="list-disc pl-6">
+          {items.map((item, idx) => (
+            <li key={`item-${idx}`}>{item}</li>
+          ))}
+        </ul>,
+      );
+      continue;
+    }
+
+    blocks.push(<p key={`p-${blocks.length}`}>{line}</p>);
+    i += 1;
+  }
+
+  return blocks;
+}
+
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   const product = await getCatalogProductBySlug(slug);
@@ -24,23 +61,18 @@ export default async function ProductPage({ params }) {
   if (!product) notFound();
 
   return (
-    <PageLayout eyebrow="For sale" title={product.title} width="full">
-      <p className="max-w-2xl text-lg text-stone-300/95 sm:text-xl">
-        {product.artist} · {product.year}
-      </p>
-
-      <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14">
-        <div className="relative overflow-hidden rounded-4xl border-2 border-slate-600/40 bg-slate-900/50 shadow-2xl shadow-slate-950/40">
-          <div className="relative aspect-4/5 w-full">
-            <Image
-              src={product.image}
-              alt={`${product.title} by ${product.artist}`}
-              fill
-              priority
-              className="object-cover"
-              sizes="(max-width: 1024px) 100vw, 50vw"
-            />
-          </div>
+    <PageLayout eyebrow={product.medium} title={product.title} width="full">
+      <div className="grid items-start gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14">
+        <div className="overflow-hidden border-2 border-slate-600/40 bg-slate-900/50 shadow-2xl shadow-slate-950/40">
+          <Image
+            src={product.image}
+            alt={`${product.title} by ${product.artist}`}
+            width={1200}
+            height={1200}
+            priority
+            className="h-auto w-full object-contain"
+            sizes="(max-width: 1024px) 100vw, 50vw"
+          />
         </div>
 
         <div className="flex flex-col">
@@ -51,7 +83,6 @@ export default async function ProductPage({ params }) {
             <p className="mt-3 font-serif text-4xl font-medium tabular-nums tracking-[-0.03em] text-stone-100 sm:text-5xl">
               {formatUsd(product.priceUsd)}
             </p>
-            <p className="mt-2 text-sm text-stone-500">{product.edition}</p>
 
             <dl className="mt-8 space-y-4 border-t border-white/5 pt-8 text-sm">
               <div className="flex justify-between gap-4">
@@ -77,14 +108,14 @@ export default async function ProductPage({ params }) {
             </div>
           </div>
 
-          <div className="mt-8 space-y-4 text-base leading-8 text-stone-200/90">
-            <p>{product.description}</p>
-            <p className="text-sm leading-7 text-stone-500">
+          <div className="mt-8 space-y-4 text-sm leading-8 text-stone-200/90">
+            {renderDescription(product.description)}
+            {/* <p className="text-sm leading-7 text-stone-500">
               Taxes may apply based on your location. Crating, insurance, and
               shipping are calculated at checkout. Wire the payment step to
               Stripe or your processor when you&apos;re ready to take live
               payments.
-            </p>
+            </p> */}
           </div>
         </div>
       </div>

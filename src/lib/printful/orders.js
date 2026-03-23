@@ -8,7 +8,7 @@ function normalizeCountry(country) {
 function lineToPrintfulItem(line) {
   if (!line.variantId) {
     throw new Error(
-      `Line item "${line.title}" is missing variantId from Printful catalog.`,
+      `Line item "${line.title}" is missing variantId from the fulfillment catalog.`,
     );
   }
   return {

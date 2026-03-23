@@ -64,7 +64,7 @@ function ThankYouContent() {
         </p>
         <p className="mt-2 text-sm text-stone-300">
           {order.fulfillment?.provider === "printful"
-            ? "Printful connected"
+            ? "Connected provider"
             : "Demo mode"}
           {order.fulfillment?.providerOrderId
             ? ` · ID ${order.fulfillment.providerOrderId}`
