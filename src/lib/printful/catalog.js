@@ -1,4 +1,5 @@
 import { products as referenceProducts } from "@/data/products";
+import { roundUsd2 } from "@/lib/money";
 import { printfulRequest, isPrintfulEnabled } from "@/lib/printful/client";
 import { slugify } from "@/lib/slug";
 
@@ -74,7 +75,7 @@ function enrichWithReference(item) {
 
 function parsePrice(retailPrice) {
   const num = Number.parseFloat(String(retailPrice ?? ""));
-  if (Number.isFinite(num)) return num;
+  if (Number.isFinite(num)) return roundUsd2(num);
   return 0;
 }
 

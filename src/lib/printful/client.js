@@ -26,7 +26,16 @@ export async function printfulRequest(path, init = {}) {
 
   const json = await response.json().catch(() => null);
   if (!response.ok) {
-    const reason = json?.error?.reason || json?.result || response.statusText;
+    const err = json?.error;
+    const nested =
+      err && typeof err === "object"
+        ? err.message || err.reason || err.hint
+        : null;
+    const reason =
+      nested ||
+      (typeof err === "string" ? err : null) ||
+      json?.result ||
+      response.statusText;
     throw new Error(`Printful API ${response.status}: ${String(reason)}`);
   }
   return json;

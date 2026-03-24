@@ -1,19 +1,139 @@
 "use client";
 
 import Link from "next/link";
+import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import PayPalCheckoutButtons from "@/components/checkout/PayPalCheckoutButtons";
+import SelectListbox from "@/components/ui/SelectListbox";
 import PageLayout from "@/components/PageLayout";
 import { useCart } from "@/context/CartContext";
-import { formatUsd } from "@/lib/money";
+import { formatUsd, roundUsd2 } from "@/lib/money";
 import {
   orderTotal,
   shippingIncludedForLines,
   ORDER_STORAGE_KEY,
 } from "@/lib/checkout";
+import {
+  CA_PROVINCE_SELECT_OPTIONS,
+  US_STATE_SELECT_OPTIONS,
+} from "@/lib/printful/address";
+
+const CHECKOUT_COUNTRY_OPTIONS = [
+  { value: "US", label: "United States" },
+  { value: "CA", label: "Canada" },
+  { value: "GB", label: "United Kingdom" },
+  { value: "OTHER", label: "Other" },
+];
 
 function makeOrderId() {
   return `ORD-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+}
+
+function digitsFromTelInput(value) {
+  let d = String(value).replace(/\D/g, "");
+  if (d.length === 11 && d.startsWith("1")) d = d.slice(1);
+  return d.slice(0, 10);
+}
+
+function formatUsPhoneMask(digits) {
+  if (digits.length === 0) return "";
+  if (digits.length < 3) return `(${digits}`;
+  if (digits.length === 3) return `(${digits})`;
+  if (digits.length <= 6) {
+    return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+  }
+  return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+}
+
+function isValidCheckoutEmail(value) {
+  const v = String(value).trim();
+  if (!v) return false;
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(v);
+}
+
+function computeCheckoutFieldErrors(form, ctx) {
+  const { shippingIncluded, shippingLoading, shippingQuoteUsd } = ctx;
+  const errors = {};
+
+  const email = form.email.trim();
+  if (!email) errors.email = "Email is required.";
+  else if (!isValidCheckoutEmail(form.email)) {
+    errors.email =
+      "Use a complete address like name@example.com (include the part after @).";
+  }
+
+  const phoneDigits = digitsFromTelInput(form.phone);
+  if (phoneDigits.length > 0 && phoneDigits.length < 10) {
+    errors.phone = "Enter all 10 digits, or leave phone blank.";
+  }
+
+  if (!form.fullName.trim()) errors.fullName = "Full name is required.";
+  if (!form.address1.trim()) errors.address1 = "Address line 1 is required.";
+  if (!form.city.trim()) errors.city = "City is required.";
+  if (!form.state.trim()) {
+    errors.state =
+      form.country === "US"
+        ? "Select a state."
+        : form.country === "CA"
+          ? "Select a province."
+          : "State or region is required.";
+  }
+  if (!form.postalCode.trim()) {
+    errors.postalCode = "Postal code is required.";
+  }
+
+  if (!shippingIncluded && (shippingLoading || shippingQuoteUsd === null)) {
+    errors.shipping =
+      "Enter your full address and wait until shipping is calculated.";
+  }
+
+  return errors;
+}
+
+function firstCheckoutErrorMessage(errors) {
+  const order = [
+    "email",
+    "phone",
+    "fullName",
+    "address1",
+    "city",
+    "state",
+    "postalCode",
+    "shipping",
+  ];
+  for (const key of order) {
+    if (errors[key]) return errors[key];
+  }
+  return Object.values(errors)[0] ?? "Check your details and try again.";
+}
+
+function scrollToFirstCheckoutFieldError(errors) {
+  if (typeof document === "undefined") return;
+  const order = [
+    "email",
+    "phone",
+    "fullName",
+    "address1",
+    "city",
+    "state",
+    "postalCode",
+    "shipping",
+  ];
+  queueMicrotask(() => {
+    for (const key of order) {
+      if (!errors[key]) continue;
+      const el = document.querySelector(`[data-checkout-field="${key}"]`);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        const focusable = el.querySelector(
+          "input, select, textarea, button",
+        );
+        focusable?.focus();
+        break;
+      }
+    }
+  });
 }
 
 export default function CheckoutPage() {
@@ -32,9 +152,14 @@ export default function CheckoutPage() {
     state: "",
     postalCode: "",
     country: "US",
-    cardName: "",
     notes: "",
   });
+
+  const checkoutOrderIdRef = useRef(null);
+
+  useEffect(() => {
+    checkoutOrderIdRef.current = null;
+  }, [lines]);
 
   const recipient = useMemo(
     () => ({
@@ -58,6 +183,18 @@ export default function CheckoutPage() {
       return;
     }
 
+    const canQuoteShipping =
+      String(recipient.address1 || "").trim() &&
+      String(recipient.city || "").trim() &&
+      String(recipient.state || "").trim() &&
+      String(recipient.postalCode || "").trim();
+
+    if (!canQuoteShipping) {
+      setShippingQuoteUsd(null);
+      setShippingLoading(false);
+      return;
+    }
+
     let active = true;
     setShippingLoading(true);
     const id = window.setTimeout(async () => {
@@ -77,7 +214,7 @@ export default function CheckoutPage() {
         if (!active) return;
         setShippingQuoteUsd(
           response.ok && data?.ok && Number.isFinite(Number(data.shippingUsd))
-            ? Number(data.shippingUsd)
+            ? roundUsd2(Number(data.shippingUsd))
             : null,
         );
       } catch {
@@ -95,11 +232,61 @@ export default function CheckoutPage() {
     };
   }, [ready, lines, recipient, shippingIncluded]);
 
-  const shipping = shippingIncluded ? 0 : (shippingQuoteUsd ?? 0);
-  const total = orderTotal(subtotalUsd, lines) + (shippingIncluded ? 0 : shipping);
+  const shipping = roundUsd2(
+    shippingIncluded ? 0 : (shippingQuoteUsd ?? 0),
+  );
+  const total = roundUsd2(
+    orderTotal(subtotalUsd, lines) + (shippingIncluded ? 0 : shipping),
+  );
 
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [showFieldErrors, setShowFieldErrors] = useState(false);
+  /** Fields the user has left (blur); used to show inline errors before submit. */
+  const [blurredFields, setBlurredFields] = useState({});
+
+  const validationCtx = useMemo(
+    () => ({
+      shippingIncluded,
+      shippingLoading,
+      shippingQuoteUsd,
+    }),
+    [shippingIncluded, shippingLoading, shippingQuoteUsd],
+  );
+
+  const fieldErrors = useMemo(() => {
+    const all = computeCheckoutFieldErrors(form, validationCtx);
+    if (showFieldErrors) return all;
+
+    const out = {};
+    const blurKeys = [
+      "email",
+      "phone",
+      "fullName",
+      "address1",
+      "city",
+      "state",
+      "postalCode",
+    ];
+    for (const key of blurKeys) {
+      if (blurredFields[key] && all[key]) out[key] = all[key];
+    }
+    if (blurredFields.shippingSection && all.shipping) {
+      out.shipping = all.shipping;
+    }
+    return out;
+  }, [showFieldErrors, blurredFields, form, validationCtx]);
+
+  const checkoutValid = useMemo(
+    () =>
+      Object.keys(computeCheckoutFieldErrors(form, validationCtx)).length === 0,
+    [form, validationCtx],
+  );
+
+  const paypalClientId =
+    typeof process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID === "string"
+      ? process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID.trim()
+      : "";
 
   if (!ready) {
     return (
@@ -131,16 +318,49 @@ export default function CheckoutPage() {
     setForm((f) => ({ ...f, [field]: value }));
   }
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    setSubmitting(true);
-    setSubmitError("");
+  function updateCountry(value) {
+    setForm((f) => ({
+      ...f,
+      country: value,
+      state: "",
+    }));
+  }
 
-    const orderId = makeOrderId();
-    const order = {
+  function handlePhoneChange(e) {
+    const digits = digitsFromTelInput(e.target.value);
+    update("phone", formatUsPhoneMask(digits));
+  }
+
+  function markFieldBlurred(fieldKey, opts = { shippingSection: false }) {
+    setBlurredFields((prev) => ({
+      ...prev,
+      [fieldKey]: true,
+      ...(opts.shippingSection ? { shippingSection: true } : {}),
+    }));
+  }
+
+  function buildOrder(options) {
+    const resetId = options?.resetId === true;
+    if (resetId) checkoutOrderIdRef.current = null;
+
+    const errs = computeCheckoutFieldErrors(form, validationCtx);
+    if (Object.keys(errs).length > 0) {
+      setShowFieldErrors(true);
+      const msg = firstCheckoutErrorMessage(errs);
+      setSubmitError(msg);
+      scrollToFirstCheckoutFieldError(errs);
+      throw new Error(msg);
+    }
+
+    setSubmitError("");
+    const email = form.email.trim();
+    const orderId = checkoutOrderIdRef.current ?? makeOrderId();
+    checkoutOrderIdRef.current = orderId;
+
+    return {
       id: orderId,
       createdAt: new Date().toISOString(),
-      email: form.email.trim(),
+      email,
       phone: form.phone.trim(),
       shippingAddress: {
         fullName: form.fullName.trim(),
@@ -164,12 +384,53 @@ export default function CheckoutPage() {
         sku: l.sku ?? null,
         quantity: l.quantity,
         image: l.image,
+        originalImage: l.originalImage ?? l.image ?? null,
       })),
       subtotalUsd,
       shippingUsd: shipping,
       totalUsd: total,
       notes: form.notes.trim(),
     };
+  }
+
+  function persistAndRedirect(order, fulfillmentExtras) {
+    const orderWithFulfillment = {
+      ...order,
+      fulfillment: {
+        provider: fulfillmentExtras.provider,
+        providerOrderId: fulfillmentExtras.providerOrderId,
+        providerStatus: fulfillmentExtras.providerStatus,
+      },
+      payment: fulfillmentExtras.payment ?? null,
+    };
+
+    try {
+      sessionStorage.setItem(
+        ORDER_STORAGE_KEY,
+        JSON.stringify(orderWithFulfillment),
+      );
+    } catch {
+      /* ignore */
+    }
+
+    clearCart();
+    router.push(`/checkout/thank-you?ref=${encodeURIComponent(order.id)}`);
+  }
+
+  async function handleDemoOrder() {
+    setSubmitting(true);
+    setSubmitError("");
+
+    let order;
+    try {
+      order = buildOrder({ resetId: true });
+    } catch (e) {
+      setSubmitError(
+        e instanceof Error ? e.message : "Check your details and try again.",
+      );
+      setSubmitting(false);
+      return;
+    }
 
     try {
       const response = await fetch("/api/checkout", {
@@ -182,26 +443,12 @@ export default function CheckoutPage() {
         throw new Error(data?.error || "Could not place order.");
       }
 
-      const orderWithFulfillment = {
-        ...order,
-        fulfillment: {
-          provider: data.mode === "printful" ? "printful" : "demo",
-          providerOrderId: data.printfulOrderId ?? null,
-          providerStatus: data.printfulStatus ?? null,
-        },
-      };
-
-      try {
-        sessionStorage.setItem(
-          ORDER_STORAGE_KEY,
-          JSON.stringify(orderWithFulfillment),
-        );
-      } catch {
-        /* ignore */
-      }
-
-      clearCart();
-      router.push(`/checkout/thank-you?ref=${encodeURIComponent(orderId)}`);
+      persistAndRedirect(order, {
+        provider: data.mode === "printful" ? "printful" : "demo",
+        providerOrderId: data.printfulOrderId ?? null,
+        providerStatus: data.printfulStatus ?? null,
+        payment: null,
+      });
     } catch (error) {
       setSubmitError(
         error instanceof Error ? error.message : "Could not place order.",
@@ -210,74 +457,171 @@ export default function CheckoutPage() {
     }
   }
 
+  function handlePayPalPaid(result) {
+    const { order, payment, mode, printfulOrderId, printfulStatus } = result;
+    persistAndRedirect(order, {
+      provider: mode === "printful" ? "printful" : "demo",
+      providerOrderId: printfulOrderId,
+      providerStatus: printfulStatus,
+      payment,
+    });
+  }
+
   const inputClass =
     "mt-1.5 w-full rounded-xl border border-slate-600/60 bg-slate-950/60 px-4 py-3 text-sm text-stone-100 placeholder:text-slate-600 focus:border-amber-400/40 focus:outline-none focus:ring-1 focus:ring-amber-400/25";
 
-  return (
+  function fieldClass(fieldKey) {
+    const invalid = Boolean(fieldErrors[fieldKey]);
+    return `${inputClass} ${
+      invalid
+        ? "!border-rose-600 focus:!border-rose-600 focus:!ring-1 focus:!ring-rose-600/35"
+        : ""
+    }`;
+  }
+
+  const payDisabled = submitting || !checkoutValid;
+
+  const checkoutBody = (
     <PageLayout
       eyebrow="Secure checkout"
       title="Checkout"
-      subtitle="Orders route through connected fulfillment when API credentials are set; otherwise checkout runs in local demo mode."
+      subtitle="Enter the information below to complete your order. We will not store any of your information."
       width="full"
     >
-      <form
-        onSubmit={handleSubmit}
-        className="grid gap-12 lg:grid-cols-[1fr_400px] lg:gap-16"
-      >
+      <div className="grid gap-12 lg:grid-cols-[1fr_400px] lg:gap-16">
         <div className="space-y-8">
           <section className="rounded-3xl border-2 border-slate-700/40 bg-slate-900/45 p-6 sm:p-8">
             <h2 className="text-xs uppercase tracking-[0.28em] text-amber-300/90">
               Contact
             </h2>
-            <label className="mt-6 block text-sm text-slate-400">
-              Email
-              <input
-                required
-                type="email"
-                autoComplete="email"
-                value={form.email}
-                onChange={(e) => update("email", e.target.value)}
-                className={inputClass}
-              />
-            </label>
-            <label className="mt-4 block text-sm text-slate-400">
-              Phone (for carrier updates)
-              <input
-                type="tel"
-                autoComplete="tel"
-                value={form.phone}
-                onChange={(e) => update("phone", e.target.value)}
-                className={inputClass}
-              />
-            </label>
+            <div className="mt-6" data-checkout-field="email">
+              <label className="block text-sm text-slate-400">
+                Email
+                <input
+                  required
+                  type="email"
+                  autoComplete="email"
+                  value={form.email}
+                  onChange={(e) => update("email", e.target.value)}
+                  onBlur={() => markFieldBlurred("email")}
+                  className={fieldClass("email")}
+                  aria-invalid={Boolean(fieldErrors.email)}
+                  aria-describedby={
+                    fieldErrors.email ? "checkout-email-error" : undefined
+                  }
+                />
+              </label>
+              {fieldErrors.email ? (
+                <p
+                  id="checkout-email-error"
+                  className="mt-1.5 text-xs text-rose-300"
+                  role="alert"
+                >
+                  {fieldErrors.email}
+                </p>
+              ) : null}
+            </div>
+            <div className="mt-4" data-checkout-field="phone">
+              <label className="block text-sm text-slate-400">
+                Phone (for carrier updates, optional)
+                <input
+                  type="tel"
+                  inputMode="numeric"
+                  autoComplete="tel"
+                  placeholder="(555) 123-4567"
+                  maxLength={14}
+                  value={form.phone}
+                  onChange={handlePhoneChange}
+                  onBlur={() => markFieldBlurred("phone")}
+                  className={fieldClass("phone")}
+                  aria-invalid={Boolean(fieldErrors.phone)}
+                  aria-describedby={
+                    fieldErrors.phone ? "checkout-phone-error" : undefined
+                  }
+                />
+              </label>
+              {fieldErrors.phone ? (
+                <p
+                  id="checkout-phone-error"
+                  className="mt-1.5 text-xs text-rose-300"
+                  role="alert"
+                >
+                  {fieldErrors.phone}
+                </p>
+              ) : null}
+            </div>
           </section>
 
-          <section className="rounded-3xl border-2 border-slate-700/40 bg-slate-900/45 p-6 sm:p-8">
+          <section
+            className="rounded-3xl border-2 border-slate-700/40 bg-slate-900/45 p-6 sm:p-8"
+            data-checkout-field="shipping"
+          >
             <h2 className="text-xs uppercase tracking-[0.28em] text-amber-300/90">
               Shipping
             </h2>
-            <label className="mt-6 block text-sm text-slate-400">
-              Full name
-              <input
-                required
-                type="text"
-                autoComplete="name"
-                value={form.fullName}
-                onChange={(e) => update("fullName", e.target.value)}
-                className={inputClass}
-              />
-            </label>
-            <label className="mt-4 block text-sm text-slate-400">
-              Address line 1
-              <input
-                required
-                type="text"
-                autoComplete="address-line1"
-                value={form.address1}
-                onChange={(e) => update("address1", e.target.value)}
-                className={inputClass}
-              />
-            </label>
+            {fieldErrors.shipping ? (
+              <p className="mt-4 rounded-xl border border-rose-400/25 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+                {fieldErrors.shipping}
+              </p>
+            ) : null}
+            <div className="mt-6" data-checkout-field="fullName">
+              <label className="block text-sm text-slate-400">
+                Full name
+                <input
+                  required
+                  type="text"
+                  autoComplete="name"
+                  value={form.fullName}
+                  onChange={(e) => update("fullName", e.target.value)}
+                  onBlur={() =>
+                    markFieldBlurred("fullName", { shippingSection: true })
+                  }
+                  className={fieldClass("fullName")}
+                  aria-invalid={Boolean(fieldErrors.fullName)}
+                  aria-describedby={
+                    fieldErrors.fullName ? "checkout-fullName-error" : undefined
+                  }
+                />
+              </label>
+              {fieldErrors.fullName ? (
+                <p
+                  id="checkout-fullName-error"
+                  className="mt-1.5 text-xs text-rose-300"
+                  role="alert"
+                >
+                  {fieldErrors.fullName}
+                </p>
+              ) : null}
+            </div>
+            <div className="mt-4" data-checkout-field="address1">
+              <label className="block text-sm text-slate-400">
+                Address line 1
+                <input
+                  required
+                  type="text"
+                  autoComplete="address-line1"
+                  value={form.address1}
+                  onChange={(e) => update("address1", e.target.value)}
+                  onBlur={() =>
+                    markFieldBlurred("address1", { shippingSection: true })
+                  }
+                  className={fieldClass("address1")}
+                  aria-invalid={Boolean(fieldErrors.address1)}
+                  aria-describedby={
+                    fieldErrors.address1 ? "checkout-address1-error" : undefined
+                  }
+                />
+              </label>
+              {fieldErrors.address1 ? (
+                <p
+                  id="checkout-address1-error"
+                  className="mt-1.5 text-xs text-rose-300"
+                  role="alert"
+                >
+                  {fieldErrors.address1}
+                </p>
+              ) : null}
+            </div>
             <label className="mt-4 block text-sm text-slate-400">
               Address line 2
               <input
@@ -285,103 +629,182 @@ export default function CheckoutPage() {
                 autoComplete="address-line2"
                 value={form.address2}
                 onChange={(e) => update("address2", e.target.value)}
+                onBlur={() => markFieldBlurred("address2", { shippingSection: true })}
                 className={inputClass}
               />
             </label>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <label className="block text-sm text-slate-400">
-                City
-                <input
-                  required
-                  type="text"
-                  autoComplete="address-level2"
-                  value={form.city}
-                  onChange={(e) => update("city", e.target.value)}
-                  className={inputClass}
-                />
-              </label>
-              <label className="block text-sm text-slate-400">
-                State / region
-                <input
-                  required
-                  type="text"
-                  autoComplete="address-level1"
-                  value={form.state}
-                  onChange={(e) => update("state", e.target.value)}
-                  className={inputClass}
-                />
-              </label>
+              <div data-checkout-field="city">
+                <label className="block text-sm text-slate-400">
+                  City
+                  <input
+                    required
+                    type="text"
+                    autoComplete="address-level2"
+                    value={form.city}
+                    onChange={(e) => update("city", e.target.value)}
+                    onBlur={() =>
+                      markFieldBlurred("city", { shippingSection: true })
+                    }
+                    className={fieldClass("city")}
+                    aria-invalid={Boolean(fieldErrors.city)}
+                    aria-describedby={
+                      fieldErrors.city ? "checkout-city-error" : undefined
+                    }
+                  />
+                </label>
+                {fieldErrors.city ? (
+                  <p
+                    id="checkout-city-error"
+                    className="mt-1.5 text-xs text-rose-300"
+                    role="alert"
+                  >
+                    {fieldErrors.city}
+                  </p>
+                ) : null}
+              </div>
+              <div data-checkout-field="state">
+                {form.country === "US" ? (
+                  <SelectListbox
+                    label="State"
+                    placeholder="Select state"
+                    options={US_STATE_SELECT_OPTIONS}
+                    valueKey="code"
+                    labelKey="label"
+                    by="code"
+                    value={form.state}
+                    onChange={(code) => update("state", code)}
+                    invalid={Boolean(fieldErrors.state)}
+                    ariaDescribedBy={
+                      fieldErrors.state ? "checkout-state-error" : undefined
+                    }
+                    onMenuClosed={() =>
+                      markFieldBlurred("state", { shippingSection: true })
+                    }
+                    buttonClassName={fieldClass("state")}
+                  />
+                ) : form.country === "CA" ? (
+                  <SelectListbox
+                    label="Province"
+                    placeholder="Select province"
+                    options={CA_PROVINCE_SELECT_OPTIONS}
+                    valueKey="code"
+                    labelKey="label"
+                    by="code"
+                    value={form.state}
+                    onChange={(code) => update("state", code)}
+                    invalid={Boolean(fieldErrors.state)}
+                    ariaDescribedBy={
+                      fieldErrors.state ? "checkout-state-error" : undefined
+                    }
+                    onMenuClosed={() =>
+                      markFieldBlurred("state", { shippingSection: true })
+                    }
+                    buttonClassName={fieldClass("state")}
+                  />
+                ) : (
+                  <label className="block text-sm text-slate-400">
+                    State / region
+                    <input
+                      required
+                      type="text"
+                      autoComplete="address-level1"
+                      value={form.state}
+                      onChange={(e) => update("state", e.target.value)}
+                      onBlur={() =>
+                        markFieldBlurred("state", { shippingSection: true })
+                      }
+                      className={fieldClass("state")}
+                      aria-invalid={Boolean(fieldErrors.state)}
+                      aria-describedby={
+                        fieldErrors.state ? "checkout-state-error" : undefined
+                      }
+                    />
+                  </label>
+                )}
+                {fieldErrors.state ? (
+                  <p
+                    id="checkout-state-error"
+                    className="mt-1.5 text-xs text-rose-300"
+                    role="alert"
+                  >
+                    {fieldErrors.state}
+                  </p>
+                ) : null}
+              </div>
             </div>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <label className="block text-sm text-slate-400">
-                Postal code
-                <input
-                  required
-                  type="text"
-                  autoComplete="postal-code"
-                  value={form.postalCode}
-                  onChange={(e) => update("postalCode", e.target.value)}
-                  className={inputClass}
-                />
-              </label>
-              <label className="block text-sm text-slate-400">
-                Country
-                <select
+              <div data-checkout-field="postalCode">
+                <label className="block text-sm text-slate-400">
+                  {form.country === "US" ? "ZIP code" : "Postal code"}
+                  <input
+                    required
+                    type="text"
+                    autoComplete="postal-code"
+                    value={form.postalCode}
+                    onChange={(e) => update("postalCode", e.target.value)}
+                    onBlur={() =>
+                      markFieldBlurred("postalCode", { shippingSection: true })
+                    }
+                    className={fieldClass("postalCode")}
+                    aria-invalid={Boolean(fieldErrors.postalCode)}
+                    aria-describedby={
+                      fieldErrors.postalCode
+                        ? "checkout-postalCode-error"
+                        : undefined
+                    }
+                  />
+                </label>
+                {fieldErrors.postalCode ? (
+                  <p
+                    id="checkout-postalCode-error"
+                    className="mt-1.5 text-xs text-rose-300"
+                    role="alert"
+                  >
+                    {fieldErrors.postalCode}
+                  </p>
+                ) : null}
+              </div>
+              <div data-checkout-field="country">
+                <SelectListbox
+                  label="Country"
+                  placeholder="Select country"
+                  options={CHECKOUT_COUNTRY_OPTIONS}
                   value={form.country}
-                  onChange={(e) => update("country", e.target.value)}
-                  className={inputClass}
-                >
-                  <option value="US">United States</option>
-                  <option value="CA">Canada</option>
-                  <option value="GB">United Kingdom</option>
-                  <option value="OTHER">Other</option>
-                </select>
-              </label>
+                  onChange={updateCountry}
+                  onMenuClosed={() =>
+                    markFieldBlurred("country", { shippingSection: true })
+                  }
+                  buttonClassName={inputClass}
+                />
+              </div>
             </div>
           </section>
 
-          <section className="rounded-3xl border-2 border-slate-700/40 bg-slate-900/45 p-6 sm:p-8">
+          {/* <section className="rounded-3xl border-2 border-slate-700/40 bg-slate-900/45 p-6 sm:p-8">
             <h2 className="text-xs uppercase tracking-[0.28em] text-amber-300/90">
               Payment
             </h2>
             <p className="mt-3 text-sm leading-relaxed text-slate-500">
-              This template creates a fulfillment order through the connected
-              provider. Add Stripe to capture payment before creating shipment.
+              Card data cannot be collected in custom fields here—PCI rules require
+              PayPal-hosted checkout. The PayPal button may also offer debit or
+              credit card funding when that option is turned on in your PayPal
+              business account.
             </p>
-            <label className="mt-6 block text-sm text-slate-400">
-              Name on card
-              <input
-                type="text"
-                autoComplete="cc-name"
-                placeholder="As shown on card"
-                value={form.cardName}
-                onChange={(e) => update("cardName", e.target.value)}
-                className={inputClass}
-              />
-            </label>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <label className="block text-sm text-slate-400">
-                Card number
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  autoComplete="cc-number"
-                  placeholder="4242 4242 4242 4242"
-                  className={inputClass}
-                  disabled
-                />
-              </label>
-              <label className="block text-sm text-slate-400">
-                Exp / CVC
-                <input
-                  type="text"
-                  disabled
-                  placeholder="Disabled in demo"
-                  className={`${inputClass} opacity-60`}
-                />
-              </label>
-            </div>
-          </section>
+            {!paypalClientId ? (
+              <p className="mt-4 rounded-xl border border-amber-400/20 bg-amber-400/5 px-4 py-3 text-sm text-amber-100/90">
+                Set{" "}
+                <code className="rounded bg-slate-950/80 px-1.5 py-0.5 text-xs text-stone-300">
+                  NEXT_PUBLIC_PAYPAL_CLIENT_ID
+                </code>{" "}
+                and{" "}
+                <code className="rounded bg-slate-950/80 px-1.5 py-0.5 text-xs text-stone-300">
+                  PAYPAL_CLIENT_SECRET
+                </code>{" "}
+                to enable PayPal on this page.
+              </p>
+            ) : null}
+          </section> */}
 
           <label className="block rounded-3xl border-2 border-slate-700/40 bg-slate-900/45 p-6 sm:p-8">
             <span className="text-xs uppercase tracking-[0.28em] text-slate-500">
@@ -449,21 +872,51 @@ export default function CheckoutPage() {
                 </dd>
               </div>
             </dl>
-            <button
-              type="submit"
-              disabled={submitting}
-              className="mt-8 w-full rounded-full bg-linear-to-br from-amber-100 via-stone-100 to-slate-300 py-4 text-sm font-semibold text-slate-900 shadow-lg shadow-slate-900/40 ring-2 ring-white/30 transition hover:scale-[1.01] hover:shadow-xl disabled:opacity-60"
-            >
-              {submitting ? "Placing order…" : "Place order"}
-            </button>
+            {payDisabled && !submitting && !checkoutValid ? (
+              <p className="mt-4 text-center text-xs leading-relaxed text-slate-500">
+                Complete the form with a valid email and full shipping address.
+                {!shippingIncluded &&
+                (shippingLoading || shippingQuoteUsd === null)
+                  ? " Wait for the shipping quote before paying."
+                  : null}
+              </p>
+            ) : null}
+            {paypalClientId ? (
+              <PayPalCheckoutButtons
+                disabled={payDisabled}
+                buildOrder={() => buildOrder()}
+                onBusy={setSubmitting}
+                onError={setSubmitError}
+                onPaid={handlePayPalPaid}
+              />
+            ) : null}
+            {!paypalClientId ? (
+              <button
+                type="button"
+                onClick={handleDemoOrder}
+                disabled={payDisabled}
+                className="mt-8 w-full rounded-full bg-linear-to-br from-amber-100 via-stone-100 to-slate-300 py-4 text-sm font-semibold text-slate-900 shadow-lg shadow-slate-900/40 ring-2 ring-white/30 transition hover:scale-[1.01] hover:shadow-xl disabled:opacity-60"
+              >
+                {submitting ? "Placing order…" : "Place order (demo)"}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleDemoOrder}
+                disabled={payDisabled}
+                className="mt-6 w-full rounded-full border-2 border-slate-600/60 bg-transparent py-3.5 text-sm font-medium text-slate-300 transition hover:border-slate-500 hover:text-stone-100 disabled:opacity-50"
+              >
+                {submitting ? "Working…" : "Skip payment (demo fulfillment)"}
+              </button>
+            )}
             {submitError ? (
               <p className="mt-3 rounded-xl border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-xs leading-relaxed text-rose-200">
                 {submitError}
               </p>
             ) : null}
             <p className="mt-4 text-center text-xs leading-relaxed text-slate-500">
-              By placing this demo order you agree to inspection, crating, and
-              final shipping quotes where applicable.
+              By completing checkout you agree to inspection, crating, and final
+              shipping terms where applicable.
             </p>
           </div>
           <Link
@@ -473,7 +926,23 @@ export default function CheckoutPage() {
             ← Back to cart
           </Link>
         </aside>
-      </form>
+      </div>
     </PageLayout>
   );
+
+  if (paypalClientId) {
+    return (
+      <PayPalScriptProvider
+        options={{
+          clientId: paypalClientId,
+          currency: "USD",
+          intent: "capture",
+        }}
+      >
+        {checkoutBody}
+      </PayPalScriptProvider>
+    );
+  }
+
+  return checkoutBody;
 }

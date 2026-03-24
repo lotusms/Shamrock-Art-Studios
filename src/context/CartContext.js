@@ -8,6 +8,7 @@ import {
   useMemo,
   useState,
 } from "react";
+import { roundUsd2 } from "@/lib/money";
 
 const STORAGE_KEY = "shamrock-cart-v1";
 
@@ -50,6 +51,7 @@ function sameLineData(a, b) {
     a.artist === b.artist &&
     a.priceUsd === b.priceUsd &&
     a.image === b.image &&
+    a.originalImage === b.originalImage &&
     Boolean(a.shippingIncluded) === Boolean(b.shippingIncluded) &&
     a.sku === b.sku &&
     a.quantity === b.quantity
@@ -107,8 +109,15 @@ export function CartProvider({ children }) {
                 slug: latest.slug ?? line.slug,
                 title: latest.title ?? line.title,
                 artist: latest.artist ?? line.artist,
-                priceUsd: Number(latest.priceUsd ?? line.priceUsd),
+                priceUsd: roundUsd2(
+                  Number(latest.priceUsd ?? line.priceUsd),
+                ),
                 image: latest.image ?? line.image,
+                originalImage:
+                  latest.originalImage ??
+                  line.originalImage ??
+                  latest.image ??
+                  line.image,
                 shippingIncluded:
                   typeof latest.shippingIncluded === "boolean"
                     ? latest.shippingIncluded
@@ -154,8 +163,10 @@ export function CartProvider({ children }) {
             slug: product.slug,
             title: product.title,
             artist: product.artist,
-            priceUsd: product.priceUsd,
+            priceUsd: roundUsd2(product.priceUsd),
             image: product.image,
+            originalImage:
+              product.originalImage ?? product.image ?? null,
             shippingIncluded: Boolean(product.shippingIncluded),
             sku: product.sku ?? null,
             quantity: qty,
@@ -187,7 +198,9 @@ export function CartProvider({ children }) {
 
   const subtotalUsd = useMemo(
     () =>
-      lines.reduce((sum, l) => sum + l.priceUsd * l.quantity, 0),
+      roundUsd2(
+        lines.reduce((sum, l) => sum + l.priceUsd * l.quantity, 0),
+      ),
     [lines],
   );
 

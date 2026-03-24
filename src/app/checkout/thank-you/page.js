@@ -70,6 +70,14 @@ function ThankYouContent() {
             ? ` · ID ${order.fulfillment.providerOrderId}`
             : ""}
         </p>
+        {order.payment?.provider === "paypal" ? (
+          <p className="mt-3 text-xs text-slate-500">
+            Paid with PayPal
+            {order.payment.paypalCaptureId
+              ? ` · capture ${order.payment.paypalCaptureId}`
+              : ""}
+          </p>
+        ) : null}
       </div>
 
       <div className="rounded-3xl border-2 border-slate-700/40 bg-slate-900/45 p-8">

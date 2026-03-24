@@ -1,49 +1,76 @@
 import { printfulRequest } from "@/lib/printful/client";
+import {
+  normalizeStateCodeForPrintful,
+  phoneDigitsForPrintful,
+} from "@/lib/printful/address";
+import { roundUsd2 } from "@/lib/money";
 
 function normalizeCountry(country) {
   if (!country || country === "OTHER") return "US";
   return country;
 }
 
+function moneyString(n) {
+  return roundUsd2(Number(n)).toFixed(2);
+}
+
+function printFileUrlForLine(line) {
+  const url = String(line.originalImage || line.image || "").trim();
+  return url || null;
+}
+
 function lineToPrintfulItem(line) {
-  if (!line.variantId) {
+  const catalogVariantId = line.catalogVariantId ?? line.variantId;
+  if (!catalogVariantId) {
     throw new Error(
-      `Line item "${line.title}" is missing variantId from the fulfillment catalog.`,
+      `Line item "${line.title}" is missing catalogVariantId from the fulfillment catalog.`,
+    );
+  }
+  const fileUrl = printFileUrlForLine(line);
+  if (!fileUrl) {
+    throw new Error(
+      `Line item "${line.title}" has no image URL for Printful print files.`,
     );
   }
   return {
-    variant_id: line.variantId,
+    variant_id: Number(catalogVariantId),
     quantity: line.quantity,
-    retail_price: String(line.priceUsd),
+    retail_price: moneyString(line.priceUsd),
     name: line.title,
+    files: [{ url: fileUrl }],
   };
 }
 
 export async function createPrintfulOrder(order) {
   const items = order.lines.map(lineToPrintfulItem);
+  const country = normalizeCountry(order.shippingAddress.country);
+  const stateRaw = order.shippingAddress.state;
+  const state_code = normalizeStateCodeForPrintful(country, stateRaw);
+  const phoneDigits = phoneDigitsForPrintful(order.phone);
+
   const payload = {
     recipient: {
       name: order.shippingAddress.fullName,
       address1: order.shippingAddress.address1,
       address2: order.shippingAddress.address2 || "",
       city: order.shippingAddress.city,
-      state_code: order.shippingAddress.state,
-      country_code: normalizeCountry(order.shippingAddress.country),
+      state_code,
+      country_code: country,
       zip: order.shippingAddress.postalCode,
       email: order.email,
-      phone: order.phone || "",
+      phone: phoneDigits,
     },
     items,
     external_id: order.id,
     retail_costs: {
-      subtotal: String(order.subtotalUsd),
-      shipping: String(order.shippingUsd),
-      total: String(order.totalUsd),
+      subtotal: moneyString(order.subtotalUsd),
+      shipping: moneyString(order.shippingUsd),
+      total: moneyString(order.totalUsd),
       currency: "USD",
     },
     packing_slip: {
       email: order.email,
-      phone: order.phone || "",
+      phone: phoneDigits || order.phone || "",
       message: order.notes || "",
     },
   };
