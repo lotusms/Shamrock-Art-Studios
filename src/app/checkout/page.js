@@ -18,9 +18,7 @@ import {
   CA_PROVINCE_SELECT_OPTIONS,
   US_STATE_SELECT_OPTIONS,
 } from "@/lib/printful/address";
-import { saveOrderToFirestore } from "@/lib/orders-store";
-
-const FIRESTORE_SAVE_TIMEOUT_MS = 5000;
+import { saveOrderToSupabase } from "@/lib/orders-store";
 
 const CHECKOUT_COUNTRY_OPTIONS = [
   { value: "US", label: "United States" },
@@ -56,7 +54,7 @@ function isValidCheckoutEmail(value) {
 }
 
 function computeCheckoutFieldErrors(form, ctx) {
-  const { shippingIncluded, shippingLoading, shippingQuoteUsd } = ctx;
+  const { shippingIncluded, shippingLoading, shippingQuoteUsd, hasTouchedPostalCode } = ctx;
   const errors = {};
 
   const email = form.email.trim();
@@ -86,7 +84,11 @@ function computeCheckoutFieldErrors(form, ctx) {
     errors.postalCode = "Postal code is required.";
   }
 
-  if (!shippingIncluded && (shippingLoading || shippingQuoteUsd === null)) {
+  if (
+    hasTouchedPostalCode &&
+    !shippingIncluded &&
+    (shippingLoading || shippingQuoteUsd === null)
+  ) {
     errors.shipping =
       "Enter your full address and wait until shipping is calculated.";
   }
@@ -247,15 +249,58 @@ export default function CheckoutPage() {
   const [showFieldErrors, setShowFieldErrors] = useState(false);
   /** Fields the user has left (blur); used to show inline errors before submit. */
   const [blurredFields, setBlurredFields] = useState({});
+  const [postalCodeTouched, setPostalCodeTouched] = useState(false);
+  const [addressSuggestions, setAddressSuggestions] = useState([]);
+  const [addressSuggestLoading, setAddressSuggestLoading] = useState(false);
+  const [showAddressSuggestions, setShowAddressSuggestions] = useState(false);
 
   const validationCtx = useMemo(
     () => ({
       shippingIncluded,
       shippingLoading,
       shippingQuoteUsd,
+      hasTouchedPostalCode: postalCodeTouched,
     }),
-    [shippingIncluded, shippingLoading, shippingQuoteUsd],
+    [shippingIncluded, shippingLoading, shippingQuoteUsd, postalCodeTouched],
   );
+
+  useEffect(() => {
+    const query = String(form.address1 || "").trim();
+    if (query.length < 4) {
+      setAddressSuggestions([]);
+      setAddressSuggestLoading(false);
+      return;
+    }
+
+    let active = true;
+    setAddressSuggestLoading(true);
+    const id = window.setTimeout(async () => {
+      try {
+        const params = new URLSearchParams({
+          q: query,
+          country: form.country,
+        });
+        const response = await fetch(`/api/address/autocomplete?${params.toString()}`, {
+          cache: "no-store",
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!active) return;
+        const next = Array.isArray(data?.suggestions) ? data.suggestions : [];
+        setAddressSuggestions(next);
+      } catch {
+        if (!active) return;
+        setAddressSuggestions([]);
+      } finally {
+        if (!active) return;
+        setAddressSuggestLoading(false);
+      }
+    }, 250);
+
+    return () => {
+      active = false;
+      window.clearTimeout(id);
+    };
+  }, [form.address1, form.country]);
 
   const fieldErrors = useMemo(() => {
     const all = computeCheckoutFieldErrors(form, validationCtx);
@@ -319,6 +364,28 @@ export default function CheckoutPage() {
 
   function update(field, value) {
     setForm((f) => ({ ...f, [field]: value }));
+  }
+
+  function toCheckoutCountry(value) {
+    const code = String(value || "").toUpperCase();
+    if (code === "US" || code === "CA" || code === "GB") return code;
+    return "OTHER";
+  }
+
+  function applyAddressSuggestion(suggestion) {
+    setForm((prev) => ({
+      ...prev,
+      address1: suggestion.address1 || prev.address1,
+      city: suggestion.city || prev.city,
+      state: suggestion.state || prev.state,
+      postalCode: suggestion.postalCode || prev.postalCode,
+      country: suggestion.country ? toCheckoutCountry(suggestion.country) : prev.country,
+    }));
+    if (suggestion.postalCode) {
+      setPostalCodeTouched(true);
+      setBlurredFields((prev) => ({ ...prev, shippingSection: true, postalCode: true }));
+    }
+    setShowAddressSuggestions(false);
   }
 
   function updateCountry(value) {
@@ -418,18 +485,14 @@ export default function CheckoutPage() {
 
     try {
       await Promise.race([
-        saveOrderToFirestore(orderWithFulfillment),
-        new Promise((_, reject) => {
-          setTimeout(
-            () => reject(new Error("Firestore save timed out")),
-            FIRESTORE_SAVE_TIMEOUT_MS,
-          );
-        }),
+        saveOrderToSupabase(orderWithFulfillment),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Supabase save timed out")), 15000),
+        ),
       ]);
     } catch (error) {
-      // Do not block checkout completion on Firestore write failures.
       console.error(
-        "[checkout] Firestore save failed:",
+        "[checkout] Supabase save failed:",
         error instanceof Error ? error.message : error,
       );
     }
@@ -622,10 +685,14 @@ export default function CheckoutPage() {
                   type="text"
                   autoComplete="address-line1"
                   value={form.address1}
-                  onChange={(e) => update("address1", e.target.value)}
+                  onChange={(e) => {
+                    update("address1", e.target.value);
+                    setShowAddressSuggestions(true);
+                  }}
                   onBlur={() =>
                     markFieldBlurred("address1", { shippingSection: true })
                   }
+                  onFocus={() => setShowAddressSuggestions(true)}
                   className={fieldClass("address1")}
                   aria-invalid={Boolean(fieldErrors.address1)}
                   aria-describedby={
@@ -633,6 +700,35 @@ export default function CheckoutPage() {
                   }
                 />
               </label>
+              {showAddressSuggestions &&
+              String(form.address1 || "").trim().length >= 4 ? (
+                <div className="mt-2 rounded-xl border border-slate-700/70 bg-slate-950/95 p-2">
+                  {addressSuggestLoading ? (
+                    <p className="px-3 py-2 text-xs text-slate-400">
+                      Searching addresses...
+                    </p>
+                  ) : addressSuggestions.length === 0 ? (
+                    <p className="px-3 py-2 text-xs text-slate-500">
+                      No address suggestions.
+                    </p>
+                  ) : (
+                    <ul className="max-h-56 overflow-y-auto">
+                      {addressSuggestions.map((item) => (
+                        <li key={item.id}>
+                          <button
+                            type="button"
+                            className="w-full rounded-lg px-3 py-2 text-left text-xs text-stone-200 transition hover:bg-slate-800/80"
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={() => applyAddressSuggestion(item)}
+                          >
+                            {item.label}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              ) : null}
               {fieldErrors.address1 ? (
                 <p
                   id="checkout-address1-error"
@@ -763,7 +859,10 @@ export default function CheckoutPage() {
                     type="text"
                     autoComplete="postal-code"
                     value={form.postalCode}
-                    onChange={(e) => update("postalCode", e.target.value)}
+                    onChange={(e) => {
+                      update("postalCode", e.target.value);
+                      setPostalCodeTouched(true);
+                    }}
                     onBlur={() =>
                       markFieldBlurred("postalCode", { shippingSection: true })
                     }

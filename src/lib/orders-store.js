@@ -1,7 +1,6 @@
 "use client";
 
-import { doc, getFirestore, serverTimestamp, setDoc } from "firebase/firestore";
-import { getFirebaseApp, hasFirebaseConfig } from "@/lib/firebase";
+import { createClient } from "@supabase/supabase-js";
 
 function sanitizeOrder(order) {
   return {
@@ -44,25 +43,46 @@ function sanitizeOrder(order) {
   };
 }
 
-export async function saveOrderToFirestore(order) {
-  if (!order?.id) {
-    throw new Error("Cannot save order to Firestore: missing order id.");
-  }
-  if (!hasFirebaseConfig()) {
+let supabaseClient = null;
+
+function getSupabaseClient() {
+  if (supabaseClient) return supabaseClient;
+  // Next.js only inlines NEXT_PUBLIC_* when accessed literally (not via process.env[name]).
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
+  if (!url || !anonKey) {
     throw new Error(
-      "Cannot save order to Firestore: missing NEXT_PUBLIC_FIREBASE_* environment variables.",
+      "Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY. Add both to .env.local (Supabase → Settings → API), then restart the dev server.",
     );
   }
-  const db = getFirestore(getFirebaseApp());
-  const ref = doc(db, "orders", String(order.id));
-
-  await setDoc(
-    ref,
-    {
-      ...sanitizeOrder(order),
-      updatedAt: serverTimestamp(),
-      savedFrom: "checkout-client",
+  supabaseClient = createClient(url, anonKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
     },
-    { merge: true },
-  );
+  });
+  return supabaseClient;
+}
+
+export async function saveOrderToSupabase(order) {
+  if (!order?.id) {
+    throw new Error("Cannot save order to Supabase: missing order id.");
+  }
+
+  const supabase = getSupabaseClient();
+  const payload = sanitizeOrder(order);
+  const row = {
+    id: String(order.id),
+    email: payload.email,
+    total_usd: payload.totalUsd,
+    payload,
+    saved_from: "checkout-client",
+    updated_at: new Date().toISOString(),
+  };
+
+  const { error } = await supabase.from("orders").upsert(row, { onConflict: "id" });
+  if (error) {
+    throw new Error(`Supabase orders upsert failed: ${error.message}`);
+  }
 }
