@@ -5,6 +5,7 @@ import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import PayPalCheckoutButtons from "@/components/checkout/PayPalCheckoutButtons";
+import PrimaryButton from "@/components/ui/PrimaryButton";
 import SelectListbox from "@/components/ui/SelectListbox";
 import PageLayout from "@/components/PageLayout";
 import { useCart } from "@/context/CartContext";
@@ -571,6 +572,11 @@ export default function CheckoutPage() {
       title="Checkout"
       subtitle="Enter the information below to complete your order. We will not store any of your information."
       width="full"
+      buttonArea={
+        <PrimaryButton href="/cart" className="px-4 py-2" icon={<span>←</span>}>
+          Back to cart
+        </PrimaryButton>
+      }
     >
       <div className="grid gap-12 lg:grid-cols-[1fr_400px] lg:gap-16">
         <div className="space-y-8">
@@ -901,31 +907,6 @@ export default function CheckoutPage() {
             </div>
           </section>
 
-          {/* <section className="rounded-3xl border-2 border-slate-700/40 bg-slate-900/45 p-6 sm:p-8">
-            <h2 className="text-xs uppercase tracking-[0.28em] text-amber-300/90">
-              Payment
-            </h2>
-            <p className="mt-3 text-sm leading-relaxed text-slate-500">
-              Card data cannot be collected in custom fields here—PCI rules require
-              PayPal-hosted checkout. The PayPal button may also offer debit or
-              credit card funding when that option is turned on in your PayPal
-              business account.
-            </p>
-            {!paypalClientId ? (
-              <p className="mt-4 rounded-xl border border-amber-400/20 bg-amber-400/5 px-4 py-3 text-sm text-amber-100/90">
-                Set{" "}
-                <code className="rounded bg-slate-950/80 px-1.5 py-0.5 text-xs text-stone-300">
-                  NEXT_PUBLIC_PAYPAL_CLIENT_ID
-                </code>{" "}
-                and{" "}
-                <code className="rounded bg-slate-950/80 px-1.5 py-0.5 text-xs text-stone-300">
-                  PAYPAL_CLIENT_SECRET
-                </code>{" "}
-                to enable PayPal on this page.
-              </p>
-            ) : null}
-          </section> */}
-
           <label className="block rounded-3xl border-2 border-slate-700/40 bg-slate-900/45 p-6 sm:p-8">
             <span className="text-xs uppercase tracking-[0.28em] text-slate-500">
               Order notes
@@ -1011,24 +992,14 @@ export default function CheckoutPage() {
               />
             ) : null}
             {!paypalClientId ? (
-              <button
-                type="button"
+              <PrimaryButton
                 onClick={handleDemoOrder}
                 disabled={payDisabled}
-                className="mt-8 w-full rounded-full bg-linear-to-br from-amber-100 via-stone-100 to-slate-300 py-4 text-sm font-semibold text-slate-900 shadow-lg shadow-slate-900/40 ring-2 ring-white/30 transition hover:scale-[1.01] hover:shadow-xl disabled:opacity-60"
+                className="mt-8 w-full py-4 shadow-slate-900/40"
               >
                 {submitting ? "Placing order…" : "Place order (demo)"}
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={handleDemoOrder}
-                disabled={payDisabled}
-                className="mt-6 w-full rounded-full border-2 border-slate-600/60 bg-transparent py-3.5 text-sm font-medium text-slate-300 transition hover:border-slate-500 hover:text-stone-100 disabled:opacity-50"
-              >
-                {submitting ? "Working…" : "Skip payment (demo fulfillment)"}
-              </button>
-            )}
+              </PrimaryButton>
+            ) : null}
             {submitError ? (
               <p className="mt-3 rounded-xl border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-xs leading-relaxed text-rose-200">
                 {submitError}
@@ -1039,12 +1010,6 @@ export default function CheckoutPage() {
               shipping terms where applicable.
             </p>
           </div>
-          <Link
-            href="/cart"
-            className="block text-center text-sm text-slate-500 underline decoration-slate-600 underline-offset-4 transition hover:text-stone-300"
-          >
-            ← Back to cart
-          </Link>
         </aside>
       </div>
     </PageLayout>
@@ -1057,6 +1022,9 @@ export default function CheckoutPage() {
           clientId: paypalClientId,
           currency: "USD",
           intent: "capture",
+          components: "buttons,card-fields",
+          // Do not set disableFunding=card — it makes CardFields.isEligible() false
+          // so Advanced Checkout fields never render. Use standalone buttons for PayPal / Pay Later only.
         }}
       >
         {checkoutBody}

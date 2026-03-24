@@ -1,5 +1,6 @@
 import Image from "next/image";
-import Button from "@/components/ui/Button";
+import PrimaryButton from "@/components/ui/PrimaryButton";
+import SecondaryButton from "@/components/ui/SecondaryButton";
 
 const featuredWorks = [
   {
@@ -80,7 +81,7 @@ export default function Home() {
   const heroWork = featuredWorks[0];
 
   return (
-    <main className="relative z-10 overflow-x-hidden pt-17">
+    <main className="pt-16">
       {/* Subtle film grain + depth */}
       <div
         aria-hidden
@@ -120,13 +121,13 @@ export default function Home() {
               space rather than a brochure for a physical location.
             </p>
 
-            <div className="mt-8 flex flex-col gap-4 sm:flex-row">
-              <Button href="/work" variant="primary">
+            <div className="mt-8 flex flex-col gap-2 sm:flex-row justify-around">
+              <PrimaryButton href="/work">
                 Explore collection
-              </Button>
-              <Button href="/about" variant="secondary">
+              </PrimaryButton>
+              <SecondaryButton href="/about" className="px-2 py-3.5">
                 View studio notes
-              </Button>
+              </SecondaryButton>
             </div>
 
             <div className="mt-10 grid gap-4 sm:grid-cols-3">

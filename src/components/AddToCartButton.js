@@ -1,11 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useCart } from "@/context/CartContext";
 
 export default function AddToCartButton({ product, className = "" }) {
-  const { addItem } = useCart();
+  const { addItem, lines } = useCart();
   const [added, setAdded] = useState(false);
+
+  const lineKey = useMemo(() => {
+    if (product?.variantId) return `v-${product.variantId}`;
+    return `p-${product?.id ?? "unknown"}`;
+  }, [product?.id, product?.variantId]);
+
+  const existingQuantity = useMemo(() => {
+    const existing = lines.find((line) => line.lineKey === lineKey);
+    return existing?.quantity ?? 0;
+  }, [lineKey, lines]);
 
   useEffect(() => {
     if (!added) return;
@@ -29,8 +39,12 @@ export default function AddToCartButton({ product, className = "" }) {
       {!product?.variantId
         ? "Unavailable"
         : added
-          ? "Added to cart"
-          : "Add to cart"}
+          ? existingQuantity > 1
+            ? "Added another"
+            : "Added to cart"
+          : existingQuantity > 0
+            ? "Add another to cart"
+            : "Add to cart"}
     </button>
   );
 }

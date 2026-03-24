@@ -1,4 +1,5 @@
 import PageLayout from "@/components/PageLayout";
+import Card from "@/components/ui/Card";
 
 export const metadata = {
   title: "Contact | Shamrock Art Studio",
@@ -47,10 +48,7 @@ export default function ContactPage() {
           </p>
         </div>
 
-        <aside className="rounded-4xl border-2 border-slate-700/40 bg-slate-900/50 p-8 shadow-inner shadow-slate-950/40 backdrop-blur-sm">
-          <p className="text-xs uppercase tracking-[0.32em] text-amber-300/90">
-            Include
-          </p>
+        <Card variant="emerald" title="Include" titleTag="h4">
           <ul className="mt-5 space-y-4 text-sm leading-7 text-stone-200/90">
             {checklist.map((line) => (
               <li key={line} className="flex gap-3">
@@ -65,18 +63,7 @@ export default function ContactPage() {
           <p className="mt-8 border-t border-white/5 pt-6 text-xs uppercase tracking-[0.22em] text-slate-500">
             Calendar / video calls by request after first reply.
           </p>
-        </aside>
-      </div>
-
-      <div className="rounded-3xl border border-dashed border-slate-600/50 bg-slate-900/30 px-6 py-8 text-center sm:px-10">
-        <p className="text-xs uppercase tracking-[0.32em] text-slate-500">
-          Next step
-        </p>
-        <p className="mx-auto mt-3 max-w-lg text-sm leading-7 text-stone-400">
-          Drop in a form builder (Tally, Basin, or your own API route) when
-          you&apos;re ready—this layout reserves the rhythm so the UI still feels
-          gallery-quiet.
-        </p>
+        </Card>
       </div>
     </PageLayout>
   );

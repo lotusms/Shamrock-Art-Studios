@@ -3,6 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import PageLayout from "@/components/PageLayout";
+import PrimaryButton from "@/components/ui/PrimaryButton";
+import SecondaryButton from "@/components/ui/SecondaryButton";
 import { useCart } from "@/context/CartContext";
 import { formatUsd } from "@/lib/money";
 import {
@@ -32,12 +34,9 @@ export default function CartPage() {
         subtitle="Browse the shop and add a piece you love—inventory updates here in real time."
         width="wide"
       >
-        <Link
-          href="/shop"
-          className="inline-flex w-fit rounded-full border-2 border-slate-500/50 bg-slate-900/55 px-8 py-3.5 text-sm font-semibold text-stone-100 shadow-inner shadow-slate-950/40 transition hover:border-amber-400/45 hover:bg-slate-800/65"
-        >
+        <PrimaryButton href="/shop" className="w-fit px-8">
           Continue shopping
-        </Link>
+        </PrimaryButton>
       </PageLayout>
     );
   }
@@ -134,18 +133,12 @@ export default function CartPage() {
               <dd className="tabular-nums text-amber-200">{formatUsd(total)}</dd>
             </div>
           </dl>
-          <Link
-            href="/checkout"
-            className="mt-8 flex w-full items-center justify-center rounded-full bg-linear-to-br from-amber-100 via-stone-100 to-slate-300 py-3.5 text-sm font-semibold text-slate-900 shadow-lg shadow-slate-900/35 ring-2 ring-white/30 transition hover:scale-[1.02] hover:shadow-xl hover:shadow-amber-400/25"
-          >
+          <PrimaryButton href="/checkout" className="mt-8 w-full">
             Checkout
-          </Link>
-          <Link
-            href="/shop"
-            className="mt-4 block text-center text-sm text-slate-500 underline decoration-slate-600 underline-offset-4 transition hover:text-stone-300"
-          >
+          </PrimaryButton>
+          <SecondaryButton href="/shop" className="mt-4">
             Continue shopping
-          </Link>
+          </SecondaryButton>
         </aside>
       </div>
     </PageLayout>

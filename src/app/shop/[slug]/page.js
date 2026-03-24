@@ -1,8 +1,8 @@
 import Image from "next/image";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import AddToCartButton from "@/components/AddToCartButton";
 import PageLayout from "@/components/PageLayout";
+import SecondaryButton from "@/components/ui/SecondaryButton";
 import { getCatalogProductBySlug } from "@/lib/printful/catalog";
 import { formatUsd } from "@/lib/money";
 
@@ -99,12 +99,9 @@ export default async function ProductPage({ params }) {
 
             <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center">
               <AddToCartButton product={product} className="sm:min-w-[200px]" />
-              <Link
-                href="/shop"
-                className="text-center text-sm font-medium text-slate-400 underline decoration-slate-600 underline-offset-4 transition hover:text-stone-200"
-              >
-                ← Back to shop
-              </Link>
+              <SecondaryButton href="/shop" icon={<span>←</span>}>
+                Back to shop
+              </SecondaryButton>
             </div>
           </div>
 

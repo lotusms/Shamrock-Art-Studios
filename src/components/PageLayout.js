@@ -6,6 +6,7 @@ export default function PageLayout({
   subtitle,
   children,
   width: _width = "default",
+  buttonArea = null,
 }) {
   const layoutWidth = "max-w-7xl";
 
@@ -22,14 +23,21 @@ export default function PageLayout({
       <div
         className={`relative z-10 mx-auto w-full px-6 pb-28 pt-29 sm:px-10 lg:px-12 ${layoutWidth}`}
       >
-        {eyebrow ? (
-          <p className="text-xs uppercase tracking-[0.32em] text-slate-400">
-            {eyebrow}
-          </p>
-        ) : null}
-        <h1 className="font-serif mt-3 text-4xl font-medium tracking-[-0.03em] text-stone-100 sm:text-5xl lg:text-[3.25rem] lg:leading-[1.08]">
-          {title}
-        </h1>
+        <div className="flex flex-col justify-center items-center md:flex-row md:justify-between gap-2">
+            <div>
+            {eyebrow ? (
+              <p className="text-xs uppercase tracking-[0.32em] text-slate-400">
+                {eyebrow}
+              </p>
+            ) : null}
+            <h1 className="font-serif mt-3 text-4xl font-medium tracking-[-0.03em] text-stone-100 sm:text-5xl lg:text-[3.25rem] lg:leading-[1.08]">
+              {title}
+            </h1>
+          </div>
+          <div>
+            {buttonArea}
+          </div>
+        </div>
         {subtitle ? (
           <p className="mt-4 max-w-full text-lg leading-relaxed text-stone-300/95 sm:text-xl lg:max-w-[75%]">
             {subtitle}

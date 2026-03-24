@@ -1,22 +1,13 @@
 "use client";
 
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useMemo } from "react";
 import PageLayout from "@/components/PageLayout";
+import Card from "@/components/ui/Card";
+import PrimaryButton from "@/components/ui/PrimaryButton";
+import SecondaryButton from "@/components/ui/SecondaryButton";
 import { formatUsd } from "@/lib/money";
 import { ORDER_STORAGE_KEY } from "@/lib/checkout";
-
-const OrderDetailsCard = ({ title, children }) => {
-  return (
-    <div className="rounded-4xl border-2 border-emerald-500/25 bg-slate-900/50 p-8 shadow-lg shadow-slate-950/30 w-full">
-      <h4 className="text-xs uppercase tracking-[0.32em] text-emerald-400/90">
-        {title}
-      </h4>
-      {children}
-    </div>
-  );
-};
 
 function ThankYouContent() {
   const searchParams = useSearchParams();
@@ -43,12 +34,9 @@ function ThankYouContent() {
         subtitle="We couldn’t load your order details—open this page from a completed checkout, or return home."
         width="wide"
       >
-        <Link
-          href="/shop"
-          className="inline-flex w-fit rounded-full border-2 border-slate-500/50 bg-slate-900/55 px-8 py-3.5 text-sm font-semibold text-stone-100 transition hover:border-amber-400/45"
-        >
+        <PrimaryButton href="/shop" className="w-fit px-8">
           Back to shop
-        </Link>
+        </PrimaryButton>
       </PageLayout>
     );
   }
@@ -62,7 +50,7 @@ function ThankYouContent() {
     >
       <div className="flex flex-col md:flex-row gap-4">
 
-        <OrderDetailsCard title="Order reference">
+        <Card variant="emerald" className="w-full" title="Order reference" titleTag="h4">
           <div className="flex flex-col mt-2">
             <p className="font-mono text-stone-100/80">
               Order #: {order.id}
@@ -87,9 +75,9 @@ function ThankYouContent() {
               </p>
             ) : null}
           </div>
-        </OrderDetailsCard>
+        </Card>
 
-        <OrderDetailsCard title="Ship to">
+        <Card variant="emerald" className="w-full" title="Ship to" titleTag="h4">
           <div className="flex flex-col mt-2">
             <p className="font-mono text-stone-100/80">
               {order.shippingAddress.fullName}
@@ -111,10 +99,10 @@ function ThankYouContent() {
               Email: <span className="text-amber-200/90">{order.email}</span>
             </p>
           </div>
-        </OrderDetailsCard>
+        </Card>
       </div>
 
-      <OrderDetailsCard title="Items">
+      <Card variant="emerald" className="w-full" title="Items" titleTag="h4">
         <ul className="mt-4 space-y-3 text-sm">
           {order.lines.map((l) => (
             <li
@@ -151,21 +139,15 @@ function ThankYouContent() {
             <dd className="tabular-nums">{formatUsd(order.totalUsd)}</dd>
           </div>
         </dl>
-      </OrderDetailsCard>
+      </Card>
 
       <div className="flex flex-row justify-end gap-4">
-        <Link
-          href="/contact"
-          className="inline-flex rounded-full border-2 border-slate-600/50 px-8 py-3.5 text-sm font-semibold text-stone-200 transition hover:border-amber-400/35"
-        >
+        <SecondaryButton href="/contact" className="px-2 py-3.5">
           Questions? Contact
-        </Link>
-        <Link
-          href="/shop"
-          className="inline-flex rounded-full bg-linear-to-br from-amber-100 via-stone-100 to-slate-300 px-8 py-3.5 text-sm font-semibold text-slate-900 shadow-lg ring-2 ring-white/30 transition hover:scale-[1.02]"
-        >
+        </SecondaryButton>
+        <PrimaryButton href="/shop" className="px-8">
           Continue shopping
-        </Link>
+        </PrimaryButton>
       </div>
     </PageLayout>
   );

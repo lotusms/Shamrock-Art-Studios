@@ -35,7 +35,7 @@ export default function RootLayout({ children }) {
       className={`${cormorant.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
     >
       <body
-        className="flex min-h-dvh flex-col bg-slate-950 font-sans text-stone-100"
+        className="flex min-h-dvh flex-col overflow-x-clip bg-slate-950 font-sans text-stone-100"
         suppressHydrationWarning
       >
         <CartProvider>
