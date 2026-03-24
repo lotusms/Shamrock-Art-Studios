@@ -18,6 +18,9 @@ import {
   CA_PROVINCE_SELECT_OPTIONS,
   US_STATE_SELECT_OPTIONS,
 } from "@/lib/printful/address";
+import { saveOrderToFirestore } from "@/lib/orders-store";
+
+const FIRESTORE_SAVE_TIMEOUT_MS = 5000;
 
 const CHECKOUT_COUNTRY_OPTIONS = [
   { value: "US", label: "United States" },
@@ -393,7 +396,7 @@ export default function CheckoutPage() {
     };
   }
 
-  function persistAndRedirect(order, fulfillmentExtras) {
+  async function persistAndRedirect(order, fulfillmentExtras) {
     const orderWithFulfillment = {
       ...order,
       fulfillment: {
@@ -411,6 +414,24 @@ export default function CheckoutPage() {
       );
     } catch {
       /* ignore */
+    }
+
+    try {
+      await Promise.race([
+        saveOrderToFirestore(orderWithFulfillment),
+        new Promise((_, reject) => {
+          setTimeout(
+            () => reject(new Error("Firestore save timed out")),
+            FIRESTORE_SAVE_TIMEOUT_MS,
+          );
+        }),
+      ]);
+    } catch (error) {
+      // Do not block checkout completion on Firestore write failures.
+      console.error(
+        "[checkout] Firestore save failed:",
+        error instanceof Error ? error.message : error,
+      );
     }
 
     clearCart();
@@ -443,7 +464,7 @@ export default function CheckoutPage() {
         throw new Error(data?.error || "Could not place order.");
       }
 
-      persistAndRedirect(order, {
+      await persistAndRedirect(order, {
         provider: data.mode === "printful" ? "printful" : "demo",
         providerOrderId: data.printfulOrderId ?? null,
         providerStatus: data.printfulStatus ?? null,
@@ -459,7 +480,7 @@ export default function CheckoutPage() {
 
   function handlePayPalPaid(result) {
     const { order, payment, mode, printfulOrderId, printfulStatus } = result;
-    persistAndRedirect(order, {
+    return persistAndRedirect(order, {
       provider: mode === "printful" ? "printful" : "demo",
       providerOrderId: printfulOrderId,
       providerStatus: printfulStatus,

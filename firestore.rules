@@ -1,0 +1,20 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Orders are written client-side after checkout completes.
+    match /orders/{orderId} {
+      // Public write is convenient for guest checkout. Restrict shape/size.
+      allow create, update: if
+        request.resource.data.id is string &&
+        request.resource.data.id == orderId &&
+        request.resource.data.email is string &&
+        request.resource.data.totalUsd is number &&
+        request.resource.data.lines is list &&
+        request.resource.data.lines.size() > 0 &&
+        request.resource.data.lines.size() <= 50;
+
+      // Keep reads private by default.
+      allow read, delete: if false;
+    }
+  }
+}

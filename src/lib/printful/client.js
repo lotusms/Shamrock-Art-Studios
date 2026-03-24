@@ -1,4 +1,5 @@
 const PRINTFUL_API_BASE = "https://api.printful.com";
+const PRINTFUL_TIMEOUT_MS = 15000;
 
 function required(name) {
   const value = process.env[name];
@@ -14,15 +15,28 @@ export function isPrintfulEnabled() {
 
 export async function printfulRequest(path, init = {}) {
   const apiKey = required("PRINTFUL_API_KEY");
-  const response = await fetch(`${PRINTFUL_API_BASE}${path}`, {
-    ...init,
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-      ...(init.headers ?? {}),
-    },
-    cache: "no-store",
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), PRINTFUL_TIMEOUT_MS);
+  let response;
+  try {
+    response = await fetch(`${PRINTFUL_API_BASE}${path}`, {
+      ...init,
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+        ...(init.headers ?? {}),
+      },
+      cache: "no-store",
+      signal: controller.signal,
+    });
+  } catch (error) {
+    if (error?.name === "AbortError") {
+      throw new Error(`Printful API request timed out after ${PRINTFUL_TIMEOUT_MS}ms`);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
 
   const json = await response.json().catch(() => null);
   if (!response.ok) {

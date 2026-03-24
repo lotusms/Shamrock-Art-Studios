@@ -107,6 +107,21 @@ function pickImage(sync, variant) {
   return "";
 }
 
+function pickPrintFileUrl(sync, variant) {
+  const files = Array.isArray(variant?.files) ? variant.files : [];
+  const preferredFile =
+    files.find((f) => f?.type === "default" && f?.url) ||
+    files.find((f) => f?.url) ||
+    null;
+  if (preferredFile?.url) return preferredFile.url;
+
+  // Fallback for stores where file metadata is sparse.
+  if (sync?.thumbnail_url) return sync.thumbnail_url;
+  if (sync?.image) return sync.image;
+  if (variant?.image) return variant.image;
+  return "";
+}
+
 function pickImageSize(variant) {
   const files = Array.isArray(variant?.files) ? variant.files : [];
   const withDims = files.find((f) => Number(f?.width) > 0 && Number(f?.height) > 0);
@@ -149,6 +164,7 @@ function toCatalogItem(detail, catalogDetails) {
     providerProduct.type_name || providerProduct.title || variant.product?.name || sync.name;
   const normalizedMedium = normalizeMedium(providerMedium);
   const image = pickImage(sync, variant) || providerVariant.image || "";
+  const printFileUrl = pickPrintFileUrl(sync, variant) || image;
   const providerDescription = providerProduct.description || "";
   const providerSize = providerVariant.size || variant.size || variant.name || "Selected variant";
   return {
@@ -169,7 +185,7 @@ function toCatalogItem(detail, catalogDetails) {
     edition: "Open edition",
     priceUsd: parsePrice(variant.retail_price),
     image,
-    originalImage: image,
+    originalImage: printFileUrl,
     imageWidth: imageSize.width,
     imageHeight: imageSize.height,
     shippingIncluded: SHIPPING_INCLUDED_BY_DEFAULT,

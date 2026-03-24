@@ -2,25 +2,36 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useMemo } from "react";
 import PageLayout from "@/components/PageLayout";
 import { formatUsd } from "@/lib/money";
 import { ORDER_STORAGE_KEY } from "@/lib/checkout";
 
+const OrderDetailsCard = ({ title, children }) => {
+  return (
+    <div className="rounded-4xl border-2 border-emerald-500/25 bg-slate-900/50 p-8 shadow-lg shadow-slate-950/30 w-full">
+      <h4 className="text-xs uppercase tracking-[0.32em] text-emerald-400/90">
+        {title}
+      </h4>
+      {children}
+    </div>
+  );
+};
+
 function ThankYouContent() {
   const searchParams = useSearchParams();
   const ref = searchParams.get("ref");
-  const [order, setOrder] = useState(null);
-
-  useEffect(() => {
+  const order = useMemo(() => {
+    if (typeof window === "undefined") return null;
     try {
       const raw = sessionStorage.getItem(ORDER_STORAGE_KEY);
-      if (!raw) return;
+      if (!raw) return null;
       const parsed = JSON.parse(raw);
-      if (ref && parsed.id === ref) setOrder(parsed);
-      else if (!ref && parsed.id) setOrder(parsed);
+      if (ref && parsed.id === ref) return parsed;
+      if (!ref && parsed.id) return parsed;
+      return null;
     } catch {
-      /* ignore */
+      return null;
     }
   }, [ref]);
 
@@ -49,67 +60,61 @@ function ThankYouContent() {
       subtitle="Your order is recorded and ready for fulfillment."
       width="wide"
     >
-      <div className="rounded-4xl border-2 border-emerald-500/25 bg-slate-900/50 p-8 shadow-lg shadow-slate-950/30">
-        <p className="text-xs uppercase tracking-[0.32em] text-emerald-400/90">
-          Order reference
-        </p>
-        <p className="mt-2 font-mono text-xl font-medium tracking-wide text-stone-100">
-          {order.id}
-        </p>
-        <p className="mt-2 text-sm text-slate-500">
-          {new Date(order.createdAt).toLocaleString()}
-        </p>
-        <p className="mt-4 text-xs uppercase tracking-[0.28em] text-slate-500">
-          Fulfillment
-        </p>
-        <p className="mt-2 text-sm text-stone-300">
-          {order.fulfillment?.provider === "printful"
-            ? "Connected provider"
-            : "Demo mode"}
-          {order.fulfillment?.providerOrderId
-            ? ` · ID ${order.fulfillment.providerOrderId}`
-            : ""}
-        </p>
-        {order.payment?.provider === "paypal" ? (
-          <p className="mt-3 text-xs text-slate-500">
-            Paid with PayPal
-            {order.payment.paypalCaptureId
-              ? ` · capture ${order.payment.paypalCaptureId}`
-              : ""}
-          </p>
-        ) : null}
-      </div>
+      <div className="flex flex-col md:flex-row gap-4">
 
-      <div className="rounded-3xl border-2 border-slate-700/40 bg-slate-900/45 p-8">
-        <p className="text-xs uppercase tracking-[0.28em] text-slate-400">
-          Ship to
-        </p>
-        <p className="mt-4 text-stone-200">
-          {order.shippingAddress.fullName}
-          <br />
-          {order.shippingAddress.address1}
-          {order.shippingAddress.address2 ? (
-            <>
+        <OrderDetailsCard title="Order reference">
+          <div className="flex flex-col mt-2">
+            <p className="font-mono text-stone-100/80">
+              Order #: {order.id}
+            </p>
+            <p className="font-mono text-stone-100/80">
+              Order date: {new Date(order.createdAt).toLocaleString()}
+            </p>            
+            <p className="font-mono text-stone-100/80">
+              {order.fulfillment?.provider === "printful"
+                ? "Fulfillment provider"
+                : "Demo mode"}
+              {order.fulfillment?.providerOrderId
+                ? `: ${order.fulfillment.providerOrderId}`
+                : ""}
+            </p>
+            {order.payment?.provider === "paypal" ? (
+              <p className="font-mono text-stone-100/80">
+                
+                {order.payment.paypalCaptureId
+                  ? `Paid with PayPal: ${order.payment.paypalCaptureId}`
+                  : ""}
+              </p>
+            ) : null}
+          </div>
+        </OrderDetailsCard>
+
+        <OrderDetailsCard title="Ship to">
+          <div className="flex flex-col mt-2">
+            <p className="font-mono text-stone-100/80">
+              {order.shippingAddress.fullName}
+            </p>
+            <p className="font-mono text-stone-100/80">
+              {order.shippingAddress.address1}
+              {order.shippingAddress.address2 ? (
+                <>
+                  <br />
+                  {order.shippingAddress.address2}
+                </>
+              ) : null}
               <br />
-              {order.shippingAddress.address2}
-            </>
-          ) : null}
-          <br />
-          {order.shippingAddress.city}, {order.shippingAddress.state}{" "}
-          {order.shippingAddress.postalCode}
-          <br />
-          {order.shippingAddress.country}
-        </p>
-        <p className="mt-6 text-xs uppercase tracking-[0.28em] text-slate-500">
-          Confirmation email
-        </p>
-        <p className="mt-2 text-amber-200/90">{order.email}</p>
+              {order.shippingAddress.city}, {order.shippingAddress.state}{" "}
+              {order.shippingAddress.postalCode} {" "}
+              {order.shippingAddress.country}
+            </p>
+            <p className="font-mono text-stone-100/80">
+              Email: <span className="text-amber-200/90">{order.email}</span>
+            </p>
+          </div>
+        </OrderDetailsCard>
       </div>
 
-      <div className="rounded-3xl border-2 border-slate-700/40 bg-slate-900/45 p-8">
-        <p className="text-xs uppercase tracking-[0.28em] text-amber-300/90">
-          Items
-        </p>
+      <OrderDetailsCard title="Items">
         <ul className="mt-4 space-y-3 text-sm">
           {order.lines.map((l) => (
             <li
@@ -146,20 +151,20 @@ function ThankYouContent() {
             <dd className="tabular-nums">{formatUsd(order.totalUsd)}</dd>
           </div>
         </dl>
-      </div>
+      </OrderDetailsCard>
 
-      <div className="flex flex-wrap gap-4">
-        <Link
-          href="/shop"
-          className="inline-flex rounded-full bg-linear-to-br from-amber-100 via-stone-100 to-slate-300 px-8 py-3.5 text-sm font-semibold text-slate-900 shadow-lg ring-2 ring-white/30 transition hover:scale-[1.02]"
-        >
-          Continue shopping
-        </Link>
+      <div className="flex flex-row justify-end gap-4">
         <Link
           href="/contact"
           className="inline-flex rounded-full border-2 border-slate-600/50 px-8 py-3.5 text-sm font-semibold text-stone-200 transition hover:border-amber-400/35"
         >
           Questions? Contact
+        </Link>
+        <Link
+          href="/shop"
+          className="inline-flex rounded-full bg-linear-to-br from-amber-100 via-stone-100 to-slate-300 px-8 py-3.5 text-sm font-semibold text-slate-900 shadow-lg ring-2 ring-white/30 transition hover:scale-[1.02]"
+        >
+          Continue shopping
         </Link>
       </div>
     </PageLayout>

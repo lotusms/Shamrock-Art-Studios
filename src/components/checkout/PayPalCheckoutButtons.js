@@ -77,13 +77,15 @@ export default function PayPalCheckoutButtons({
             if (!response.ok || !result?.ok) {
               throw new Error(result?.error || "Payment could not be completed.");
             }
-            onPaid({
-              order,
-              payment: result.payment,
-              mode: result.mode,
-              printfulOrderId: result.printfulOrderId ?? null,
-              printfulStatus: result.printfulStatus ?? null,
-            });
+            await Promise.resolve(
+              onPaid({
+                order,
+                payment: result.payment,
+                mode: result.mode,
+                printfulOrderId: result.printfulOrderId ?? null,
+                printfulStatus: result.printfulStatus ?? null,
+              }),
+            );
           } finally {
             onBusy?.(false);
           }
