@@ -48,7 +48,7 @@ export default function ContactPage() {
           </p>
         </div>
 
-        <Card variant="emerald" title="Include" titleTag="h4">
+        <Card variant="inset" title="Include" titleTag="h4">
           <ul className="mt-5 space-y-4 text-sm leading-7 text-stone-200/90">
             {checklist.map((line) => (
               <li key={line} className="flex gap-3">

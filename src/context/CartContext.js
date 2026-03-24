@@ -27,6 +27,7 @@ function loadStored() {
 }
 
 function toLineKey(product) {
+  if (product?.catalogVariantId) return `cv-${product.catalogVariantId}`;
   if (product?.variantId) return `v-${product.variantId}`;
   return `p-${product?.id ?? "unknown"}`;
 }
@@ -99,7 +100,9 @@ export function CartProvider({ children }) {
             .map((line) => {
               if (!line.variantId) return line;
               const latest = byVariant.get(String(line.variantId));
-              if (!latest) return null;
+              // Keep cart lines that are not part of the "primary variant" projection
+              // from /api/catalog/products (e.g., user selected a different variant).
+              if (!latest) return line;
               return {
                 ...line,
                 productId: latest.id,

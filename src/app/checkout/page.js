@@ -20,6 +20,7 @@ import {
   US_STATE_SELECT_OPTIONS,
 } from "@/lib/printful/address";
 import { saveOrderToSupabase } from "@/lib/orders-store";
+import Card from "@/components/ui/Card";
 
 const CHECKOUT_COUNTRY_OPTIONS = [
   { value: "US", label: "United States" },
@@ -580,10 +581,7 @@ export default function CheckoutPage() {
     >
       <div className="grid gap-12 lg:grid-cols-[1fr_400px] lg:gap-16">
         <div className="space-y-8">
-          <section className="rounded-3xl border-2 border-slate-700/40 bg-slate-900/45 p-6 sm:p-8">
-            <h2 className="text-xs uppercase tracking-[0.28em] text-amber-300/90">
-              Contact
-            </h2>
+          <Card variant="inset" className="w-full" title="Contact" titleTag="h4"> 
             <div className="mt-6" data-checkout-field="email">
               <label className="block text-sm text-slate-400">
                 Email
@@ -640,15 +638,9 @@ export default function CheckoutPage() {
                 </p>
               ) : null}
             </div>
-          </section>
+          </Card>
 
-          <section
-            className="rounded-3xl border-2 border-slate-700/40 bg-slate-900/45 p-6 sm:p-8"
-            data-checkout-field="shipping"
-          >
-            <h2 className="text-xs uppercase tracking-[0.28em] text-amber-300/90">
-              Shipping
-            </h2>
+          <Card variant="inset" className="w-full" title="Shipping" titleTag="h4" data-checkout-field="shipping">
             {fieldErrors.shipping ? (
               <p className="mt-4 rounded-xl border border-rose-400/25 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
                 {fieldErrors.shipping}
@@ -905,12 +897,9 @@ export default function CheckoutPage() {
                 />
               </div>
             </div>
-          </section>
+          </Card>
 
-          <label className="block rounded-3xl border-2 border-slate-700/40 bg-slate-900/45 p-6 sm:p-8">
-            <span className="text-xs uppercase tracking-[0.28em] text-slate-500">
-              Order notes
-            </span>
+          <Card variant="inset" className="w-full" title="Order notes" titleTag="h4">
             <textarea
               rows={3}
               value={form.notes}
@@ -918,14 +907,11 @@ export default function CheckoutPage() {
               className={`${inputClass} mt-3 resize-none`}
               placeholder="Installation deadline, VAT ID, shipping window…"
             />
-          </label>
+          </Card>
         </div>
 
         <aside className="h-fit space-y-6 lg:sticky lg:top-28">
-          <div className="rounded-4xl border-2 border-slate-600/35 bg-linear-to-br from-slate-800/50 to-slate-950/50 p-8 shadow-xl ring-2 ring-slate-500/15 backdrop-blur-md">
-            <p className="text-xs uppercase tracking-[0.32em] text-amber-300">
-              Order summary
-            </p>
+          <Card variant="inset" className="w-full" title="Order summary" titleTag="h4">
             <ul className="mt-6 max-h-48 space-y-3 overflow-y-auto text-sm">
               {lines.map((l) => (
                 <li
@@ -1009,7 +995,7 @@ export default function CheckoutPage() {
               By completing checkout you agree to inspection, crating, and final
               shipping terms where applicable.
             </p>
-          </div>
+          </Card>
         </aside>
       </div>
     </PageLayout>

@@ -5,6 +5,15 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { formatUsd } from "@/lib/money";
 
+function formatProductPrice(product) {
+  const min = Number(product?.minPriceUsd);
+  const max = Number(product?.maxPriceUsd);
+  if (Number.isFinite(min) && Number.isFinite(max) && min > 0 && max > min) {
+    return `${formatUsd(min)}–${formatUsd(max)}`;
+  }
+  return formatUsd(product.priceUsd);
+}
+
 function ProductCard({ product }) {
   return (
     <Link href={`/shop/${product.slug}`} className="group block w-full">
@@ -18,7 +27,7 @@ function ProductCard({ product }) {
           className="block h-auto w-full"
         />
         <div className="absolute right-4 top-4 rounded-full border border-amber-300/35 bg-slate-950/70 px-3 py-1.5 text-sm font-semibold tabular-nums text-amber-200 backdrop-blur-sm">
-          {formatUsd(product.priceUsd)}
+          {formatProductPrice(product)}
         </div>
         <div className="absolute inset-0 bg-linear-to-t from-slate-950/88 via-slate-950/25 to-transparent opacity-90" />
         <div className="absolute bottom-0 left-0 right-0 p-5">

@@ -44,7 +44,7 @@ export default function AboutPage() {
       </p>
 
       <div className="grid gap-5 md:grid-cols-2">
-        <Card variant="emerald" title="Operating model">
+        <Card variant="inset" title="Operating model">
           <p className="mt-4 font-serif text-2xl font-medium leading-snug tracking-[-0.02em] text-stone-100 sm:text-3xl">
             Online-first drops, private previews, and commissions—without
             pretending the internet is a substitute for craft.
@@ -55,7 +55,7 @@ export default function AboutPage() {
             need files, dimensions, and confidence—fast.
           </p>
         </Card>
-        <Card variant="emerald" className="flex flex-col justify-between" title="In one line">
+        <Card variant="inset" className="flex flex-col justify-between" title="In one line">
           <div>
             <p className="mt-4 font-serif text-xl font-medium italic leading-relaxed text-stone-100/95 sm:text-2xl">
               “Make the site feel like a private viewing—open to the world, but

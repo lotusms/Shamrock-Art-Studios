@@ -8,9 +8,10 @@ export default function AddToCartButton({ product, className = "" }) {
   const [added, setAdded] = useState(false);
 
   const lineKey = useMemo(() => {
+    if (product?.catalogVariantId) return `cv-${product.catalogVariantId}`;
     if (product?.variantId) return `v-${product.variantId}`;
     return `p-${product?.id ?? "unknown"}`;
-  }, [product?.id, product?.variantId]);
+  }, [product?.catalogVariantId, product?.id, product?.variantId]);
 
   const existingQuantity = useMemo(() => {
     const existing = lines.find((line) => line.lineKey === lineKey);

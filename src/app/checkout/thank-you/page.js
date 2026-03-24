@@ -50,7 +50,7 @@ function ThankYouContent() {
     >
       <div className="flex flex-col md:flex-row gap-4">
 
-        <Card variant="emerald" className="w-full" title="Order reference" titleTag="h4">
+        <Card variant="inset" className="w-full" title="Order reference" titleTag="h4">
           <div className="flex flex-col mt-2">
             <p className="font-mono text-stone-100/80">
               Order #: {order.id}
@@ -77,7 +77,7 @@ function ThankYouContent() {
           </div>
         </Card>
 
-        <Card variant="emerald" className="w-full" title="Ship to" titleTag="h4">
+        <Card variant="inset" className="w-full" title="Ship to" titleTag="h4">
           <div className="flex flex-col mt-2">
             <p className="font-mono text-stone-100/80">
               {order.shippingAddress.fullName}
@@ -102,7 +102,7 @@ function ThankYouContent() {
         </Card>
       </div>
 
-      <Card variant="emerald" className="w-full" title="Items" titleTag="h4">
+      <Card variant="inset" className="w-full" title="Items" titleTag="h4">
         <ul className="mt-4 space-y-3 text-sm">
           {order.lines.map((l) => (
             <li

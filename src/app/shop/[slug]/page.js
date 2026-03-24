@@ -1,10 +1,8 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import AddToCartButton from "@/components/AddToCartButton";
 import PageLayout from "@/components/PageLayout";
-import SecondaryButton from "@/components/ui/SecondaryButton";
+import ProductPurchasePanel from "@/components/shop/ProductPurchasePanel";
 import { getCatalogProductBySlug } from "@/lib/printful/catalog";
-import { formatUsd } from "@/lib/money";
 
 export const dynamic = "force-dynamic";
 
@@ -76,34 +74,7 @@ export default async function ProductPage({ params }) {
         </div>
 
         <div className="flex flex-col">
-          <div className="rounded-3xl border-2 border-slate-700/40 bg-slate-900/50 p-8 shadow-inner shadow-slate-950/40 backdrop-blur-sm">
-            <p className="text-xs uppercase tracking-[0.32em] text-slate-400">
-              Price
-            </p>
-            <p className="mt-3 font-serif text-4xl font-medium tabular-nums tracking-[-0.03em] text-stone-100 sm:text-5xl">
-              {formatUsd(product.priceUsd)}
-            </p>
-
-            <dl className="mt-8 space-y-4 border-t border-white/5 pt-8 text-sm">
-              <div className="flex justify-between gap-4">
-                <dt className="text-slate-500">Medium</dt>
-                <dd className="text-right text-stone-200">{product.medium}</dd>
-              </div>
-              <div className="flex justify-between gap-4">
-                <dt className="text-slate-500">Dimensions</dt>
-                <dd className="text-right text-stone-200">
-                  {product.dimensions}
-                </dd>
-              </div>
-            </dl>
-
-            <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center">
-              <AddToCartButton product={product} className="sm:min-w-[200px]" />
-              <SecondaryButton href="/shop" icon={<span>←</span>}>
-                Back to shop
-              </SecondaryButton>
-            </div>
-          </div>
+          <ProductPurchasePanel product={product} />
 
           <div className="mt-8 space-y-4 text-sm leading-8 text-stone-200/90">
             {renderDescription(product.description)}

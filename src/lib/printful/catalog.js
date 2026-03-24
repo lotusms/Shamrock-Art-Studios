@@ -37,6 +37,9 @@ function fallbackFromReference() {
     description: p.description,
     edition: p.edition ?? "Open edition",
     priceUsd: p.priceUsd,
+    minPriceUsd: p.priceUsd,
+    maxPriceUsd: p.priceUsd,
+    variants: [],
     image: p.image,
     originalImage: p.originalImage ?? p.image,
     imageWidth: 1200,
@@ -77,6 +80,36 @@ function parsePrice(retailPrice) {
   const num = Number.parseFloat(String(retailPrice ?? ""));
   if (Number.isFinite(num)) return roundUsd2(num);
   return 0;
+}
+
+function derivePriceBounds(variants) {
+  if (!Array.isArray(variants) || variants.length === 0) return null;
+  const prices = variants
+    .map((v) => parsePrice(v?.retail_price))
+    .filter((p) => Number.isFinite(p) && p > 0);
+  if (prices.length === 0) return null;
+  return {
+    minPriceUsd: roundUsd2(Math.min(...prices)),
+    maxPriceUsd: roundUsd2(Math.max(...prices)),
+  };
+}
+
+function mapVariantsForDisplay(variants) {
+  if (!Array.isArray(variants)) return [];
+  return variants
+    .map((v) => {
+      const priceUsd = parsePrice(v?.retail_price);
+      return {
+        id: v?.id ?? null,
+        catalogVariantId: v?.variant_id ?? null,
+        name: String(v?.name || v?.size || "Variant").trim(),
+        size: String(v?.size || "").trim(),
+        sku: v?.sku ?? null,
+        priceUsd,
+      };
+    })
+    .filter((v) => v.priceUsd > 0)
+    .sort((a, b) => a.priceUsd - b.priceUsd);
 }
 
 function pickPrimaryVariant(variants) {
@@ -154,6 +187,8 @@ function toCatalogItem(detail, catalogDetails) {
   const sync = detail?.sync_product ?? {};
   const variants = Array.isArray(detail?.sync_variants) ? detail.sync_variants : [];
   const variant = pickPrimaryVariant(variants) ?? {};
+  const priceBounds = derivePriceBounds(variants);
+  const mappedVariants = mapVariantsForDisplay(variants);
   const parsed = splitArtistAndYear(sync.name);
   const title = parsed.title || sync.name || "Untitled";
   const slug = slugify(sync.external_id || title);
@@ -184,6 +219,9 @@ function toCatalogItem(detail, catalogDetails) {
       "This piece is fulfilled on demand and ships directly after order processing.",
     edition: "Open edition",
     priceUsd: parsePrice(variant.retail_price),
+    minPriceUsd: priceBounds?.minPriceUsd ?? parsePrice(variant.retail_price),
+    maxPriceUsd: priceBounds?.maxPriceUsd ?? parsePrice(variant.retail_price),
+    variants: mappedVariants,
     image,
     originalImage: printFileUrl,
     imageWidth: imageSize.width,
