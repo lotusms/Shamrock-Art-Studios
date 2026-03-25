@@ -10,7 +10,8 @@
     "dev": "WATCHPACK_POLLING=true CHOKIDAR_USEPOLLING=true next dev --port 3001 --webpack",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "email:test": "node --env-file=.env.local scripts/send-order-email.mjs"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.9",
@@ -18,6 +19,7 @@
     "@paypal/react-paypal-js": "^9.0.2",
     "@supabase/supabase-js": "^2.100.0",
     "next": "16.2.1",
+    "nodemailer": "^8.0.3",
     "react": "19.2.4",
     "react-dom": "19.2.4"
   },

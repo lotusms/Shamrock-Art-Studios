@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createPrintfulOrder } from "@/lib/printful/orders";
 import { isPrintfulEnabled } from "@/lib/printful/client";
+import { sendOrderConfirmationEmails } from "@/lib/email/order-emails.mjs";
 
 export async function POST(request) {
   try {
@@ -14,6 +15,15 @@ export async function POST(request) {
 
     const order = payload.order;
     if (!isPrintfulEnabled()) {
+      await sendOrderConfirmationEmails({
+        order,
+        payment: null,
+        fulfillment: {
+          provider: "demo",
+          printfulOrderId: null,
+          printfulStatus: null,
+        },
+      });
       return NextResponse.json({
         ok: true,
         mode: "demo",
@@ -22,6 +32,15 @@ export async function POST(request) {
     }
 
     const created = await createPrintfulOrder(order);
+    await sendOrderConfirmationEmails({
+      order,
+      payment: null,
+      fulfillment: {
+        provider: "printful",
+        printfulOrderId: created?.id ?? null,
+        printfulStatus: created?.status ?? null,
+      },
+    });
     return NextResponse.json({
       ok: true,
       mode: "printful",

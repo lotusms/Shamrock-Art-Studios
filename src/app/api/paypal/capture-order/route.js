@@ -7,6 +7,7 @@ import {
   paypalCapturedAmountUsd,
   paypalCaptureId,
 } from "@/lib/paypal/server";
+import { sendOrderConfirmationEmails } from "@/lib/email/order-emails.mjs";
 
 function sameMoney(a, b) {
   return Math.abs(Number(a) - Number(b)) < 0.005;
@@ -90,32 +91,47 @@ export async function POST(request) {
     }
 
     const captureId = paypalCaptureId(captured);
+    const payment = {
+      provider: "paypal",
+      paypalOrderId: paypalOrderID,
+      paypalCaptureId: captureId,
+    };
 
     if (!isPrintfulEnabled()) {
+      await sendOrderConfirmationEmails({
+        order,
+        payment,
+        fulfillment: {
+          provider: "demo",
+          printfulOrderId: null,
+          printfulStatus: null,
+        },
+      });
       return NextResponse.json({
         ok: true,
         mode: "demo",
         printfulOrderId: null,
         printfulStatus: null,
-        payment: {
-          provider: "paypal",
-          paypalOrderId: paypalOrderID,
-          paypalCaptureId: captureId,
-        },
+        payment,
       });
     }
 
     const created = await createPrintfulOrder(order);
+    await sendOrderConfirmationEmails({
+      order,
+      payment,
+      fulfillment: {
+        provider: "printful",
+        printfulOrderId: created?.id ?? null,
+        printfulStatus: created?.status ?? null,
+      },
+    });
     return NextResponse.json({
       ok: true,
       mode: "printful",
       printfulOrderId: created?.id ?? null,
       printfulStatus: created?.status ?? null,
-      payment: {
-        provider: "paypal",
-        paypalOrderId: paypalOrderID,
-        paypalCaptureId: captureId,
-      },
+      payment,
     });
   } catch (error) {
     const message =

@@ -1,0 +1,38 @@
+{
+  "order": {
+    "id": "test-order-001",
+    "email": "buyer@example.com",
+    "phone": "555-0100",
+    "shippingAddress": {
+      "fullName": "Test Buyer",
+      "address1": "123 Main St",
+      "address2": "",
+      "city": "Austin",
+      "state": "TX",
+      "postalCode": "78701",
+      "country": "US"
+    },
+    "lines": [
+      {
+        "title": "Sample print",
+        "slug": "sample-print",
+        "quantity": 2,
+        "priceUsd": 24.5
+      }
+    ],
+    "subtotalUsd": 49,
+    "shippingUsd": 5.99,
+    "totalUsd": 54.99,
+    "notes": "Leave at door"
+  },
+  "payment": {
+    "provider": "paypal",
+    "paypalOrderId": "TEST-PAYPAL-ORDER",
+    "paypalCaptureId": "TEST-CAPTURE"
+  },
+  "fulfillment": {
+    "provider": "demo",
+    "printfulOrderId": null,
+    "printfulStatus": null
+  }
+}
