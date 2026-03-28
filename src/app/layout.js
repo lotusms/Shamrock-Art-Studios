@@ -1,8 +1,7 @@
 import { Cormorant_Garamond, Geist, Geist_Mono } from "next/font/google";
 import CartProvider from "@/components/CartProvider";
 import ScrollToTopOnLoad from "@/components/ScrollToTopOnLoad";
-import SiteFooter from "@/components/SiteFooter";
-import SiteHeader from "@/components/SiteHeader";
+import { AuthProvider } from "@/context/AuthContext";
 import "./globals.css";
 
 /** Elegant serif for headings — softer, more feminine art-gallery feel */
@@ -11,6 +10,8 @@ const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
   display: "swap",
   weight: ["400", "500", "600", "700"],
+  // Avoid unused `<link rel="preload">` warnings when body text uses Geist first.
+  preload: false,
 });
 
 const geistSans = Geist({
@@ -21,6 +22,7 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  preload: false,
 });
 
 export const metadata = {
@@ -38,12 +40,12 @@ export default function RootLayout({ children }) {
         className="flex min-h-dvh flex-col overflow-x-clip bg-slate-950 font-sans text-stone-100"
         suppressHydrationWarning
       >
-        <CartProvider>
-          <ScrollToTopOnLoad />
-          <SiteHeader />
-          {children}
-          <SiteFooter />
-        </CartProvider>
+        <AuthProvider>
+          <CartProvider>
+            <ScrollToTopOnLoad />
+            {children}
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );

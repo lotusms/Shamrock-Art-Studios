@@ -1,5 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Dev tooling is mounted once at the App Router root (wraps every route: /, /shop,
+  // /login, /dashboard, etc.). It is not part of the dashboard layout — so any stuck
+  // dev overlay affects the whole site. `devIndicators: false` hides the on-canvas
+  // indicator (Next 16 docs); restart `next dev` after changing this.
+  devIndicators: false,
   // Keep Turbopack explicit for Next.js 16+ build compatibility on Vercel.
   turbopack: {},
   // External / network volumes often break native file watchers; polling keeps HMR reliable.

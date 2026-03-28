@@ -53,6 +53,17 @@ body {
   }
 }
 
+/*
+ * Next.js 16 devtools (compiled next-devtools) uses Base UI for the dev menu.
+ * Its modal backdrop is role="presentation" + data-base-ui-inert + fixed inset:0.
+ * When that scrim sticks open, it blocks every click (often noticed after login).
+ * This app does not use Base UI; disabling pointer-events on that layer restores
+ * the page in dev. Production builds do not inject these nodes.
+ */
+[role="presentation"][data-base-ui-inert] {
+  pointer-events: none !important;
+}
+
 @keyframes aura-1 {
   0%,
   100% {

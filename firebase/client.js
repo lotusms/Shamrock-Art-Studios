@@ -1,9 +1,11 @@
 import { getApps, initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { assertFirebaseConfig, FIRESTORE_DATABASE_ID } from "./config.js";
 
 let appInstance = null;
 let dbInstance = null;
+let authInstance = null;
 
 /** Browser-only Firebase App (Next.js client components / event handlers). */
 export function getFirebaseApp() {
@@ -25,4 +27,14 @@ export function getFirebaseDb() {
   if (dbInstance) return dbInstance;
   dbInstance = getFirestore(getFirebaseApp(), FIRESTORE_DATABASE_ID);
   return dbInstance;
+}
+
+/** Firebase Auth (browser only). Enable Email/Password in Firebase Console → Authentication. */
+export function getFirebaseAuth() {
+  if (typeof window === "undefined") {
+    throw new Error("Firebase Auth is only available in the browser.");
+  }
+  if (authInstance) return authInstance;
+  authInstance = getAuth(getFirebaseApp());
+  return authInstance;
 }

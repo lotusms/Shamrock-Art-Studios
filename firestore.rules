@@ -18,5 +18,22 @@ service cloud.firestore {
       // Keep reads private by default.
       allow read, delete: if false;
     }
+
+    // User profiles: document id = Firebase Auth uid. Initial create from signed-in client (empty orders only).
+    // Cloud Functions may still upsert the same shape with Admin SDK.
+    match /useraccounts/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.data.uid == userId
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.firstName is string
+        && request.resource.data.lastName is string
+        && request.resource.data.orderHistory is list
+        && request.resource.data.orderHistory.size() == 0
+        && request.resource.data.orderDetails is map
+        && request.resource.data.orderDetails.keys().size() == 0;
+      allow update, delete: if false;
+    }
   }
 }
