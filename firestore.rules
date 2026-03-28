@@ -1,4 +1,6 @@
 rules_version = '2';
+// Database: `main`. Deploy with: pnpm firebase:deploy:firestore:main (not `firebase deploy --only firestore:rules`, which may skip named DBs).
+// Create the DB in Console → Firestore → Databases if needed.
 service cloud.firestore {
   match /databases/{database}/documents {
     // Orders are written client-side after checkout completes.

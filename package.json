@@ -11,13 +11,16 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "email:test": "node --env-file=.env.local scripts/send-order-email.mjs"
+    "email:test": "node --env-file=.env.local scripts/send-order-email.mjs",
+    "firebase:databases": "firebase firestore:databases:list",
+    "firebase:deploy:firestore": "firebase deploy --only firestore",
+    "firebase:deploy:firestore:main": "firebase deploy --only firestore:main"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.9",
     "@heroicons/react": "^2.2.0",
     "@paypal/react-paypal-js": "^9.0.2",
-    "@supabase/supabase-js": "^2.100.0",
+    "firebase": "^12.11.0",
     "next": "16.2.1",
     "nodemailer": "^8.0.3",
     "react": "19.2.4",
@@ -27,6 +30,7 @@
     "@tailwindcss/postcss": "^4",
     "eslint": "^9",
     "eslint-config-next": "16.2.1",
+    "firebase-tools": "^15",
     "tailwindcss": "^4"
   }
 }

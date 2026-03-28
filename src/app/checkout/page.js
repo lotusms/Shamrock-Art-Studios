@@ -19,7 +19,8 @@ import {
   CA_PROVINCE_SELECT_OPTIONS,
   US_STATE_SELECT_OPTIONS,
 } from "@/lib/printful/address";
-import { saveOrderToSupabase } from "@/lib/orders-store";
+import { saveOrderToFirestore } from "@/lib/orders-store";
+import { makeOrderId } from "@/lib/make-order-id";
 import Card from "@/components/ui/Card";
 
 const CHECKOUT_COUNTRY_OPTIONS = [
@@ -28,10 +29,6 @@ const CHECKOUT_COUNTRY_OPTIONS = [
   { value: "GB", label: "United Kingdom" },
   { value: "OTHER", label: "Other" },
 ];
-
-function makeOrderId() {
-  return `ORD-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
-}
 
 function digitsFromTelInput(value) {
   let d = String(value).replace(/\D/g, "");
@@ -487,14 +484,14 @@ export default function CheckoutPage() {
 
     try {
       await Promise.race([
-        saveOrderToSupabase(orderWithFulfillment),
+        saveOrderToFirestore(orderWithFulfillment),
         new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("Supabase save timed out")), 15000),
+          setTimeout(() => reject(new Error("Firestore save timed out")), 15000),
         ),
       ]);
     } catch (error) {
       console.error(
-        "[checkout] Supabase save failed:",
+        "[checkout] Firestore save failed:",
         error instanceof Error ? error.message : error,
       );
     }
