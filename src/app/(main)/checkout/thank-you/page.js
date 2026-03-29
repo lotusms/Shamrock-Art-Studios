@@ -20,8 +20,10 @@ function ThankYouContent() {
       if (!raw) return;
       const parsed = JSON.parse(raw);
       sessionStorage.removeItem(ORDER_EMAIL_STATUS_KEY);
-      if (parsed && typeof parsed === "object" && parsed.ok === false) {
-        setEmailNotice(parsed);
+      if (parsed && typeof parsed === "object") {
+        if (parsed.ok === false) setEmailNotice({ kind: "error", ...parsed });
+        else if (parsed.buyerReceiptViaSeller)
+          setEmailNotice({ kind: "forward", ...parsed });
       }
     } catch {
       /* ignore */
@@ -66,17 +68,35 @@ function ThankYouContent() {
     >
       {emailNotice ? (
         <div
-          className="mb-6 rounded-2xl border border-amber-400/35 bg-amber-950/40 px-4 py-3 text-sm text-amber-100/95"
+          className={`mb-6 rounded-2xl border px-4 py-3 text-sm ${
+            emailNotice.kind === "forward"
+              ? "border-sky-400/35 bg-sky-950/35 text-sky-100/95"
+              : "border-amber-400/35 bg-amber-950/40 text-amber-100/95"
+          }`}
           role="status"
         >
-          <p className="font-medium text-amber-200">
-            Confirmation email could not be sent automatically.
-          </p>
-          <p className="mt-1 text-amber-100/85">
-            {emailNotice.skipped && emailNotice.reason === "smtp_not_configured"
-              ? "The shop’s mail settings are not configured on this server (for example on Vercel, add the same SMTP variables you use locally)."
-              : "You can still use the order number on this page for your records. If you need a receipt, contact us with your order number."}
-          </p>
+          {emailNotice.kind === "forward" ? (
+            <>
+              <p className="font-medium text-sky-200">
+                Confirmation email may arrive from the shop instead of automatically to you.
+              </p>
+              <p className="mt-1 text-sky-100/85">
+                Your mail provider may have blocked our receipt. We sent a full copy to the studio
+                to forward to you—also check your spam folder. Your order is still confirmed below.
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="font-medium text-amber-200">
+                Confirmation email could not be sent automatically.
+              </p>
+              <p className="mt-1 text-amber-100/85">
+                {emailNotice.skipped && emailNotice.reason === "smtp_not_configured"
+                  ? "The shop’s mail settings are not configured on this server (for example on Vercel, add the same SMTP variables you use locally)."
+                  : "You can still use the order number on this page for your records. If you need a receipt, contact us with your order number."}
+              </p>
+            </>
+          )}
         </div>
       ) : null}
 
