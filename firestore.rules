@@ -15,8 +15,12 @@ service cloud.firestore {
         request.resource.data.lines.size() > 0 &&
         request.resource.data.lines.size() <= 50;
 
-      // Keep reads private by default.
-      allow read, delete: if false;
+      // Signed-in users can read orders whose email matches their Auth email (dashboard).
+      allow read: if request.auth != null
+        && request.auth.token.email != null
+        && resource.data.email == request.auth.token.email;
+
+      allow delete: if false;
     }
 
     // User profiles: document id = Firebase Auth uid. Initial create from signed-in client (empty orders only).
