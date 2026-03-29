@@ -2,7 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { RiMailSendLine } from "react-icons/ri";
+import {
+  RiArrowRightSLine,
+  RiFileList2Line,
+  RiMailSendLine,
+} from "react-icons/ri";
 import { useAuth } from "@/context/AuthContext";
 import { getFirebaseAuth } from "@firebase/client";
 import { fetchOrdersForCurrentUser } from "@/lib/orders-queries";
@@ -94,6 +98,11 @@ export default function DashboardOrdersPage() {
     message: null,
     error: null,
   });
+  const [expandedById, setExpandedById] = useState({});
+
+  function toggleOrderExpanded(orderId) {
+    setExpandedById((prev) => ({ ...prev, [orderId]: !prev[orderId] }));
+  }
 
   async function handleResendOrderEmail(orderId, e) {
     e.preventDefault();
@@ -269,87 +278,140 @@ export default function DashboardOrdersPage() {
 
             const resendBusy =
               resendState.loading && resendState.orderId === o.id;
+            const isOpen = Boolean(expandedById[o.id]);
 
             return (
               <li key={o.id}>
                 <div className="flex rounded-2xl border border-slate-700/35 bg-slate-900/40 shadow-md shadow-slate-950/25 backdrop-blur-sm transition hover:border-amber-400/35 hover:bg-slate-900/60">
-                  <Link
-                    href={`/dashboard/orders/${encodeURIComponent(o.id)}`}
-                    className="min-w-0 flex-1 p-5"
-                  >
-                  <div className="flex flex-wrap items-start justify-between gap-4">
-                    <div className="min-w-0 flex-1 space-y-3">
-                      <div>
-                        <p className="font-mono text-sm text-amber-200/95">
-                          {o.id}
-                        </p>
-                        <p className="mt-0.5 text-xs text-slate-500">
-                          Placed {formatWhen(o.createdAt)}
-                        </p>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-start gap-2 p-4 sm:p-5">
+                      <button
+                        type="button"
+                        onClick={() => toggleOrderExpanded(o.id)}
+                        aria-expanded={isOpen}
+                        aria-controls={`order-panel-${o.id}`}
+                        id={`order-expand-${o.id}`}
+                        title={isOpen ? "Collapse order" : "Expand order"}
+                        className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-slate-600/40 bg-slate-950/50 text-slate-400 transition hover:border-amber-400/30 hover:bg-slate-800/80 hover:text-amber-200/90"
+                      >
+                        <RiArrowRightSLine
+                          className={`h-5 w-5 transition-transform duration-200 ${isOpen ? "rotate-90" : ""}`}
+                          aria-hidden
+                        />
+                      </button>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <Link
+                              href={`/dashboard/orders/${encodeURIComponent(o.id)}`}
+                              className="font-mono text-sm text-amber-200/95 underline decoration-amber-500/25 underline-offset-2 transition hover:text-amber-100 hover:decoration-amber-400/50"
+                            >
+                              {o.id}
+                            </Link>                            
+                          </div>
+                          <div className="shrink-0 text-right">
+                            <p className="text-lg font-semibold tabular-nums text-stone-100">
+                              {formatUsd(o.totalUsd ?? 0)}
+                            </p>
+                          </div>
+                        </div>
+
+                        {!isOpen ? (
+                          <p className="mt-3 line-clamp-2 text-sm text-stone-400">
+                            <span className="text-slate-600">Summary · </span>
+                            {preview.primary}
+                            {preview.extra > 0 ? (
+                              <span className="text-slate-600">
+                                {" "}
+                                (+{preview.extra} more)
+                              </span>
+                            ) : null}
+                            {shipTo ? (
+                              <>
+                                <span className="text-slate-600"> · </span>
+                                <span className="text-stone-500">{shipTo}</span>
+                              </>
+                            ) : null}
+                          </p>
+                        ) : null}
                       </div>
+                    </div>
 
-                      {shipTo ? (
-                        <p className="text-sm text-stone-300/95">
-                          <span className="text-slate-500">Ship to </span>
-                          {shipTo}
-                        </p>
-                      ) : null}
-
-                      <div>
-                        <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
-                          Items ({lineCount} line{lineCount === 1 ? "" : "s"} ·{" "}
-                          {qty} unit{qty === 1 ? "" : "s"})
-                        </p>
-                        <p className="mt-1 line-clamp-2 text-sm leading-snug text-stone-200">
-                          {preview.primary}
-                          {preview.extra > 0 ? (
-                            <span className="text-slate-500">
-                              {" "}
-                              · +{preview.extra} more
-                            </span>
+                    {isOpen ? (
+                      <div
+                        id={`order-panel-${o.id}`}
+                        role="region"
+                        aria-labelledby={`order-expand-${o.id}`}
+                        className="border-t border-slate-700/35 px-4 pb-5 pt-0 sm:px-5"
+                      >
+                        <div className="space-y-4 pt-4">
+                          {shipTo ? (
+                            <p className="text-sm text-stone-300/95">
+                              <span className="text-slate-500">Ship to </span>
+                              {shipTo}
+                            </p>
                           ) : null}
-                        </p>
-                      </div>
 
-                      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
-                        {fulfill ? (
-                          <span>
-                            <span className="text-slate-600">Fulfillment: </span>
-                            <span className="text-slate-400">{fulfill}</span>
-                          </span>
-                        ) : null}
-                        {pay ? (
-                          <span>
-                            <span className="text-slate-600">Payment: </span>
-                            <span className="text-slate-400">{pay}</span>
-                          </span>
-                        ) : null}
-                        {o.phone ? (
-                          <span>
-                            <span className="text-slate-600">Phone: </span>
-                            <span className="text-slate-400">{o.phone}</span>
-                          </span>
-                        ) : null}
-                      </div>
-                    </div>
+                          <p className="mt-0.5 text-xs text-slate-500">
+                            Placed {formatWhen(o.createdAt)}
+                          </p>
 
-                    <div className="shrink-0 text-right sm:min-w-36">
-                      <p className="text-lg font-semibold tabular-nums text-stone-100">
-                        {formatUsd(o.totalUsd ?? 0)}
-                      </p>
-                      <p className="mt-1 text-xs tabular-nums text-slate-500">
-                        Subtotal {formatUsd(sub)}
-                      </p>
-                      <p className="text-xs tabular-nums text-slate-500">
-                        Shipping {formatUsd(ship)}
-                      </p>
-                      <p className="mt-3 text-xs font-medium text-amber-200/90">
-                        View details →
-                      </p>
-                    </div>
+                          <div>
+                            <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
+                              Items ({lineCount} line{lineCount === 1 ? "" : "s"}{" "}
+                              · {qty} unit{qty === 1 ? "" : "s"})
+                            </p>
+                            <p className="mt-1 text-sm leading-snug text-stone-200">
+                              {preview.primary}
+                              {preview.extra > 0 ? (
+                                <span className="text-slate-500">
+                                  {" "}
+                                  · +{preview.extra} more
+                                </span>
+                              ) : null}
+                            </p>
+                          </div>
+
+                          <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
+                            {fulfill ? (
+                              <span>
+                                <span className="text-slate-600">
+                                  Fulfillment:{" "}
+                                </span>
+                                <span className="text-slate-400">{fulfill}</span>
+                              </span>
+                            ) : null}
+                            {pay ? (
+                              <span>
+                                <span className="text-slate-600">Payment: </span>
+                                <span className="text-slate-400">{pay}</span>
+                              </span>
+                            ) : null}
+                            {o.phone ? (
+                              <span>
+                                <span className="text-slate-600">Phone: </span>
+                                <span className="text-slate-400">{o.phone}</span>
+                              </span>
+                            ) : null}
+                          </div>
+
+                          <div className="flex flex-wrap items-end justify-between gap-4 border-t border-slate-700/30 pt-4">
+                            <div className="text-xs tabular-nums text-slate-500">
+                              <p>Subtotal {formatUsd(sub)}</p>
+                              <p>Shipping {formatUsd(ship)}</p>
+                            </div>
+                            <Link
+                              href={`/dashboard/orders/${encodeURIComponent(o.id)}`}
+                              className="text-sm font-medium text-amber-200/90 transition hover:text-amber-100"
+                            >
+                              View full order →
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    ) : null}
                   </div>
-                  </Link>
-                  <div className="flex shrink-0 flex-col border-l border-slate-700/35 p-2 sm:p-3">
+                  <div className="flex shrink-0 flex-col gap-1 border-l border-slate-700/35 p-2 sm:p-3">
                     <button
                       type="button"
                       onClick={(e) => handleResendOrderEmail(o.id, e)}
@@ -363,6 +425,14 @@ export default function DashboardOrdersPage() {
                         aria-hidden
                       />
                     </button>
+                    <Link
+                      href={`/dashboard/orders/${encodeURIComponent(o.id)}`}
+                      title="View order details"
+                      aria-label={`View order ${o.id}`}
+                      className="flex h-10 w-10 items-center justify-center rounded-xl text-amber-200/90 transition hover:bg-slate-800/90 hover:text-amber-100"
+                    >
+                      <RiFileList2Line className="h-5 w-5" aria-hidden />
+                    </Link>
                   </div>
                 </div>
               </li>

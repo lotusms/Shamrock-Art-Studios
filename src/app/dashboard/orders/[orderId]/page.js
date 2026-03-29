@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { RiMailSendLine } from "react-icons/ri";
 import { useAuth } from "@/context/AuthContext";
+import { getFirebaseAuth } from "@firebase/client";
 import { fetchOrderByIdForCurrentUser } from "@/lib/orders-queries";
 import { formatUsd } from "@/lib/money";
 
@@ -28,6 +30,60 @@ export default function DashboardOrderDetailPage() {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [resendState, setResendState] = useState({
+    orderId: null,
+    loading: false,
+    message: null,
+    error: null,
+  });
+
+  async function handleResendOrderEmail(e) {
+    e.preventDefault();
+    if (!order?.id) return;
+    setResendState({
+      orderId: order.id,
+      loading: true,
+      message: null,
+      error: null,
+    });
+    try {
+      const auth = getFirebaseAuth();
+      const u = auth.currentUser;
+      if (!u) throw new Error("Sign in again to send email.");
+      const token = await u.getIdToken();
+      const res = await fetch("/api/orders/resend-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ orderId: order.id }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(
+          typeof data?.error === "string" ? data.error : "Could not send email.",
+        );
+      }
+      setResendState({
+        orderId: order.id,
+        loading: false,
+        message:
+          "Order details emailed to the buyer. The shop inbox was CC'd when it is not the same as the buyer.",
+        error: null,
+      });
+      window.setTimeout(() => {
+        setResendState((s) => (s.message ? { ...s, message: null } : s));
+      }, 6000);
+    } catch (err) {
+      setResendState({
+        orderId: null,
+        loading: false,
+        message: null,
+        error: err instanceof Error ? err.message : "Could not send email.",
+      });
+    }
+  }
 
   useEffect(() => {
     if (authLoading || !user || !orderId) {
@@ -79,19 +135,58 @@ export default function DashboardOrderDetailPage() {
     );
   }
 
+  const resendBusy =
+    Boolean(order?.id) &&
+    resendState.loading &&
+    resendState.orderId === order.id;
+
   return (
     <div className="mx-auto max-w-7xl">
-      <div className="mb-8">
-        <Link
-          href="/dashboard/orders"
-          className="text-sm font-medium text-amber-200/95 underline decoration-amber-400/35 underline-offset-4 transition hover:text-amber-100"
-        >
-          ← All orders
-        </Link>
-        <h1 className="mt-4 font-serif text-4xl font-medium tracking-[-0.03em] text-stone-100 sm:text-5xl">
-          Order details
-        </h1>
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <Link
+            href="/dashboard/orders"
+            className="text-sm font-medium text-amber-200/95 underline decoration-amber-400/35 underline-offset-4 transition hover:text-amber-100"
+          >
+            ← All orders
+          </Link>
+          <h1 className="mt-4 font-serif text-4xl font-medium tracking-[-0.03em] text-stone-100 sm:text-5xl">
+            Order details
+          </h1>
+        </div>
+        {order ? (
+          <button
+            type="button"
+            onClick={handleResendOrderEmail}
+            disabled={resendBusy}
+            title="Email HTML order details to the buyer (CC shop inbox)"
+            aria-label={`Email order ${order.id} details to buyer`}
+            className="flex h-11 w-11 shrink-0 items-center justify-center self-start rounded-xl border border-slate-600/50 bg-slate-900/60 text-amber-200/90 transition hover:border-amber-400/35 hover:bg-slate-800/80 hover:text-amber-100 disabled:cursor-not-allowed disabled:opacity-40 sm:mt-8"
+          >
+            <RiMailSendLine
+              className={`h-5 w-5 ${resendBusy ? "animate-pulse" : ""}`}
+              aria-hidden
+            />
+          </button>
+        ) : null}
       </div>
+
+      {order && resendState.message ? (
+        <p
+          className="mb-4 rounded-xl border border-emerald-500/35 bg-emerald-950/30 px-4 py-3 text-sm text-emerald-100/95"
+          role="status"
+        >
+          {resendState.message}
+        </p>
+      ) : null}
+      {order && resendState.error ? (
+        <p
+          className="mb-4 rounded-xl border border-rose-500/35 bg-rose-950/30 px-4 py-3 text-sm text-rose-100/95"
+          role="alert"
+        >
+          {resendState.error}
+        </p>
+      ) : null}
 
       {loading ? (
         <p className="text-sm text-stone-400">Loading order…</p>
