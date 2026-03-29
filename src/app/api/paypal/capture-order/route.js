@@ -7,7 +7,10 @@ import {
   paypalCapturedAmountUsd,
   paypalCaptureId,
 } from "@/lib/paypal/server";
-import { sendOrderConfirmationEmails } from "@/lib/email/order-emails.mjs";
+import {
+  emailResultForClient,
+  sendOrderConfirmationEmails,
+} from "@/lib/email/order-emails.mjs";
 
 function sameMoney(a, b) {
   return Math.abs(Number(a) - Number(b)) < 0.005;
@@ -97,41 +100,43 @@ export async function POST(request) {
       paypalCaptureId: captureId,
     };
 
-    if (!isPrintfulEnabled()) {
-      await sendOrderConfirmationEmails({
-        order,
-        payment,
-        fulfillment: {
-          provider: "demo",
+    let fulfillment = {
+      provider: "demo",
+      printfulOrderId: null,
+      printfulStatus: null,
+    };
+
+    if (isPrintfulEnabled()) {
+      try {
+        const created = await createPrintfulOrder(order);
+        fulfillment = {
+          provider: "printful",
+          printfulOrderId: created?.id ?? null,
+          printfulStatus: created?.status ?? null,
+        };
+      } catch (e) {
+        console.error("[capture-order] Printful create failed after PayPal capture:", e);
+        fulfillment = {
+          provider: "printful",
           printfulOrderId: null,
-          printfulStatus: null,
-        },
-      });
-      return NextResponse.json({
-        ok: true,
-        mode: "demo",
-        printfulOrderId: null,
-        printfulStatus: null,
-        payment,
-      });
+          printfulStatus: "failed",
+        };
+      }
     }
 
-    const created = await createPrintfulOrder(order);
-    await sendOrderConfirmationEmails({
+    const emailResult = await sendOrderConfirmationEmails({
       order,
       payment,
-      fulfillment: {
-        provider: "printful",
-        printfulOrderId: created?.id ?? null,
-        printfulStatus: created?.status ?? null,
-      },
+      fulfillment,
     });
+
     return NextResponse.json({
       ok: true,
-      mode: "printful",
-      printfulOrderId: created?.id ?? null,
-      printfulStatus: created?.status ?? null,
+      mode: isPrintfulEnabled() ? "printful" : "demo",
+      printfulOrderId: fulfillment.printfulOrderId,
+      printfulStatus: fulfillment.printfulStatus,
       payment,
+      email: emailResultForClient(emailResult),
     });
   } catch (error) {
     const message =

@@ -20,3 +20,6 @@ export function orderTotal(subtotalUsd, lines = []) {
 }
 
 export const ORDER_STORAGE_KEY = "shamrock-last-order-v1";
+
+/** One-shot status after checkout for thank-you page (email send result). */
+export const ORDER_EMAIL_STATUS_KEY = "shamrock-order-email-status-v1";

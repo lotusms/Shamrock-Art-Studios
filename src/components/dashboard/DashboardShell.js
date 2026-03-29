@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { doc, getDoc } from "firebase/firestore";
 import {
   RiDashboardLine,
   RiSettings3Line,
@@ -9,6 +11,8 @@ import {
 } from "react-icons/ri";
 import { useAuth } from "@/context/AuthContext";
 import InnerPageBackdrop from "@/components/InnerPageBackdrop";
+import { getFirebaseDb } from "@firebase/client";
+import { USER_ACCOUNTS_COLLECTION } from "@/lib/user-accounts";
 
 const GRAIN_BG = `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`;
 
@@ -21,11 +25,49 @@ const navItems = [
 export default function DashboardShell({ children }) {
   const pathname = usePathname();
   const { user, signOut } = useAuth();
+  const [welcomeName, setWelcomeName] = useState("");
 
-  const displayName =
-    user?.displayName ||
-    user?.email?.split("@")[0] ||
-    "Admin";
+  useEffect(() => {
+    if (!user?.uid) {
+      setWelcomeName("");
+      return;
+    }
+
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const db = getFirebaseDb();
+        const ref = doc(db, USER_ACCOUNTS_COLLECTION, user.uid);
+        const snap = await getDoc(ref);
+        if (cancelled) return;
+        if (snap.exists()) {
+          const d = snap.data();
+          const first = String(d.firstName ?? "").trim();
+          const last = String(d.lastName ?? "").trim();
+          const full = [first, last].filter(Boolean).join(" ");
+          if (full) {
+            setWelcomeName(full);
+            return;
+          }
+        }
+      } catch (e) {
+        console.warn("[DashboardShell] user account", e);
+      }
+
+      if (cancelled) return;
+      const dn = String(user.displayName ?? "").trim();
+      if (dn) {
+        setWelcomeName(dn);
+        return;
+      }
+      setWelcomeName("there");
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
 
   return (
     <div className="relative flex min-h-dvh overflow-hidden bg-slate-950 text-stone-100">
@@ -83,7 +125,9 @@ export default function DashboardShell({ children }) {
           <div className="flex items-center gap-4">
             <span className="hidden text-sm text-stone-400 sm:inline">
               Welcome{" "}
-              <span className="font-medium text-stone-200">{displayName}</span>
+              <span className="font-medium text-stone-200">
+                {welcomeName || "…"}
+              </span>
             </span>
             <button
               type="button"

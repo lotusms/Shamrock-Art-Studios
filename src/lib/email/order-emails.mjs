@@ -14,19 +14,59 @@ function formatUsd(amount) {
 /**
  * Env (server only):
  * - SMTP_HOST, SMTP_PORT (default 587), SMTP_SECURE (optional "true" for port 465)
- * - SMTP_USER, SMTP_PASS
- * - SMTP_FROM — From address (must be allowed by your provider)
- * - ORDER_NOTIFICATION_EMAIL — seller inbox for new-order alerts
+ * - SMTP_USER
+ * - SMTP_PASS or SMTP_PASSWORD (Gmail app passwords often use SMTP_PASSWORD)
+ * - SMTP_FROM — full From header, OR SMTP_FROM_EMAIL + optional SMTP_FROM_NAME
+ * - ORDER_NOTIFICATION_EMAIL — seller inbox (defaults to SMTP_USER if unset)
  */
+
+function smtpPassword() {
+  return (
+    process.env.SMTP_PASS?.trim() || process.env.SMTP_PASSWORD?.trim() || ""
+  );
+}
+
+/** Nodemailer "from" string: "Name <email>" or plain email */
+function smtpFromAddress() {
+  const single = process.env.SMTP_FROM?.trim();
+  if (single) return single;
+  const email = process.env.SMTP_FROM_EMAIL?.trim();
+  if (!email) return "";
+  const name = process.env.SMTP_FROM_NAME?.trim();
+  if (!name) return email;
+  const safe = name.replace(/[\r\n<>]/g, "");
+  return `${safe} <${email}>`;
+}
+
+function sellerInbox() {
+  return (
+    process.env.ORDER_NOTIFICATION_EMAIL?.trim() ||
+    process.env.SMTP_USER?.trim() ||
+    ""
+  );
+}
 
 function smtpConfigured() {
   return Boolean(
     process.env.SMTP_HOST?.trim() &&
       process.env.SMTP_USER?.trim() &&
-      process.env.SMTP_PASS?.trim() &&
-      process.env.SMTP_FROM?.trim() &&
-      process.env.ORDER_NOTIFICATION_EMAIL?.trim(),
+      smtpPassword() &&
+      smtpFromAddress() &&
+      sellerInbox(),
   );
+}
+
+/** Non-secret hints for logs / support (which env keys are unset). */
+export function smtpMissingParts() {
+  const missing = [];
+  if (!process.env.SMTP_HOST?.trim()) missing.push("SMTP_HOST");
+  if (!process.env.SMTP_USER?.trim()) missing.push("SMTP_USER");
+  if (!smtpPassword()) missing.push("SMTP_PASS or SMTP_PASSWORD");
+  if (!smtpFromAddress()) {
+    missing.push("SMTP_FROM or SMTP_FROM_EMAIL (+ optional SMTP_FROM_NAME)");
+  }
+  if (!sellerInbox()) missing.push("ORDER_NOTIFICATION_EMAIL or SMTP_USER");
+  return missing;
 }
 
 function createTransport() {
@@ -39,7 +79,7 @@ function createTransport() {
     secure,
     auth: {
       user: process.env.SMTP_USER?.trim(),
-      pass: process.env.SMTP_PASS?.trim(),
+      pass: smtpPassword(),
     },
   });
 }
@@ -140,6 +180,18 @@ function fulfillmentBlockHtml(fulfillment) {
   return `<p><strong>${escapeHtml(fulfillment.provider || "Fulfillment")}</strong><br/>Printful order: ${escapeHtml(String(fulfillment.printfulOrderId ?? "—"))}<br/>Status: ${escapeHtml(String(fulfillment.printfulStatus ?? "—"))}</p>`;
 }
 
+/** Stored orders may use `providerOrderId` / `providerStatus` instead of Printful field names. */
+function normalizeFulfillmentForEmail(raw) {
+  if (!raw || typeof raw !== "object") {
+    return { provider: "unknown", printfulOrderId: null, printfulStatus: null };
+  }
+  return {
+    provider: String(raw.provider || "unknown"),
+    printfulOrderId: raw.printfulOrderId ?? raw.providerOrderId ?? null,
+    printfulStatus: raw.printfulStatus ?? raw.providerStatus ?? null,
+  };
+}
+
 function buildBodies({ order, payment, fulfillment, options = {} }) {
   const internal = Boolean(options.internal);
   const id = order?.id || "—";
@@ -206,8 +258,10 @@ function buildBodies({ order, payment, fulfillment, options = {} }) {
  */
 export async function sendOrderConfirmationEmails({ order, payment, fulfillment }) {
   if (!smtpConfigured()) {
+    const missing = smtpMissingParts();
     console.warn(
-      "[order-emails] SMTP not fully configured; set SMTP_HOST, SMTP_USER, SMTP_PASS, SMTP_FROM, ORDER_NOTIFICATION_EMAIL",
+      "[order-emails] SMTP incomplete. Missing or empty:",
+      missing.join(", ") || "(unknown)",
     );
     return { ok: false, skipped: true, reason: "smtp_not_configured" };
   }
@@ -218,8 +272,8 @@ export async function sendOrderConfirmationEmails({ order, payment, fulfillment 
     return { ok: false, skipped: true, reason: "no_buyer_email" };
   }
 
-  const seller = process.env.ORDER_NOTIFICATION_EMAIL?.trim() ?? "";
-  const from = process.env.SMTP_FROM.trim();
+  const seller = sellerInbox();
+  const from = smtpFromAddress();
   const orderId = order?.id || "order";
 
   const transport = createTransport();
@@ -231,6 +285,10 @@ export async function sendOrderConfirmationEmails({ order, payment, fulfillment 
     options: { internal: true },
   });
 
+  let buyerOk = false;
+  let sellerOk = false;
+  const failures = [];
+
   try {
     await transport.sendMail({
       from,
@@ -239,6 +297,14 @@ export async function sendOrderConfirmationEmails({ order, payment, fulfillment 
       text: buyerBodies.text,
       html: buyerBodies.html,
     });
+    buyerOk = true;
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("[order-emails] Buyer send failed:", message);
+    failures.push(`buyer: ${message}`);
+  }
+
+  try {
     await transport.sendMail({
       from,
       to: seller,
@@ -246,10 +312,75 @@ export async function sendOrderConfirmationEmails({ order, payment, fulfillment 
       text: sellerBodies.text,
       html: sellerBodies.html,
     });
+    sellerOk = true;
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("[order-emails] Seller notification failed:", message);
+    failures.push(`seller: ${message}`);
+  }
+
+  if (buyerOk && sellerOk) return { ok: true, buyerOk: true, sellerOk: true };
+  return {
+    ok: false,
+    buyerOk,
+    sellerOk,
+    error: failures.join("; ") || "unknown",
+  };
+}
+
+/**
+ * One HTML email to the buyer with the studio address in CC (same template as checkout confirmation).
+ */
+export async function sendOrderDetailsEmailBuyerWithCc({ order, payment, fulfillment }) {
+  if (!smtpConfigured()) {
+    const missing = smtpMissingParts();
+    console.warn(
+      "[order-emails] Resend: SMTP incomplete:",
+      missing.join(", ") || "(unknown)",
+    );
+    return { ok: false, skipped: true, reason: "smtp_not_configured" };
+  }
+
+  const buyer = order?.email?.trim();
+  if (!buyer) {
+    return { ok: false, skipped: true, reason: "no_buyer_email" };
+  }
+
+  const cc = sellerInbox();
+  const from = smtpFromAddress();
+  const orderId = order?.id || "order";
+  const fulfillmentNorm = normalizeFulfillmentForEmail(fulfillment);
+  const bodies = buildBodies({ order, payment, fulfillment: fulfillmentNorm });
+  const transport = createTransport();
+
+  const ccAddr =
+    cc && cc.toLowerCase() !== buyer.toLowerCase() ? cc : undefined;
+
+  try {
+    await transport.sendMail({
+      from,
+      to: buyer,
+      cc: ccAddr,
+      subject: `Order #${orderId} — Shamrock Art Studio`,
+      text: bodies.text,
+      html: bodies.html,
+    });
     return { ok: true };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    console.error("[order-emails] Send failed:", message);
+    console.error("[order-emails] Resend failed:", message);
     return { ok: false, error: message };
   }
+}
+
+/** Safe subset for JSON responses (no internal env details). */
+export function emailResultForClient(result) {
+  if (!result || typeof result !== "object") return undefined;
+  const out = { ok: Boolean(result.ok) };
+  if (result.skipped) out.skipped = true;
+  if (result.reason) out.reason = result.reason;
+  if (result.buyerOk != null) out.buyerOk = result.buyerOk;
+  if (result.sellerOk != null) out.sellerOk = result.sellerOk;
+  if (!result.ok && result.error) out.error = result.error;
+  return out;
 }

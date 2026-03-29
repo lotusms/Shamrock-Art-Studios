@@ -1,17 +1,33 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { Suspense, useMemo } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import PageLayout from "@/components/PageLayout";
 import Card from "@/components/ui/Card";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
 import { formatUsd } from "@/lib/money";
-import { ORDER_STORAGE_KEY } from "@/lib/checkout";
+import { ORDER_EMAIL_STATUS_KEY, ORDER_STORAGE_KEY } from "@/lib/checkout";
 
 function ThankYouContent() {
   const searchParams = useSearchParams();
   const ref = searchParams.get("ref");
+  const [emailNotice, setEmailNotice] = useState(null);
+
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem(ORDER_EMAIL_STATUS_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      sessionStorage.removeItem(ORDER_EMAIL_STATUS_KEY);
+      if (parsed && typeof parsed === "object" && parsed.ok === false) {
+        setEmailNotice(parsed);
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
   const order = useMemo(() => {
     if (typeof window === "undefined") return null;
     try {
@@ -48,6 +64,22 @@ function ThankYouContent() {
       subtitle="Your order is recorded and ready for fulfillment."
       width="wide"
     >
+      {emailNotice ? (
+        <div
+          className="mb-6 rounded-2xl border border-amber-400/35 bg-amber-950/40 px-4 py-3 text-sm text-amber-100/95"
+          role="status"
+        >
+          <p className="font-medium text-amber-200">
+            Confirmation email could not be sent automatically.
+          </p>
+          <p className="mt-1 text-amber-100/85">
+            {emailNotice.skipped && emailNotice.reason === "smtp_not_configured"
+              ? "The shop’s mail settings are not configured on this server (for example on Vercel, add the same SMTP variables you use locally)."
+              : "You can still use the order number on this page for your records. If you need a receipt, contact us with your order number."}
+          </p>
+        </div>
+      ) : null}
+
       <div className="flex flex-col md:flex-row gap-4">
 
         <Card variant="inset" className="w-full" title="Order reference" titleTag="h4">

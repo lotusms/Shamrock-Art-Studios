@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { createPrintfulOrder } from "@/lib/printful/orders";
 import { isPrintfulEnabled } from "@/lib/printful/client";
-import { sendOrderConfirmationEmails } from "@/lib/email/order-emails.mjs";
+import {
+  emailResultForClient,
+  sendOrderConfirmationEmails,
+} from "@/lib/email/order-emails.mjs";
 
 export async function POST(request) {
   try {
@@ -14,38 +17,43 @@ export async function POST(request) {
     }
 
     const order = payload.order;
-    if (!isPrintfulEnabled()) {
-      await sendOrderConfirmationEmails({
-        order,
-        payment: null,
-        fulfillment: {
-          provider: "demo",
+
+    let fulfillment = {
+      provider: "demo",
+      printfulOrderId: null,
+      printfulStatus: null,
+    };
+
+    if (isPrintfulEnabled()) {
+      try {
+        const created = await createPrintfulOrder(order);
+        fulfillment = {
+          provider: "printful",
+          printfulOrderId: created?.id ?? null,
+          printfulStatus: created?.status ?? null,
+        };
+      } catch (e) {
+        console.error("[checkout] Printful create failed:", e);
+        fulfillment = {
+          provider: "printful",
           printfulOrderId: null,
-          printfulStatus: null,
-        },
-      });
-      return NextResponse.json({
-        ok: true,
-        mode: "demo",
-        printfulOrderId: null,
-      });
+          printfulStatus: "failed",
+        };
+      }
     }
 
-    const created = await createPrintfulOrder(order);
-    await sendOrderConfirmationEmails({
+    const emailResult = await sendOrderConfirmationEmails({
       order,
       payment: null,
-      fulfillment: {
-        provider: "printful",
-        printfulOrderId: created?.id ?? null,
-        printfulStatus: created?.status ?? null,
-      },
+      fulfillment,
     });
+
     return NextResponse.json({
       ok: true,
-      mode: "printful",
-      printfulOrderId: created?.id ?? null,
-      printfulStatus: created?.status ?? null,
+      mode: isPrintfulEnabled() ? "printful" : "demo",
+      printfulOrderId: fulfillment.printfulOrderId,
+      printfulStatus: fulfillment.printfulStatus,
+      email: emailResultForClient(emailResult),
     });
   } catch (error) {
     const message =

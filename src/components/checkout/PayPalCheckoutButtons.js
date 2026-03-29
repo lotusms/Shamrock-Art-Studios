@@ -39,7 +39,7 @@ const CARD_FIELDS_STYLE = {
  *   buildOrder: () => object;
  *   onBusy?: (busy: boolean) => void;
  *   onError?: (message: string) => void;
- *   onPaid: (data: { order: object; payment: object; mode: string; printfulOrderId: string | null; printfulStatus: string | null }) => void;
+ *   onPaid: (data: { order: object; payment: object; mode: string; printfulOrderId: string | null; printfulStatus: string | null; email?: object }) => void;
  * }} props
  */
 export default function PayPalCheckoutButtons({
@@ -128,6 +128,7 @@ export default function PayPalCheckoutButtons({
             mode: result.mode,
             printfulOrderId: result.printfulOrderId ?? null,
             printfulStatus: result.printfulStatus ?? null,
+            email: result.email,
           }),
         );
       } catch (e) {

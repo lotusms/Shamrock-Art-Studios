@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { RiMailSendLine } from "react-icons/ri";
 import { useAuth } from "@/context/AuthContext";
+import { getFirebaseAuth } from "@firebase/client";
 import { fetchOrdersForCurrentUser } from "@/lib/orders-queries";
 import { formatUsd } from "@/lib/money";
 
@@ -86,6 +88,62 @@ export default function DashboardOrdersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [page, setPage] = useState(1);
+  const [resendState, setResendState] = useState({
+    orderId: null,
+    loading: false,
+    message: null,
+    error: null,
+  });
+
+  async function handleResendOrderEmail(orderId, e) {
+    e.preventDefault();
+    e.stopPropagation();
+    setResendState({
+      orderId,
+      loading: true,
+      message: null,
+      error: null,
+    });
+    try {
+      const auth = getFirebaseAuth();
+      const u = auth.currentUser;
+      if (!u) throw new Error("Sign in again to send email.");
+      const token = await u.getIdToken();
+      const res = await fetch("/api/orders/resend-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ orderId }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(
+          typeof data?.error === "string" ? data.error : "Could not send email.",
+        );
+      }
+      setResendState({
+        orderId,
+        loading: false,
+        message:
+          "Order details emailed to the buyer. The shop inbox was CC'd when it is not the same as the buyer.",
+        error: null,
+      });
+      window.setTimeout(() => {
+        setResendState((s) =>
+          s.message ? { ...s, message: null } : s,
+        );
+      }, 6000);
+    } catch (err) {
+      setResendState({
+        orderId: null,
+        loading: false,
+        message: null,
+        error: err instanceof Error ? err.message : "Could not send email.",
+      });
+    }
+  }
 
   useEffect(() => {
     if (authLoading || !user) return;
@@ -180,6 +238,23 @@ export default function DashboardOrdersPage() {
         </div>
       ) : (
         <>
+        {resendState.message ? (
+          <p
+            className="mb-4 rounded-xl border border-emerald-500/35 bg-emerald-950/30 px-4 py-3 text-sm text-emerald-100/95"
+            role="status"
+          >
+            {resendState.message}
+          </p>
+        ) : null}
+        {resendState.error ? (
+          <p
+            className="mb-4 rounded-xl border border-rose-500/35 bg-rose-950/30 px-4 py-3 text-sm text-rose-100/95"
+            role="alert"
+          >
+            {resendState.error}
+          </p>
+        ) : null}
+
         <ul className="flex flex-col gap-4">
           {pagedOrders.map((o) => {
             const lines = Array.isArray(o.lines) ? o.lines : [];
@@ -192,12 +267,16 @@ export default function DashboardOrdersPage() {
             const sub = Number(o.subtotalUsd ?? 0);
             const ship = Number(o.shippingUsd ?? 0);
 
+            const resendBusy =
+              resendState.loading && resendState.orderId === o.id;
+
             return (
               <li key={o.id}>
-                <Link
-                  href={`/dashboard/orders/${encodeURIComponent(o.id)}`}
-                  className="block rounded-2xl border border-slate-700/35 bg-slate-900/40 p-5 shadow-md shadow-slate-950/25 backdrop-blur-sm transition hover:border-amber-400/35 hover:bg-slate-900/60"
-                >
+                <div className="flex rounded-2xl border border-slate-700/35 bg-slate-900/40 shadow-md shadow-slate-950/25 backdrop-blur-sm transition hover:border-amber-400/35 hover:bg-slate-900/60">
+                  <Link
+                    href={`/dashboard/orders/${encodeURIComponent(o.id)}`}
+                    className="min-w-0 flex-1 p-5"
+                  >
                   <div className="flex flex-wrap items-start justify-between gap-4">
                     <div className="min-w-0 flex-1 space-y-3">
                       <div>
@@ -269,7 +348,23 @@ export default function DashboardOrdersPage() {
                       </p>
                     </div>
                   </div>
-                </Link>
+                  </Link>
+                  <div className="flex shrink-0 flex-col border-l border-slate-700/35 p-2 sm:p-3">
+                    <button
+                      type="button"
+                      onClick={(e) => handleResendOrderEmail(o.id, e)}
+                      disabled={resendBusy}
+                      title="Email HTML order details to the buyer (CC shop inbox)"
+                      aria-label={`Email order ${o.id} details to buyer`}
+                      className="flex h-10 w-10 items-center justify-center rounded-xl text-amber-200/90 transition hover:bg-slate-800/90 hover:text-amber-100 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      <RiMailSendLine
+                        className={`h-5 w-5 ${resendBusy ? "animate-pulse" : ""}`}
+                        aria-hidden
+                      />
+                    </button>
+                  </div>
+                </div>
               </li>
             );
           })}

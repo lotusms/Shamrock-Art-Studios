@@ -132,14 +132,14 @@ export default function DashboardHomePage() {
       bLabel: "All time",
       sub: "Unique ship-to addresses (name + postal code).",
     },
-    {
-      title: "Catalog",
-      a: catalog.loading ? "…" : catalog.live != null ? String(catalog.live) : "—",
-      b: catalog.loading ? "…" : catalog.variants != null ? String(catalog.variants) : "—",
-      aLabel: "Products",
-      bLabel: "Variants",
-      sub: "Live Printful sync from /api/catalog/products.",
-    },
+    // {
+    //   title: "Catalog",
+    //   a: catalog.loading ? "…" : catalog.live != null ? String(catalog.live) : "—",
+    //   b: catalog.loading ? "…" : catalog.variants != null ? String(catalog.variants) : "—",
+    //   aLabel: "Products",
+    //   bLabel: "Variants",
+    //   sub: "Live Printful sync from /api/catalog/products.",
+    // },
   ];
 
   return (
@@ -160,7 +160,7 @@ export default function DashboardHomePage() {
         </p>
       ) : null}
 
-      <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
         {cards.map((c) => (
           <Card
             key={c.title}

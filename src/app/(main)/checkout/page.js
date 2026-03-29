@@ -13,10 +13,12 @@ import { formatUsd, roundUsd2 } from "@/lib/money";
 import {
   orderTotal,
   shippingIncludedForLines,
+  ORDER_EMAIL_STATUS_KEY,
   ORDER_STORAGE_KEY,
 } from "@/lib/checkout";
 import {
   CA_PROVINCE_SELECT_OPTIONS,
+  normalizeStateCodeForPrintful,
   US_STATE_SELECT_OPTIONS,
 } from "@/lib/printful/address";
 import { saveOrderToFirestore } from "@/lib/orders-store";
@@ -372,18 +374,34 @@ export default function CheckoutPage() {
   }
 
   function applyAddressSuggestion(suggestion) {
-    setForm((prev) => ({
+    setForm((prev) => {
+      const nextCountry = suggestion.country
+        ? toCheckoutCountry(suggestion.country)
+        : prev.country;
+      const rawState = String(suggestion.state ?? "").trim() || prev.state;
+      const state =
+        nextCountry === "US" || nextCountry === "CA"
+          ? normalizeStateCodeForPrintful(nextCountry, rawState)
+          : rawState;
+
+      return {
+        ...prev,
+        address1: String(suggestion.address1 ?? "").trim() || prev.address1,
+        city: String(suggestion.city ?? "").trim() || prev.city,
+        state: state || prev.state,
+        postalCode: String(suggestion.postalCode ?? "").trim() || prev.postalCode,
+        country: nextCountry,
+      };
+    });
+    setPostalCodeTouched(true);
+    setBlurredFields((prev) => ({
       ...prev,
-      address1: suggestion.address1 || prev.address1,
-      city: suggestion.city || prev.city,
-      state: suggestion.state || prev.state,
-      postalCode: suggestion.postalCode || prev.postalCode,
-      country: suggestion.country ? toCheckoutCountry(suggestion.country) : prev.country,
+      shippingSection: true,
+      address1: true,
+      city: true,
+      state: true,
+      postalCode: true,
     }));
-    if (suggestion.postalCode) {
-      setPostalCodeTouched(true);
-      setBlurredFields((prev) => ({ ...prev, shippingSection: true, postalCode: true }));
-    }
     setShowAddressSuggestions(false);
   }
 
@@ -462,7 +480,7 @@ export default function CheckoutPage() {
     };
   }
 
-  async function persistAndRedirect(order, fulfillmentExtras) {
+  async function persistAndRedirect(order, fulfillmentExtras, emailMeta) {
     const orderWithFulfillment = {
       ...order,
       fulfillment: {
@@ -478,6 +496,14 @@ export default function CheckoutPage() {
         ORDER_STORAGE_KEY,
         JSON.stringify(orderWithFulfillment),
       );
+    } catch {
+      /* ignore */
+    }
+
+    try {
+      if (emailMeta != null) {
+        sessionStorage.setItem(ORDER_EMAIL_STATUS_KEY, JSON.stringify(emailMeta));
+      }
     } catch {
       /* ignore */
     }
@@ -526,12 +552,16 @@ export default function CheckoutPage() {
         throw new Error(data?.error || "Could not place order.");
       }
 
-      await persistAndRedirect(order, {
-        provider: data.mode === "printful" ? "printful" : "demo",
-        providerOrderId: data.printfulOrderId ?? null,
-        providerStatus: data.printfulStatus ?? null,
-        payment: null,
-      });
+      await persistAndRedirect(
+        order,
+        {
+          provider: data.mode === "printful" ? "printful" : "demo",
+          providerOrderId: data.printfulOrderId ?? null,
+          providerStatus: data.printfulStatus ?? null,
+          payment: null,
+        },
+        data.email,
+      );
     } catch (error) {
       setSubmitError(
         error instanceof Error ? error.message : "Could not place order.",
@@ -541,13 +571,18 @@ export default function CheckoutPage() {
   }
 
   function handlePayPalPaid(result) {
-    const { order, payment, mode, printfulOrderId, printfulStatus } = result;
-    return persistAndRedirect(order, {
-      provider: mode === "printful" ? "printful" : "demo",
-      providerOrderId: printfulOrderId,
-      providerStatus: printfulStatus,
-      payment,
-    });
+    const { order, payment, mode, printfulOrderId, printfulStatus, email } =
+      result;
+    return persistAndRedirect(
+      order,
+      {
+        provider: mode === "printful" ? "printful" : "demo",
+        providerOrderId: printfulOrderId,
+        providerStatus: printfulStatus,
+        payment,
+      },
+      email,
+    );
   }
 
   const inputClass =
