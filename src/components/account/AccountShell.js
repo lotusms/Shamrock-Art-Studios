@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useMemo } from "react";
 import {
   RiHome4Line,
+  RiLockLine,
   RiShoppingBag3Line,
   RiUserHeartLine,
 } from "react-icons/ri";
@@ -19,6 +20,12 @@ const navItems = [
     href: "/account/orders",
     label: "My orders",
     Icon: RiShoppingBag3Line,
+    end: false,
+  },
+  {
+    href: "/account/change-password",
+    label: "Password",
+    Icon: RiLockLine,
     end: false,
   },
 ];

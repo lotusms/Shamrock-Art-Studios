@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useMemo } from "react";
 import {
   RiDashboardLine,
+  RiLockLine,
   RiSettings3Line,
   RiShoppingBag3Line,
 } from "react-icons/ri";
@@ -17,6 +18,7 @@ const navItems = [
   { href: "/dashboard", label: "Dashboard", Icon: RiDashboardLine },
   { href: "/dashboard/orders", label: "Orders", Icon: RiShoppingBag3Line },
   { href: "/dashboard/settings", label: "Settings", Icon: RiSettings3Line },
+  { href: "/dashboard/change-password", label: "Password", Icon: RiLockLine },
 ];
 
 export default function DashboardShell({ children }) {
