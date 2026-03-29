@@ -4,7 +4,7 @@ import { useId, useState } from "react";
 import { RiLockLine, RiLockUnlockLine } from "react-icons/ri";
 
 const INPUT_BASE =
-  "w-full rounded-lg border border-white/[0.08] bg-[#0b0f1a] py-2.5 pl-3 pr-11 text-stone-100 outline-none ring-lime-400/30 placeholder:text-slate-600 focus:border-lime-400/50 focus:ring-2";
+  "w-full rounded-lg border border-slate-600/40 bg-slate-950/80 py-2.5 pl-3 pr-11 text-stone-100 outline-none ring-amber-400/25 placeholder:text-slate-600 focus:border-amber-400/45 focus:ring-2";
 
 /**
  * Password input with lock / unlock (line) icons to toggle visibility.
@@ -54,7 +54,7 @@ export default function PasswordField({
           aria-pressed={visible}
           disabled={disabled}
           onClick={() => setVisible((v) => !v)}
-          className="absolute right-2 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-md text-slate-500 transition hover:bg-white/[0.06] hover:text-lime-400/90 disabled:opacity-40"
+          className="absolute right-2 top-1/2 flex size-9 -translate-y-1/2 items-center justify-center rounded-md text-slate-500 transition hover:bg-white/[0.06] hover:text-amber-200/90 disabled:opacity-40"
         >
           {visible ? (
             <RiLockLine className="size-5 shrink-0" aria-hidden />

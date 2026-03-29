@@ -47,12 +47,15 @@ export default function LoginPage() {
   if (loading) {
     return (
       <>
-        <div className="pointer-events-auto fixed left-0 right-0 top-0 z-[9999] flex justify-end gap-4 border-b border-white/10 bg-[#0b0f1a]/95 px-4 py-2 text-xs backdrop-blur-sm">
-          <Link href="/" className="text-lime-400/90 hover:text-lime-300">
+        <div className="pointer-events-auto fixed left-0 right-0 top-0 z-[9999] flex justify-end gap-4 border-b border-white/[0.06] bg-slate-950/95 px-4 py-2 text-xs backdrop-blur-md">
+          <Link
+            href="/"
+            className="font-medium text-amber-200/95 transition hover:text-amber-100"
+          >
             Home
           </Link>
         </div>
-        <div className="flex min-h-dvh items-center justify-center bg-[#0b0f1a] text-slate-400">
+        <div className="flex min-h-dvh items-center justify-center bg-slate-950 text-stone-400">
           <p className="text-sm">Loading…</p>
         </div>
       </>
@@ -63,22 +66,19 @@ export default function LoginPage() {
   // links so nothing blocks the whole app if router.replace is slow or stuck.
   if (user) {
     return (
-      <div className="flex min-h-dvh flex-col items-center justify-center gap-6 bg-[#0b0f1a] px-6 text-center text-slate-400">
+      <div className="flex min-h-dvh flex-col items-center justify-center gap-6 bg-slate-950 px-6 text-center text-stone-400">
         <p className="text-sm tracking-wide">Opening your dashboard…</p>
-        <p className="max-w-sm text-xs text-slate-600">
+        <p className="max-w-sm text-xs text-stone-500">
           Stuck here? Continue manually:
         </p>
         <div className="flex flex-wrap items-center justify-center gap-4 text-sm">
           <Link
             href="/dashboard"
-            className="font-medium text-lime-400/90 underline underline-offset-4 hover:text-lime-300"
+            className="font-semibold text-amber-200/95 underline decoration-amber-400/40 underline-offset-4 transition hover:text-amber-100"
           >
             Go to dashboard
           </Link>
-          <Link
-            href="/"
-            className="text-slate-500 hover:text-slate-300"
-          >
+          <Link href="/" className="text-stone-500 transition hover:text-stone-300">
             Back to site
           </Link>
         </div>
@@ -87,12 +87,12 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center bg-[#0b0f1a] px-6 py-16">
-      <div className="w-full max-w-md rounded-2xl border border-white/[0.08] bg-[#0d1220] p-8 shadow-xl">
-        <p className="font-serif text-2xl font-semibold text-stone-100">
+    <div className="flex min-h-dvh flex-col items-center justify-center bg-slate-950 px-6 py-16">
+      <div className="w-full max-w-md rounded-3xl border-2 border-slate-700/40 bg-slate-900/45 p-8 shadow-2xl shadow-slate-950/50 backdrop-blur-md ring-1 ring-slate-500/15">
+        <p className="font-serif text-3xl font-medium tracking-[-0.03em] text-stone-100">
           Studio login
         </p>
-        <p className="mt-2 text-sm text-slate-500">
+        <p className="mt-2 text-sm leading-relaxed text-stone-300/95">
           Sign in with the email and password configured in Firebase Authentication.
         </p>
 
@@ -112,7 +112,7 @@ export default function LoginPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-1.5 w-full rounded-lg border border-white/[0.08] bg-[#0b0f1a] px-3 py-2.5 text-stone-100 outline-none ring-lime-400/30 placeholder:text-slate-600 focus:border-lime-400/50 focus:ring-2"
+              className="mt-1.5 w-full rounded-lg border border-slate-600/40 bg-slate-950/80 px-3 py-2.5 text-stone-100 outline-none ring-amber-400/25 placeholder:text-slate-600 focus:border-amber-400/45 focus:ring-2"
               placeholder="you@example.com"
             />
           </div>
@@ -141,8 +141,11 @@ export default function LoginPage() {
           </PrimaryButton>
         </form>
 
-        <p className="mt-8 text-center text-sm text-slate-500">
-          <Link href="/" className="text-lime-400/90 hover:text-lime-300">
+        <p className="mt-8 text-center text-sm text-stone-500">
+          <Link
+            href="/"
+            className="font-medium text-amber-200/95 transition hover:text-amber-100"
+          >
             ← Back to site
           </Link>
         </p>
