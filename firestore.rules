@@ -33,11 +33,29 @@ service cloud.firestore {
         && request.resource.data.email == request.auth.token.email
         && request.resource.data.firstName is string
         && request.resource.data.lastName is string
+        && request.resource.data.admin == false
+        && request.resource.data.guest == false
         && request.resource.data.orderHistory is list
         && request.resource.data.orderHistory.size() == 0
         && request.resource.data.orderDetails is map
-        && request.resource.data.orderDetails.keys().size() == 0;
-      allow update, delete: if false;
+        && request.resource.data.orderDetails.keys().size() == 0
+        && (!('phone' in request.resource.data) || request.resource.data.phone is string)
+        && (!('shippingAddress' in request.resource.data) || request.resource.data.shippingAddress is map);
+      // Profile updates (e.g. checkout registration merge) — immutable order/admin fields.
+      allow update: if request.auth != null && request.auth.uid == userId
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.email == resource.data.email
+        && request.resource.data.admin == resource.data.admin
+        // guest flag immutable; treat missing guest as false (legacy docs before migration)
+        && (request.resource.data.guest == resource.data.guest
+          || (!resource.data.keys().hasAny(['guest']) && request.resource.data.guest == false))
+        && request.resource.data.orderHistory == resource.data.orderHistory
+        && request.resource.data.orderDetails == resource.data.orderDetails
+        && request.resource.data.firstName is string
+        && request.resource.data.lastName is string
+        && (!('phone' in request.resource.data) || request.resource.data.phone is string)
+        && (!('shippingAddress' in request.resource.data) || request.resource.data.shippingAddress is map);
+      allow delete: if false;
     }
   }
 }

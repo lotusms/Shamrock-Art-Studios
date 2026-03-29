@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useId, useState } from "react";
+import HeaderAuth from "@/components/HeaderAuth";
 import { useCart } from "@/context/CartContext";
 import { mainNav } from "@/config/nav";
 import { formatUsd } from "@/lib/money";
@@ -188,6 +189,7 @@ export default function SiteHeader() {
           </nav>
 
           <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+            <HeaderAuth onNavigate={close} />
             <CartNavLink onNavigate={close} />
             <button
               type="button"
@@ -320,6 +322,9 @@ export default function SiteHeader() {
           </nav>
 
           <div className="shrink-0 space-y-4 border-t border-amber-400/15 bg-slate-900/70 px-6 py-6 backdrop-blur-sm">
+            <div className="flex justify-center">
+              <HeaderAuth onNavigate={close} />
+            </div>
             <Link
               href="/cart"
               onClick={close}

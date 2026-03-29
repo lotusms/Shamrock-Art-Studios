@@ -3,6 +3,7 @@ import {
   getFirebaseAdminDb,
   verifyFirebaseIdToken,
 } from "@/lib/firebase-admin-server";
+import { USER_ACCOUNTS_COLLECTION } from "@/lib/user-accounts";
 import {
   emailResultForClient,
   sendOrderDetailsEmailBuyerWithCc,
@@ -25,9 +26,9 @@ export async function POST(request) {
     );
   }
 
-  const userEmail = decoded.email;
-  if (!userEmail || typeof userEmail !== "string") {
-    return NextResponse.json({ error: "Account has no email" }, { status: 403 });
+  const uid = decoded.uid;
+  if (!uid || typeof uid !== "string") {
+    return NextResponse.json({ error: "Invalid token" }, { status: 403 });
   }
 
   let body;
@@ -45,18 +46,29 @@ export async function POST(request) {
 
   try {
     const db = getFirebaseAdminDb();
+    const userSnap = await db
+      .collection(USER_ACCOUNTS_COLLECTION)
+      .doc(uid)
+      .get();
+    const ua = userSnap.data();
+    const isAdmin =
+      Boolean(ua?.admin) && ua?.guest !== true;
+    if (!isAdmin) {
+      return NextResponse.json(
+        {
+          error:
+            "Only shop administrators can resend order emails.",
+        },
+        { status: 403 },
+      );
+    }
+
     const snap = await db.collection("orders").doc(orderId).get();
     if (!snap.exists) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
     const data = snap.data();
-    if (
-      String(data?.email || "").toLowerCase() !== userEmail.toLowerCase()
-    ) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
     const order = { id: snap.id, ...data };
     const payment = order.payment ?? null;
     const fulfillment = order.fulfillment ?? null;

@@ -8,7 +8,7 @@ import PasswordField from "@/components/ui/PasswordField";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 
 export default function LoginPage() {
-  const { user, loading, signIn } = useAuth();
+  const { user, loading, accountLoading, isAdmin, signIn } = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -17,10 +17,9 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (loading) return;
-    if (user) {
-      router.replace("/dashboard");
-    }
-  }, [user, loading, router]);
+    if (!user || accountLoading) return;
+    router.replace(isAdmin ? "/dashboard" : "/account");
+  }, [user, loading, accountLoading, isAdmin, router]);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -28,8 +27,6 @@ export default function LoginPage() {
     setSubmitting(true);
     try {
       await signIn(email, password);
-      // Navigation is also triggered by the effect when `user` updates; one replace is enough.
-      router.replace("/dashboard");
     } catch (err) {
       const msg =
         err instanceof Error
@@ -41,42 +38,37 @@ export default function LoginPage() {
     }
   }
 
-  // Initial Firebase auth hydration only — do not tie this to `user` or a successful
-  // login replaces the whole page with a non-interactive full-screen layer (felt like
-  // a site-wide overlay) until client navigation finishes.
   if (loading) {
     return (
-      <>
-        <div className="pointer-events-auto fixed left-0 right-0 top-0 z-[9999] flex justify-end gap-4 border-b border-white/[0.06] bg-slate-950/95 px-4 py-2 text-xs backdrop-blur-md">
-          <Link
-            href="/"
-            className="font-medium text-amber-200/95 transition hover:text-amber-100"
-          >
-            Home
-          </Link>
-        </div>
-        <div className="flex min-h-dvh items-center justify-center bg-slate-950 text-stone-400">
-          <p className="text-sm">Loading…</p>
-        </div>
-      </>
+      <div className="flex min-h-dvh items-center justify-center bg-slate-950 text-stone-400">
+        <p className="text-sm">Loading…</p>
+      </div>
     );
   }
 
-  // Already signed in: redirect in the effect above; show a minimal screen with real
-  // links so nothing blocks the whole app if router.replace is slow or stuck.
+  if (user && accountLoading) {
+    return (
+      <div className="flex min-h-dvh flex-col items-center justify-center gap-4 bg-slate-950 px-6 text-center text-stone-400">
+        <p className="text-sm tracking-wide">Loading your account…</p>
+      </div>
+    );
+  }
+
   if (user) {
     return (
       <div className="flex min-h-dvh flex-col items-center justify-center gap-6 bg-slate-950 px-6 text-center text-stone-400">
-        <p className="text-sm tracking-wide">Opening your dashboard…</p>
+        <p className="text-sm tracking-wide">
+          Opening {isAdmin ? "the portal" : "your account"}…
+        </p>
         <p className="max-w-sm text-xs text-stone-500">
           Stuck here? Continue manually:
         </p>
         <div className="flex flex-wrap items-center justify-center gap-4 text-sm">
           <Link
-            href="/dashboard"
+            href={isAdmin ? "/dashboard" : "/account"}
             className="font-semibold text-amber-200/95 underline decoration-amber-400/40 underline-offset-4 transition hover:text-amber-100"
           >
-            Go to dashboard
+            {isAdmin ? "Go to portal" : "Go to My Account"}
           </Link>
           <Link href="/" className="text-stone-500 transition hover:text-stone-300">
             Back to site
@@ -90,10 +82,10 @@ export default function LoginPage() {
     <div className="flex min-h-dvh flex-col items-center justify-center bg-slate-950 px-6 py-16">
       <div className="w-full max-w-md rounded-3xl border-2 border-slate-700/40 bg-slate-900/45 p-8 shadow-2xl shadow-slate-950/50 backdrop-blur-md ring-1 ring-slate-500/15">
         <p className="font-serif text-3xl font-medium tracking-[-0.03em] text-stone-100">
-          Studio login
+          Sign in
         </p>
         <p className="mt-2 text-sm leading-relaxed text-stone-300/95">
-          Sign in with the email and password configured in Firebase Authentication.
+          Use the email and password for your Shamrock Art Studio account.
         </p>
 
         <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-4">

@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import AddressLine1Autocomplete from "@/components/checkout/AddressLine1Autocomplete";
+import CheckoutAuthSection from "@/components/checkout/CheckoutAuthSection";
 import PayPalCheckoutButtons from "@/components/checkout/PayPalCheckoutButtons";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import SelectListbox from "@/components/ui/SelectListbox";
@@ -24,13 +26,12 @@ import {
 import { saveOrderToFirestore } from "@/lib/orders-store";
 import { makeOrderId } from "@/lib/make-order-id";
 import Card from "@/components/ui/Card";
-
-const CHECKOUT_COUNTRY_OPTIONS = [
-  { value: "US", label: "United States" },
-  { value: "CA", label: "Canada" },
-  { value: "GB", label: "United Kingdom" },
-  { value: "OTHER", label: "Other" },
-];
+import {
+  fetchUserAccountDoc,
+  profileToCheckoutFormPatch,
+} from "@/lib/checkout-auth";
+import { CHECKOUT_COUNTRY_OPTIONS } from "@/lib/checkout-countries";
+import { useAuth } from "@/context/AuthContext";
 
 function digitsFromTelInput(value) {
   let d = String(value).replace(/\D/g, "");
@@ -144,7 +145,9 @@ function scrollToFirstCheckoutFieldError(errors) {
 
 export default function CheckoutPage() {
   const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
   const { lines, ready, subtotalUsd, clearCart } = useCart();
+  const prefillUidRef = useRef(null);
   const shippingIncluded = shippingIncludedForLines(lines);
   const [shippingQuoteUsd, setShippingQuoteUsd] = useState(null);
   const [shippingLoading, setShippingLoading] = useState(false);
@@ -251,9 +254,44 @@ export default function CheckoutPage() {
   /** Fields the user has left (blur); used to show inline errors before submit. */
   const [blurredFields, setBlurredFields] = useState({});
   const [postalCodeTouched, setPostalCodeTouched] = useState(false);
-  const [addressSuggestions, setAddressSuggestions] = useState([]);
-  const [addressSuggestLoading, setAddressSuggestLoading] = useState(false);
-  const [showAddressSuggestions, setShowAddressSuggestions] = useState(false);
+  /** Avoid showing "empty cart" while navigating to thank-you after a successful order. */
+  const [redirectingToThankYou, setRedirectingToThankYou] = useState(false);
+  const applyCheckoutPrefill = useCallback((patch) => {
+    setForm((f) => ({ ...f, ...patch }));
+    setPostalCodeTouched(true);
+    setBlurredFields((prev) => ({
+      ...prev,
+      email: true,
+      phone: true,
+      fullName: true,
+      address1: true,
+      city: true,
+      state: true,
+      postalCode: true,
+      shippingSection: true,
+    }));
+  }, []);
+
+  useEffect(() => {
+    if (!ready || authLoading) return;
+    if (!user?.uid) {
+      prefillUidRef.current = null;
+      return;
+    }
+    if (prefillUidRef.current === user.uid) return;
+    prefillUidRef.current = user.uid;
+
+    let cancelled = false;
+    (async () => {
+      const d = await fetchUserAccountDoc(user.uid);
+      if (cancelled) return;
+      const patch = profileToCheckoutFormPatch(d, user.email);
+      applyCheckoutPrefill(patch);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [ready, authLoading, user?.uid, user?.email, applyCheckoutPrefill]);
 
   const validationCtx = useMemo(
     () => ({
@@ -264,44 +302,6 @@ export default function CheckoutPage() {
     }),
     [shippingIncluded, shippingLoading, shippingQuoteUsd, postalCodeTouched],
   );
-
-  useEffect(() => {
-    const query = String(form.address1 || "").trim();
-    if (query.length < 4) {
-      setAddressSuggestions([]);
-      setAddressSuggestLoading(false);
-      return;
-    }
-
-    let active = true;
-    setAddressSuggestLoading(true);
-    const id = window.setTimeout(async () => {
-      try {
-        const params = new URLSearchParams({
-          q: query,
-          country: form.country,
-        });
-        const response = await fetch(`/api/address/autocomplete?${params.toString()}`, {
-          cache: "no-store",
-        });
-        const data = await response.json().catch(() => ({}));
-        if (!active) return;
-        const next = Array.isArray(data?.suggestions) ? data.suggestions : [];
-        setAddressSuggestions(next);
-      } catch {
-        if (!active) return;
-        setAddressSuggestions([]);
-      } finally {
-        if (!active) return;
-        setAddressSuggestLoading(false);
-      }
-    }, 250);
-
-    return () => {
-      active = false;
-      window.clearTimeout(id);
-    };
-  }, [form.address1, form.country]);
 
   const fieldErrors = useMemo(() => {
     const all = computeCheckoutFieldErrors(form, validationCtx);
@@ -346,6 +346,18 @@ export default function CheckoutPage() {
   }
 
   if (lines.length === 0) {
+    if (redirectingToThankYou) {
+      return (
+        <PageLayout
+          eyebrow="Checkout"
+          title="Order placed"
+          subtitle="Taking you to your confirmation…"
+          width="wide"
+        >
+          <p className="text-sm text-stone-400">One moment.</p>
+        </PageLayout>
+      );
+    }
     return (
       <PageLayout
         eyebrow="Checkout"
@@ -402,7 +414,6 @@ export default function CheckoutPage() {
       state: true,
       postalCode: true,
     }));
-    setShowAddressSuggestions(false);
   }
 
   function updateCountry(value) {
@@ -508,6 +519,7 @@ export default function CheckoutPage() {
       /* ignore */
     }
 
+    let orderSaved = false;
     try {
       await Promise.race([
         saveOrderToFirestore(orderWithFulfillment),
@@ -515,6 +527,7 @@ export default function CheckoutPage() {
           setTimeout(() => reject(new Error("Firestore save timed out")), 15000),
         ),
       ]);
+      orderSaved = true;
     } catch (error) {
       console.error(
         "[checkout] Firestore save failed:",
@@ -522,6 +535,29 @@ export default function CheckoutPage() {
       );
     }
 
+    if (orderSaved && !user) {
+      try {
+        const r = await fetch("/api/useraccounts/guest", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            orderId: order.id,
+            guestCheckout: true,
+          }),
+        });
+        if (!r.ok) {
+          const j = await r.json().catch(() => ({}));
+          console.warn(
+            "[checkout] guest useraccount:",
+            typeof j?.error === "string" ? j.error : r.status,
+          );
+        }
+      } catch (e) {
+        console.warn("[checkout] guest useraccount:", e);
+      }
+    }
+
+    setRedirectingToThankYou(true);
     clearCart();
     router.push(`/checkout/thank-you?ref=${encodeURIComponent(order.id)}`);
   }
@@ -603,7 +639,7 @@ export default function CheckoutPage() {
     <PageLayout
       eyebrow="Secure checkout"
       title="Checkout"
-      subtitle="Enter the information below to complete your order. We will not store any of your information."
+      subtitle="Guest checkout is available below. Create an account or sign in to save your details to your profile."
       width="full"
       buttonArea={
         <PrimaryButton href="/cart" className="px-4 py-2" icon={<span>←</span>}>
@@ -613,6 +649,7 @@ export default function CheckoutPage() {
     >
       <div className="grid gap-12 lg:grid-cols-[1fr_400px] lg:gap-16">
         <div className="space-y-8">
+          <CheckoutAuthSection onApplyPrefill={applyCheckoutPrefill} />
           <Card variant="inset" className="w-full" title="Contact" titleTag="h4"> 
             <div className="mt-6" data-checkout-field="email">
               <label className="block text-sm text-slate-400">
@@ -707,68 +744,26 @@ export default function CheckoutPage() {
                 </p>
               ) : null}
             </div>
-            <div className="mt-4" data-checkout-field="address1">
-              <label className="block text-sm text-slate-400">
-                Address line 1
-                <input
-                  required
-                  type="text"
-                  autoComplete="address-line1"
-                  value={form.address1}
-                  onChange={(e) => {
-                    update("address1", e.target.value);
-                    setShowAddressSuggestions(true);
-                  }}
-                  onBlur={() =>
-                    markFieldBlurred("address1", { shippingSection: true })
-                  }
-                  onFocus={() => setShowAddressSuggestions(true)}
-                  className={fieldClass("address1")}
-                  aria-invalid={Boolean(fieldErrors.address1)}
-                  aria-describedby={
-                    fieldErrors.address1 ? "checkout-address1-error" : undefined
-                  }
-                />
-              </label>
-              {showAddressSuggestions &&
-              String(form.address1 || "").trim().length >= 4 ? (
-                <div className="mt-2 rounded-xl border border-slate-700/70 bg-slate-950/95 p-2">
-                  {addressSuggestLoading ? (
-                    <p className="px-3 py-2 text-xs text-slate-400">
-                      Searching addresses...
-                    </p>
-                  ) : addressSuggestions.length === 0 ? (
-                    <p className="px-3 py-2 text-xs text-slate-500">
-                      No address suggestions.
-                    </p>
-                  ) : (
-                    <ul className="max-h-56 overflow-y-auto">
-                      {addressSuggestions.map((item) => (
-                        <li key={item.id}>
-                          <button
-                            type="button"
-                            className="w-full rounded-lg px-3 py-2 text-left text-xs text-stone-200 transition hover:bg-slate-800/80"
-                            onMouseDown={(e) => e.preventDefault()}
-                            onClick={() => applyAddressSuggestion(item)}
-                          >
-                            {item.label}
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              ) : null}
-              {fieldErrors.address1 ? (
-                <p
-                  id="checkout-address1-error"
-                  className="mt-1.5 text-xs text-rose-300"
-                  role="alert"
-                >
-                  {fieldErrors.address1}
-                </p>
-              ) : null}
-            </div>
+            <AddressLine1Autocomplete
+              className="mt-4"
+              data-checkout-field="address1"
+              label="Address line 1"
+              value={form.address1}
+              onChange={(v) => update("address1", v)}
+              country={form.country}
+              onSelectSuggestion={applyAddressSuggestion}
+              inputClassName={fieldClass("address1")}
+              required
+              onBlur={() =>
+                markFieldBlurred("address1", { shippingSection: true })
+              }
+              aria-invalid={Boolean(fieldErrors.address1)}
+              aria-describedby={
+                fieldErrors.address1 ? "checkout-address1-error" : undefined
+              }
+              errorMessage={fieldErrors.address1}
+              errorId="checkout-address1-error"
+            />
             <label className="mt-4 block text-sm text-slate-400">
               Address line 2
               <input

@@ -4,9 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMemo } from "react";
 import {
-  RiDashboardLine,
-  RiSettings3Line,
+  RiHome4Line,
   RiShoppingBag3Line,
+  RiUserHeartLine,
 } from "react-icons/ri";
 import { useAuth } from "@/context/AuthContext";
 import InnerPageBackdrop from "@/components/InnerPageBackdrop";
@@ -14,12 +14,16 @@ import InnerPageBackdrop from "@/components/InnerPageBackdrop";
 const GRAIN_BG = `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`;
 
 const navItems = [
-  { href: "/dashboard", label: "Dashboard", Icon: RiDashboardLine },
-  { href: "/dashboard/orders", label: "Orders", Icon: RiShoppingBag3Line },
-  { href: "/dashboard/settings", label: "Settings", Icon: RiSettings3Line },
+  { href: "/account", label: "My Account", Icon: RiUserHeartLine, end: true },
+  {
+    href: "/account/orders",
+    label: "My orders",
+    Icon: RiShoppingBag3Line,
+    end: false,
+  },
 ];
 
-export default function DashboardShell({ children }) {
+export default function AccountShell({ children }) {
   const pathname = usePathname();
   const { user, signOut, userAccount } = useAuth();
 
@@ -34,6 +38,11 @@ export default function DashboardShell({ children }) {
     return "there";
   }, [userAccount, user?.displayName]);
 
+  function isActive(href, end) {
+    if (end) return pathname === href;
+    return pathname === href || pathname.startsWith(`${href}/`);
+  }
+
   return (
     <div className="relative flex min-h-dvh overflow-hidden bg-slate-950 text-stone-100">
       <div
@@ -47,14 +56,11 @@ export default function DashboardShell({ children }) {
 
       <aside className="relative z-10 flex w-[4.25rem] shrink-0 flex-col border-r border-white/[0.06] bg-slate-950/85 px-2 py-6 backdrop-blur-md supports-[backdrop-filter]:bg-slate-950/75 lg:w-56 lg:px-4 lg:py-8">
         <p className="mb-4 hidden px-3 text-[0.65rem] font-medium uppercase tracking-[0.35em] text-slate-500 lg:mb-6 lg:block">
-          Navigation
+          Your account
         </p>
-        <nav className="flex flex-col gap-1" aria-label="Dashboard">
+        <nav className="flex flex-col gap-1" aria-label="Account">
           {navItems.map((item) => {
-            const active =
-              item.href === "/dashboard"
-                ? pathname === "/dashboard"
-                : pathname.startsWith(item.href);
+            const active = isActive(item.href, item.end);
             const Icon = item.Icon;
             return (
               <Link
@@ -76,6 +82,15 @@ export default function DashboardShell({ children }) {
               </Link>
             );
           })}
+          <Link
+            href="/"
+            title="Back to the site"
+            aria-label="Back to the site"
+            className="mt-4 flex items-center justify-center gap-3 rounded-lg px-2 py-2.5 text-sm font-medium text-stone-500 transition hover:bg-white/[0.04] hover:text-stone-200 lg:justify-start lg:px-3"
+          >
+            <RiHome4Line className="size-[1.35rem] shrink-0" aria-hidden />
+            <span className="hidden lg:inline">Shop site</span>
+          </Link>
         </nav>
       </aside>
 
@@ -88,7 +103,7 @@ export default function DashboardShell({ children }) {
             Shamrock Art Studio
           </Link>
           <div className="flex items-center gap-4">
-            <span className="hidden text-sm text-stone-400 sm:inline">
+            <span className="hidden max-w-[min(100%,18rem)] truncate text-sm text-stone-400 sm:inline">
               Welcome{" "}
               <span className="font-medium text-stone-200">
                 {welcomeName || "…"}
@@ -99,7 +114,7 @@ export default function DashboardShell({ children }) {
               onClick={() => signOut()}
               className="rounded-full bg-linear-to-br from-amber-100 via-stone-100 to-slate-300 px-4 py-2 text-sm font-semibold text-slate-900 shadow-lg shadow-slate-900/35 ring-2 ring-white/30 transition hover:scale-[1.02] hover:shadow-xl"
             >
-              Logout
+              Sign out
             </button>
           </div>
         </header>

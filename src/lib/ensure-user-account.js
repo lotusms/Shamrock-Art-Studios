@@ -27,6 +27,8 @@ export async function ensureUserAccountDocIfMissing() {
       email: u.email || "",
       firstName,
       lastName,
+      admin: false,
+      guest: false,
       orderHistory: [],
       orderDetails: {},
       createdAt: serverTimestamp(),

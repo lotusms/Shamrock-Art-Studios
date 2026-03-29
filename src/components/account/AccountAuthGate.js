@@ -21,7 +21,7 @@ function GateEscapeBar() {
   );
 }
 
-export default function DashboardAuthGate({ children }) {
+export default function AccountAuthGate({ children }) {
   const { user, loading, accountLoading, isAdmin, signingOut } = useAuth();
   const router = useRouter();
 
@@ -31,12 +31,12 @@ export default function DashboardAuthGate({ children }) {
       router.replace("/login");
       return;
     }
-    if (user && !isAdmin) {
-      router.replace("/account");
+    if (user && isAdmin) {
+      router.replace("/dashboard");
     }
   }, [user, loading, accountLoading, isAdmin, signingOut, router]);
 
-  if (loading || accountLoading) {
+  if (loading) {
     return (
       <>
         <GateEscapeBar />
@@ -69,12 +69,23 @@ export default function DashboardAuthGate({ children }) {
     );
   }
 
-  if (!isAdmin) {
+  if (accountLoading) {
     return (
       <>
         <GateEscapeBar />
         <div className="flex min-h-dvh items-center justify-center bg-slate-950 text-stone-400">
-          <p className="text-sm tracking-wide">Opening your account…</p>
+          <p className="text-sm tracking-wide">Loading your account…</p>
+        </div>
+      </>
+    );
+  }
+
+  if (isAdmin) {
+    return (
+      <>
+        <GateEscapeBar />
+        <div className="flex min-h-dvh items-center justify-center bg-slate-950 text-stone-400">
+          <p className="text-sm tracking-wide">Opening the portal…</p>
         </div>
       </>
     );

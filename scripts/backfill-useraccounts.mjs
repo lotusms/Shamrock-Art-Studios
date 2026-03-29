@@ -65,6 +65,8 @@ async function main() {
           email: userRecord.email || "",
           firstName,
           lastName,
+          admin: false,
+          guest: false,
           orderHistory: [],
           orderDetails: {},
           createdAt: FieldValue.serverTimestamp(),
