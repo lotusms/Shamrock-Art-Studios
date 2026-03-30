@@ -112,10 +112,44 @@ function mapVariantsForDisplay(variants) {
     .sort((a, b) => a.priceUsd - b.priceUsd);
 }
 
+/** Prefer variants Printful has not marked ignored; fall back if every row is ignored. */
+function variantsForPricing(syncVariants) {
+  if (!Array.isArray(syncVariants) || syncVariants.length === 0) return [];
+  const active = syncVariants.filter((v) => v?.is_ignored !== true);
+  return active.length > 0 ? active : syncVariants;
+}
+
 function pickPrimaryVariant(variants) {
   if (!Array.isArray(variants) || variants.length === 0) return null;
   const withPrice = variants.find((v) => parsePrice(v?.retail_price) > 0);
   return withPrice ?? variants[0];
+}
+
+const STORE_PRODUCTS_PAGE_SIZE = 100;
+
+/** Walk all paging offsets — a single `limit=100` request drops everything past 100 sync products. */
+export async function listAllStoreProductSummaries() {
+  const summaries = [];
+  let offset = 0;
+  let reportedTotal = null;
+
+  for (;;) {
+    const res = await printfulRequest(
+      `/store/products?limit=${STORE_PRODUCTS_PAGE_SIZE}&offset=${offset}`,
+    );
+    const batch = Array.isArray(res?.result) ? res.result : [];
+    if (reportedTotal === null && res?.paging != null) {
+      const t = Number(res.paging.total);
+      if (Number.isFinite(t)) reportedTotal = t;
+    }
+    summaries.push(...batch);
+    if (batch.length === 0) break;
+    offset += batch.length;
+    if (reportedTotal !== null && summaries.length >= reportedTotal) break;
+    if (batch.length < STORE_PRODUCTS_PAGE_SIZE) break;
+  }
+
+  return summaries;
 }
 
 function pickImage(sync, variant) {
@@ -185,7 +219,10 @@ function splitArtistAndYear(name) {
 
 function toCatalogItem(detail, catalogDetails) {
   const sync = detail?.sync_product ?? {};
-  const variants = Array.isArray(detail?.sync_variants) ? detail.sync_variants : [];
+  const rawVariants = Array.isArray(detail?.sync_variants)
+    ? detail.sync_variants
+    : [];
+  const variants = variantsForPricing(rawVariants);
   const variant = pickPrimaryVariant(variants) ?? {};
   const priceBounds = derivePriceBounds(variants);
   const mappedVariants = mapVariantsForDisplay(variants);
@@ -237,8 +274,7 @@ export async function getCatalogProducts() {
   }
 
   try {
-    const list = await printfulRequest("/store/products?limit=100");
-    const products = Array.isArray(list?.result) ? list.result : [];
+    const products = await listAllStoreProductSummaries();
     const details = await Promise.all(
       products.map((p) => printfulRequest(`/store/products/${p.id}`)),
     );

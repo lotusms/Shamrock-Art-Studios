@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { isPrintfulEnabled, printfulRequest } from "@/lib/printful/client";
-import { getCatalogProducts } from "@/lib/printful/catalog";
+import { getCatalogProducts, listAllStoreProductSummaries } from "@/lib/printful/catalog";
 
 export async function GET() {
   if (!isPrintfulEnabled()) {
@@ -11,8 +11,7 @@ export async function GET() {
   }
 
   try {
-    const productsRes = await printfulRequest("/store/products?limit=50");
-    const products = Array.isArray(productsRes?.result) ? productsRes.result : [];
+    const products = await listAllStoreProductSummaries();
 
     const normalized = [];
     for (const p of products) {
