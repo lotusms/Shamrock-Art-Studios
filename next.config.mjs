@@ -30,6 +30,11 @@ const nextConfig = {
         pathname: "/CRDImages/**",
         search: "",
       },
+      {
+        protocol: "https",
+        hostname: "firebasestorage.googleapis.com",
+        pathname: "/v0/b/**",
+      },
     ],
   },
 };
