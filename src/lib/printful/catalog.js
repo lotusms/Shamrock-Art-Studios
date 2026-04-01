@@ -1,4 +1,3 @@
-import { products as referenceProducts } from "@/data/products";
 import { roundUsd2 } from "@/lib/money";
 import { printfulRequest, isPrintfulEnabled } from "@/lib/printful/client";
 import { slugify } from "@/lib/slug";
@@ -20,60 +19,6 @@ async function getVariantCatalogDetails(variantId) {
   } catch {
     return null;
   }
-}
-
-function fallbackFromReference() {
-  return referenceProducts.map((p) => ({
-    id: p.id,
-    printfulProductId: null,
-    variantId: p.printfulVariantId ?? null,
-    externalId: null,
-    slug: p.slug,
-    title: p.title,
-    artist: p.artist,
-    year: p.year,
-    medium: normalizeMedium(p.medium),
-    dimensions: p.dimensions,
-    description: p.description,
-    edition: p.edition ?? "Open edition",
-    priceUsd: p.priceUsd,
-    minPriceUsd: p.priceUsd,
-    maxPriceUsd: p.priceUsd,
-    variants: [],
-    image: p.image,
-    originalImage: p.originalImage ?? p.image,
-    imageWidth: 1200,
-    imageHeight: 1500,
-    shippingIncluded: SHIPPING_INCLUDED_BY_DEFAULT,
-    sku: null,
-  }));
-}
-
-function enrichWithReference(item) {
-  const byVariant = referenceProducts.find(
-    (p) => p.printfulVariantId && p.printfulVariantId === item.variantId,
-  );
-  const bySlug = referenceProducts.find((p) => p.slug === item.slug);
-  const byTitle = referenceProducts.find(
-    (p) => p.title?.toLowerCase() === item.title?.toLowerCase(),
-  );
-  const ref = byVariant ?? bySlug ?? byTitle;
-  if (!ref) return item;
-  return {
-    ...item,
-    slug: ref.slug || item.slug,
-    artist: ref.artist || item.artist,
-    year: ref.year || item.year,
-    edition: ref.edition || item.edition,
-    originalImage: ref.originalImage || item.originalImage,
-    image: ref.image || item.image,
-    imageWidth: item.imageWidth || 1200,
-    imageHeight: item.imageHeight || 1500,
-    shippingIncluded:
-      typeof item.shippingIncluded === "boolean"
-        ? item.shippingIncluded
-        : SHIPPING_INCLUDED_BY_DEFAULT,
-  };
 }
 
 function parsePrice(retailPrice) {
@@ -239,8 +184,15 @@ function toCatalogItem(detail, catalogDetails) {
   const printFileUrl = pickPrintFileUrl(sync, variant) || image;
   const providerDescription = providerProduct.description || "";
   const providerSize = providerVariant.size || variant.size || variant.name || "Selected variant";
+  const catalogUpdatedAt =
+    Number(sync.updated) ||
+    Number(sync.created) ||
+    Number(sync.updated_at) ||
+    Number(sync.created_at) ||
+    0;
   return {
     id: `pf-${sync.id}`,
+    catalogUpdatedAt,
     printfulProductId: sync.id,
     variantId: variant.id ?? null,
     catalogVariantId: variant.variant_id ?? null,
@@ -266,6 +218,10 @@ function toCatalogItem(detail, catalogDetails) {
     shippingIncluded: SHIPPING_INCLUDED_BY_DEFAULT,
     sku: variant.sku ?? null,
   };
+}
+
+function fallbackFromReference() {
+  return [];
 }
 
 export async function getCatalogProducts() {
@@ -295,7 +251,7 @@ export async function getCatalogProducts() {
       .filter((p) => p.variantId && p.priceUsd > 0);
     return mapped;
   } catch {
-    return fallbackFromReference();
+    return [];
   }
 }
 

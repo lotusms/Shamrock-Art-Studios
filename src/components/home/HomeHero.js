@@ -1,9 +1,10 @@
-import Image from "next/image";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
-import { featuredAspectClass, featuredWorkSubtitle } from "@/data/homePage";
+import HomeHeroArtRotator from "@/components/home/HomeHeroArtRotator";
 
-export default function HomeHero({ heroWork }) {
+export default function HomeHero({ heroProducts = [] }) {
+  const hasSlides = Array.isArray(heroProducts) && heroProducts.length > 0;
+
   return (
     <section className="relative z-10 mx-auto flex min-h-screen w-full max-w-7xl items-center px-6 py-14 sm:px-10 lg:px-12">
       <div className="grid w-full gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12">
@@ -38,36 +39,22 @@ export default function HomeHero({ heroWork }) {
 
         <div className="relative">
           <div className="absolute -left-6 top-12 hidden h-24 w-24 rounded-full border-2 border-slate-600/35 bg-amber-500/8 blur-sm lg:block" />
-          <div className="rounded-4xl border-2 border-slate-600/40 bg-linear-to-br from-slate-900/55 to-slate-950/50 p-3 shadow-2xl shadow-slate-950/40 ring-2 ring-slate-500/25 backdrop-blur transition duration-500 hover:ring-amber-400/30 hover:shadow-slate-950/50">
-            <div className="relative overflow-hidden rounded-3xl border-2 border-white/15">
-              <div className={`relative ${featuredAspectClass(heroWork)}`}>
-                <Image
-                  src={heroWork.image}
-                  alt={`${heroWork.title} by ${heroWork.artist}`}
-                  fill
-                  preload
-                  sizes="(max-width: 1024px) 100vw, 45vw"
-                  className="object-cover"
-                />
-              </div>
-              <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-slate-950/40 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
-                <p className="text-xs uppercase tracking-[0.32em] text-slate-400">
-                  Featured work
+          {hasSlides ? (
+            <HomeHeroArtRotator
+              key={heroProducts.map((p) => p.id).join("-")}
+              products={heroProducts}
+            />
+          ) : (
+            <div className="rounded-4xl border-2 border-slate-600/40 bg-linear-to-br from-slate-900/55 to-slate-950/50 p-3 shadow-2xl shadow-slate-950/40 ring-2 ring-slate-500/25 backdrop-blur transition duration-500 hover:ring-amber-400/30 hover:shadow-slate-950/50">
+              <div className="flex min-h-[min(70vw,28rem)] flex-col items-center justify-center gap-6 rounded-3xl border-2 border-dashed border-slate-600/50 bg-slate-950/35 px-8 py-14 text-center sm:min-h-[28rem]">
+                <p className="max-w-sm text-sm leading-7 text-stone-300/90">
+                  Connect Printful so portrait pieces can rotate in this hero—or
+                  head to the shop when products are live.
                 </p>
-                <div className="mt-3 flex items-end justify-between gap-6">
-                  <div>
-                    <h2 className="font-serif text-2xl font-medium tracking-[-0.02em] text-stone-100 sm:text-3xl">
-                      {heroWork.title}
-                    </h2>
-                    <p className="mt-2 text-sm text-stone-200/85">
-                      {featuredWorkSubtitle(heroWork)}
-                    </p>
-                  </div>
-                </div>
+                <PrimaryButton href="/shop">Browse the shop</PrimaryButton>
               </div>
             </div>
-          </div>
+          )}
 
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
             <div className="rounded-3xl border-2 border-slate-700/35 bg-slate-900/50 p-4 backdrop-blur-sm sm:p-5">
@@ -83,7 +70,9 @@ export default function HomeHero({ heroWork }) {
                 Artwork source
               </p>
               <p className="mt-2 text-sm leading-snug text-stone-200/90">
-                Hero and grid pull from Firebase Storage download URLs.
+                Hero fades between up to three newest portrait-oriented
+                Printful syncs on a timed rotation, or your newest listings if
+                none qualify as portrait.
               </p>
             </div>
           </div>

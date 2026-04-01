@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { formatUsd } from "@/lib/money";
+import CoverImageFrame from "@/components/ui/CoverImageFrame";
 
 function formatProductPrice(product) {
   const min = Number(product?.minPriceUsd);
@@ -18,13 +18,12 @@ function ProductCard({ product }) {
   return (
     <Link href={`/shop/${product.slug}`} className="group block w-full">
       <div className="relative border-2 border-slate-700/35 hover:border-amber-400/30 bg-slate-950/45 shadow-lg shadow-slate-950/35 transition duration-500 hover:-translate-y-1 hover:shadow-2xl hover:shadow-slate-950/45">
-        <Image
+        <CoverImageFrame
           src={product.image}
           alt={`${product.title} by ${product.artist}`}
-          width={product.imageWidth || 1200}
-          height={product.imageHeight || 1500}
+          imageWidth={product.imageWidth}
+          imageHeight={product.imageHeight}
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          className="block h-auto w-full"
         />
         <div className="absolute right-4 top-4 rounded-full border border-amber-300/35 bg-slate-950/70 px-3 py-1.5 text-sm font-semibold tabular-nums text-amber-200 backdrop-blur-sm">
           {formatProductPrice(product)}

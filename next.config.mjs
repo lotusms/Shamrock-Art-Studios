@@ -21,7 +21,6 @@ const nextConfig = {
   images: {
     unoptimized: true,
     contentDispositionType: "inline",
-    contentSecurityPolicy: "default-src 'self';",
     remotePatterns: [
       {
         protocol: "https",
@@ -34,6 +33,17 @@ const nextConfig = {
         protocol: "https",
         hostname: "firebasestorage.googleapis.com",
         pathname: "/v0/b/**",
+      },
+      // Printful mockups & file CDN (catalog product images)
+      {
+        protocol: "https",
+        hostname: "files.cdn.printful.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "cdn.printful.com",
+        pathname: "/**",
       },
     ],
   },
