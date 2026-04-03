@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { ARTWORK_MAT_INNER, ARTWORK_MAT_OUTER } from "@/components/ui/artworkMatClasses";
 
 const ROTATE_MS = 8000;
 /** Crossfade between slides (opacity on overlapping layers). */
@@ -32,37 +33,41 @@ export default function HomeHeroArtRotator({ products }) {
     <div
       className="relative overflow-hidden rounded-3xl border-2 border-slate-600/40 bg-slate-950 shadow-2xl shadow-slate-950/40 ring-2 ring-slate-500/25 transition duration-500 hover:ring-amber-400/35 hover:shadow-slate-950/50"
     >
-      {/* Fixed portrait frame; preview mockups often include padding inside the PNG — zoom + clip fills the card. */}
-      <div className="relative aspect-[2/3] w-full overflow-hidden bg-slate-950">
-        {products.map((p, idx) => (
-          <div
-            key={p.id}
-            className={`absolute inset-0 overflow-hidden transition-opacity ease-in-out ${
-              idx === index
-                ? "z-[1] opacity-100"
-                : "pointer-events-none z-0 opacity-0"
-            }`}
-            aria-hidden={idx !== index}
-            style={{ transitionDuration: `${SLIDE_FADE_MS}ms` }}
-          >
-            {p.image?.trim() ? (
-              <div className="relative h-full w-full origin-center scale-[1.14]">
-                <Image
-                  src={p.image}
-                  alt={`${p.title} by ${p.artist}`}
-                  fill
-                  priority={idx === 0}
-                  sizes="(max-width: 1024px) 100vw, 45vw"
-                  className="object-cover object-center"
-                />
+      {/* Mat + inner aperture; fixed portrait; mockup PNG zoom fills aperture. */}
+      <div className={ARTWORK_MAT_OUTER}>
+        <div className={ARTWORK_MAT_INNER}>
+          <div className="relative aspect-[2/3] w-full overflow-hidden bg-slate-950">
+            {products.map((p, idx) => (
+              <div
+                key={p.id}
+                className={`absolute inset-0 overflow-hidden transition-opacity ease-in-out ${
+                  idx === index
+                    ? "z-[1] opacity-100"
+                    : "pointer-events-none z-0 opacity-0"
+                }`}
+                aria-hidden={idx !== index}
+                style={{ transitionDuration: `${SLIDE_FADE_MS}ms` }}
+              >
+                {p.image?.trim() ? (
+                  <div className="relative h-full w-full origin-center scale-[1.14]">
+                    <Image
+                      src={p.image}
+                      alt={`${p.title} by ${p.artist}`}
+                      fill
+                      priority={idx === 0}
+                      sizes="(max-width: 1024px) 100vw, 45vw"
+                      className="object-cover object-center"
+                    />
+                  </div>
+                ) : (
+                  <div className="flex h-full items-center justify-center text-sm text-stone-500">
+                    No preview image
+                  </div>
+                )}
               </div>
-            ) : (
-              <div className="flex h-full items-center justify-center text-sm text-stone-500">
-                No preview image
-              </div>
-            )}
+            ))}
           </div>
-        ))}
+        </div>
       </div>
 
       <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-slate-950 via-slate-950/35 to-transparent" />

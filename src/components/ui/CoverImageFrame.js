@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { ARTWORK_MAT_INNER, ARTWORK_MAT_OUTER } from "@/components/ui/artworkMatClasses";
 
 function aspectStyle(imageWidth, imageHeight, fallbackAspectRatio) {
   const w = Number(imageWidth);
@@ -21,8 +22,11 @@ export default function CoverImageFrame({
   zoomClass = "scale-[1.14]",
   hoverZoomClass = "group-hover:scale-[1.2]",
   frameClassName = "relative w-full overflow-hidden bg-slate-950",
+  secondaryMat = true,
+  matOuterClassName = "",
+  matInnerClassName = "",
 }) {
-  return (
+  const core = (
     <div
       className={frameClassName}
       style={aspectStyle(imageWidth, imageHeight, fallbackAspectRatio)}
@@ -39,6 +43,16 @@ export default function CoverImageFrame({
             className="object-cover object-center"
           />
         </div>
+      </div>
+    </div>
+  );
+
+  if (!secondaryMat) return core;
+
+  return (
+    <div className={`${ARTWORK_MAT_OUTER} ${matOuterClassName}`.trim()}>
+      <div className={`${ARTWORK_MAT_INNER} ${matInnerClassName}`.trim()}>
+        {core}
       </div>
     </div>
   );
