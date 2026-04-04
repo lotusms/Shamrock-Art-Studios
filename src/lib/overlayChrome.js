@@ -411,3 +411,108 @@ export function emptyStateCtaLink(light) {
     ? "inline-flex w-fit rounded-full border-2 border-stone-400/60 bg-white/90 px-8 py-3.5 text-sm font-semibold text-stone-900 shadow-sm transition hover:border-amber-500/45 hover:bg-amber-50/80"
     : "inline-flex w-fit rounded-full border-2 border-slate-500/50 bg-slate-900/55 px-8 py-3.5 text-sm font-semibold text-stone-100 transition hover:border-amber-400/45";
 }
+
+/* --- Auth pages (login / register shell / forgot password) — body `bg-site-bg` shows through --- */
+
+/** @param {boolean} light */
+export function authCardPanel(light) {
+  return light
+    ? "w-full max-w-md rounded-3xl border-2 border-stone-300/50 bg-white/92 p-8 shadow-2xl shadow-stone-400/20 backdrop-blur-md ring-1 ring-stone-200/55"
+    : "w-full max-w-md rounded-3xl border-2 border-slate-700/40 bg-slate-900/45 p-8 shadow-2xl shadow-slate-950/50 backdrop-blur-md ring-1 ring-slate-500/15";
+}
+
+/** @param {boolean} light */
+export function authTitle(light) {
+  return light
+    ? "font-serif text-3xl font-medium tracking-[-0.03em] text-stone-900"
+    : "font-serif text-3xl font-medium tracking-[-0.03em] text-stone-100";
+}
+
+/** @param {boolean} light */
+export function authSubtitle(light) {
+  return light
+    ? "mt-2 text-sm leading-relaxed text-stone-600"
+    : "mt-2 text-sm leading-relaxed text-stone-300/95";
+}
+
+/** @param {boolean} light */
+export function authLabelUppercase(light) {
+  return light
+    ? "block text-xs font-medium uppercase tracking-wider text-stone-600"
+    : "block text-xs font-medium uppercase tracking-wider text-slate-500";
+}
+
+/** Login / forgot email field (rounded-lg to match `PasswordField` height). */
+/** @param {boolean} light */
+export function authEmailInput(light) {
+  return light
+    ? "mt-1.5 w-full rounded-lg border border-stone-300/80 bg-white px-3 py-2.5 text-stone-900 outline-none ring-amber-400/25 placeholder:text-stone-500 focus:border-amber-500/50 focus:ring-2"
+    : "mt-1.5 w-full rounded-lg border border-slate-600/40 bg-slate-950/80 px-3 py-2.5 text-stone-100 outline-none ring-amber-400/25 placeholder:text-slate-600 focus:border-amber-400/45 focus:ring-2";
+}
+
+/**
+ * Overrides `PasswordField` dark base on light themes (`INPUT_BASE` merge).
+ * @param {boolean} light
+ */
+export function authPasswordInputOverride(light) {
+  return light
+    ? "!rounded-lg !border-stone-300/80 !bg-white !px-3 !py-2.5 !pl-3 !pr-11 !text-stone-900 placeholder:!text-stone-500 focus:!border-amber-500/50 focus:!ring-amber-400/35"
+    : "";
+}
+
+/** @param {boolean} light */
+export function authLinkAccent(light) {
+  return light
+    ? "font-medium text-amber-900 underline decoration-amber-600/40 underline-offset-4 transition hover:text-amber-800"
+    : "font-medium text-amber-200/95 underline decoration-amber-400/35 underline-offset-4 transition hover:text-amber-100";
+}
+
+/** @param {boolean} light */
+export function authFooterMuted(light) {
+  return light ? "text-stone-600" : "text-stone-500";
+}
+
+/** @param {boolean} light */
+export function authInlineError(light) {
+  return light ? "text-sm text-rose-700" : "text-sm text-red-400/90";
+}
+
+/** @param {boolean} light */
+export function registerHeroTitle(light) {
+  return light
+    ? "font-serif text-3xl font-medium tracking-[-0.03em] text-stone-900 sm:text-4xl"
+    : "font-serif text-3xl font-medium tracking-[-0.03em] text-stone-100 sm:text-4xl";
+}
+
+/** @param {boolean} light */
+export function registerHeroBody(light) {
+  return light
+    ? "mt-2 max-w-2xl text-sm leading-relaxed text-stone-700"
+    : "mt-2 max-w-2xl text-sm leading-relaxed text-stone-400";
+}
+
+/** @param {boolean} light */
+export function registerHeroMeta(light) {
+  return light ? "mt-4 text-sm text-stone-600" : "mt-4 text-sm text-stone-500";
+}
+
+/** @param {boolean} light */
+export function registerFormShell(light) {
+  return light
+    ? "mt-8 flex min-h-0 flex-1 flex-col overflow-hidden rounded-3xl border-2 border-stone-300/50 bg-white/92 shadow-2xl shadow-stone-400/20 ring-1 ring-stone-200/55"
+    : "mt-8 flex min-h-0 flex-1 flex-col overflow-hidden rounded-3xl border-2 border-slate-700/40 bg-slate-900/45 shadow-2xl shadow-slate-950/50 ring-1 ring-slate-500/15";
+}
+
+/** @param {boolean} light */
+export function forgotSuccessBanner(light) {
+  return light
+    ? "rounded-xl border border-emerald-300/60 bg-emerald-50/95 px-4 py-3 text-sm text-emerald-950"
+    : "rounded-xl border border-emerald-500/35 bg-emerald-950/30 px-4 py-3 text-sm text-emerald-100/95";
+}
+
+/** @param {boolean} light */
+export function forgotSuccessBannerLink(light) {
+  return light
+    ? "font-medium text-amber-900 underline decoration-amber-600/40 underline-offset-4"
+    : "font-medium text-amber-200/95 underline decoration-amber-400/40 underline-offset-4";
+}

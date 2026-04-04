@@ -10,8 +10,12 @@ import {
 } from "react-icons/ri";
 import { useAuth } from "@/context/AuthContext";
 import { getFirebaseAuth } from "@firebase/client";
+import { useDocumentThemeId } from "@/hooks/useDocumentThemeId";
+import * as dash from "@/lib/dashboardChrome";
+import * as overlayChrome from "@/lib/overlayChrome";
 import { fetchOrdersForCurrentUser } from "@/lib/orders-queries";
 import { formatUsd } from "@/lib/money";
+import { isLightThemeId } from "@/theme";
 
 function formatWhen(iso) {
   if (!iso) return "—";
@@ -148,6 +152,8 @@ const PAGE_SIZE = 10;
 export default function OrdersListPage({
   ordersBasePath = "/dashboard/orders",
 }) {
+  const themeId = useDocumentThemeId();
+  const light = isLightThemeId(themeId);
   const { user, loading: authLoading, isAdmin } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -303,7 +309,7 @@ export default function OrdersListPage({
   if (authLoading) {
     return (
       <div className="mx-auto max-w-4xl">
-        <p className="text-sm text-stone-400">Loading…</p>
+        <p className={`text-sm ${overlayChrome.pageMutedText(light)}`}>Loading…</p>
       </div>
     );
   }
@@ -311,7 +317,9 @@ export default function OrdersListPage({
   if (!user?.email) {
     return (
       <div className="mx-auto max-w-4xl">
-        <p className="text-stone-400">Sign in to see orders linked to your email.</p>
+        <p className={overlayChrome.pageMutedText(light)}>
+          Sign in to see orders linked to your email.
+        </p>
       </div>
     );
   }
@@ -319,27 +327,29 @@ export default function OrdersListPage({
   return (
     <div className="mx-auto max-w-7xl">
       <div className="mb-8">
-        <h1 className="font-serif text-4xl font-medium tracking-[-0.03em] text-stone-100 sm:text-5xl">
-          Orders
-        </h1>
-        <p className="mt-3 max-w-2xl text-lg leading-relaxed text-stone-300/95">
+        <h1 className={dash.dashboardPageTitle(light)}>Orders</h1>
+        <p className={`mt-3 max-w-2xl text-lg leading-relaxed ${light ? "text-stone-700" : "text-stone-300/95"}`}>
           Orders placed with{" "}
-          <span className="text-stone-200">{user.email}</span> at checkout.
+          <span className={light ? "text-stone-900" : "text-stone-200"}>{user.email}</span>{" "}
+          at checkout.
         </p>
       </div>
 
       {loading ? (
-        <p className="text-sm text-stone-400">Loading orders…</p>
+        <p className={`text-sm ${overlayChrome.pageMutedText(light)}`}>Loading orders…</p>
       ) : error ? (
-        <p className="text-sm text-red-400/90" role="alert">
+        <p
+          className={`text-sm ${light ? "text-rose-700" : "text-red-400/90"}`}
+          role="alert"
+        >
           {error}
         </p>
       ) : orders.length === 0 ? (
-        <div className="rounded-3xl border-2 border-slate-700/40 bg-slate-900/45 p-10 text-center shadow-lg shadow-slate-950/30 backdrop-blur">
-          <p className="text-stone-400">No orders yet.</p>
+        <div className={dash.ordersEmptyPanel(light)}>
+          <p className={overlayChrome.pageMutedText(light)}>No orders yet.</p>
           <Link
             href="/shop"
-            className="mt-4 inline-block text-sm font-semibold text-amber-200/95 underline decoration-amber-400/40 underline-offset-4 transition hover:text-amber-100"
+            className={`mt-4 inline-block text-sm font-semibold ${dash.ordersLinkAccent(light)}`}
           >
             Browse the shop →
           </Link>
@@ -347,18 +357,12 @@ export default function OrdersListPage({
       ) : (
         <>
         {resendState.message ? (
-          <p
-            className="mb-4 rounded-xl border border-emerald-500/35 bg-emerald-950/30 px-4 py-3 text-sm text-emerald-100/95"
-            role="status"
-          >
+          <p className={dash.dashSuccessBanner(light)} role="status">
             {resendState.message}
           </p>
         ) : null}
         {resendState.error ? (
-          <p
-            className="mb-4 rounded-xl border border-rose-500/35 bg-rose-950/30 px-4 py-3 text-sm text-rose-100/95"
-            role="alert"
-          >
+          <p className={dash.dashErrorBanner(light)} role="alert">
             {resendState.error}
           </p>
         ) : null}
@@ -367,13 +371,13 @@ export default function OrdersListPage({
           <div className="min-w-0 flex-1 sm:min-w-[min(100%,18rem)]">
             <label
               htmlFor="orders-search"
-              className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-slate-500"
+              className={`mb-1.5 block text-xs font-medium uppercase tracking-wider ${light ? "text-stone-600" : "text-slate-500"}`}
             >
               Search
             </label>
             <div className="relative">
               <RiSearchLine
-                className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500"
+                className={`pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 ${light ? "text-stone-500" : "text-slate-500"}`}
                 aria-hidden
               />
               <input
@@ -383,7 +387,7 @@ export default function OrdersListPage({
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Order ID, items, address, phone…"
                 autoComplete="off"
-                className="w-full rounded-xl border border-slate-600/50 bg-slate-950/50 py-2.5 pl-9 pr-3 text-sm text-stone-100 placeholder:text-slate-600 outline-none ring-amber-400/0 transition focus:border-amber-400/40 focus:ring-2 focus:ring-amber-400/25"
+                className={dash.ordersSearchInput(light)}
               />
             </div>
           </div>
@@ -391,7 +395,7 @@ export default function OrdersListPage({
             <div className="w-full sm:w-72">
               <label
                 htmlFor="orders-email-filter"
-                className="mb-1.5 block text-xs font-medium uppercase tracking-wider text-slate-500"
+                className={`mb-1.5 block text-xs font-medium uppercase tracking-wider ${light ? "text-stone-600" : "text-slate-500"}`}
               >
                 Customer email
               </label>
@@ -399,7 +403,7 @@ export default function OrdersListPage({
                 id="orders-email-filter"
                 value={emailFilter}
                 onChange={(e) => setEmailFilter(e.target.value)}
-                className="w-full rounded-xl border border-slate-600/50 bg-slate-950/50 px-3 py-2.5 text-sm text-stone-100 outline-none ring-amber-400/0 transition focus:border-amber-400/40 focus:ring-2 focus:ring-amber-400/25"
+                className={dash.ordersSelect(light)}
               >
                 <option value="">All addresses</option>
                 {uniqueEmails.map((email) => (
@@ -417,7 +421,7 @@ export default function OrdersListPage({
                 setSearchQuery("");
                 setEmailFilter("");
               }}
-              className="rounded-xl border border-slate-600/50 bg-slate-900/60 px-4 py-2.5 text-sm font-medium text-stone-200 transition hover:border-amber-400/35 hover:bg-slate-800/80"
+              className={dash.ordersGhostButton(light)}
             >
               Clear filters
             </button>
@@ -425,8 +429,8 @@ export default function OrdersListPage({
         </div>
 
         {filteredOrders.length === 0 ? (
-          <div className="rounded-3xl border-2 border-slate-700/40 bg-slate-900/45 p-10 text-center shadow-lg shadow-slate-950/30 backdrop-blur">
-            <p className="text-stone-400">
+          <div className={dash.ordersEmptyPanel(light)}>
+            <p className={overlayChrome.pageMutedText(light)}>
               {isAdmin
                 ? "No orders match your search or email filter."
                 : "No orders match your search."}
@@ -438,7 +442,7 @@ export default function OrdersListPage({
                   setSearchQuery("");
                   setEmailFilter("");
                 }}
-                className="mt-4 text-sm font-semibold text-amber-200/95 underline decoration-amber-400/40 underline-offset-4 transition hover:text-amber-100"
+                className={`mt-4 text-sm font-semibold ${dash.ordersLinkAccent(light)}`}
               >
                 Clear filters
               </button>
@@ -463,7 +467,7 @@ export default function OrdersListPage({
 
             return (
               <li key={o.id}>
-                <div className="flex rounded-2xl border border-slate-700/35 bg-slate-900/40 shadow-md shadow-slate-950/25 backdrop-blur-sm transition hover:border-amber-400/35 hover:bg-slate-900/60">
+                <div className={dash.ordersListRow(light)}>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-start gap-2 p-4 sm:p-5">
                       <button
@@ -473,7 +477,7 @@ export default function OrdersListPage({
                         aria-controls={`order-panel-${o.id}`}
                         id={`order-expand-${o.id}`}
                         title={isOpen ? "Collapse order" : "Expand order"}
-                        className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-slate-600/40 bg-slate-950/50 text-slate-400 transition hover:border-amber-400/30 hover:bg-slate-800/80 hover:text-amber-200/90"
+                        className={dash.ordersExpandButton(light)}
                       >
                         <RiArrowRightSLine
                           className={`h-5 w-5 transition-transform duration-200 ${isOpen ? "rotate-90" : ""}`}
@@ -485,32 +489,43 @@ export default function OrdersListPage({
                           <div className="min-w-0">
                             <Link
                               href={`${ordersBasePath}/${encodeURIComponent(o.id)}`}
-                              className="font-mono text-sm text-amber-200/95 underline decoration-amber-500/25 underline-offset-2 transition hover:text-amber-100 hover:decoration-amber-400/50"
+                              className={dash.ordersMonoLink(light)}
                             >
                               {o.id}
                             </Link>                            
                           </div>
                           <div className="shrink-0 text-right">
-                            <p className="text-lg font-semibold tabular-nums text-stone-100">
+                            <p
+                              className={`text-lg font-semibold tabular-nums ${light ? "text-stone-900" : "text-stone-100"}`}
+                            >
                               {formatUsd(o.totalUsd ?? 0)}
                             </p>
                           </div>
                         </div>
 
                         {!isOpen ? (
-                          <p className="mt-3 line-clamp-2 text-sm text-stone-400">
-                            <span className="text-slate-600">Summary · </span>
+                          <p
+                            className={`mt-3 line-clamp-2 text-sm ${light ? "text-stone-600" : "text-stone-400"}`}
+                          >
+                            <span className={light ? "text-stone-500" : "text-slate-600"}>
+                              Summary ·{" "}
+                            </span>
                             {preview.primary}
                             {preview.extra > 0 ? (
-                              <span className="text-slate-600">
+                              <span className={light ? "text-stone-500" : "text-slate-600"}>
                                 {" "}
                                 (+{preview.extra} more)
                               </span>
                             ) : null}
                             {shipTo ? (
                               <>
-                                <span className="text-slate-600"> · </span>
-                                <span className="text-stone-500">{shipTo}</span>
+                                <span className={light ? "text-stone-500" : "text-slate-600"}>
+                                  {" "}
+                                  ·{" "}
+                                </span>
+                                <span className={light ? "text-stone-700" : "text-stone-500"}>
+                                  {shipTo}
+                                </span>
                               </>
                             ) : null}
                           </p>
@@ -523,29 +538,39 @@ export default function OrdersListPage({
                         id={`order-panel-${o.id}`}
                         role="region"
                         aria-labelledby={`order-expand-${o.id}`}
-                        className="border-t border-slate-700/35 px-4 pb-5 pt-0 sm:px-5"
+                        className={`border-t px-4 pb-5 pt-0 sm:px-5 ${light ? "border-stone-300/55" : "border-slate-700/35"}`}
                       >
                         <div className="space-y-4 pt-4">
                           {shipTo ? (
-                            <p className="text-sm text-stone-300/95">
-                              <span className="text-slate-500">Ship to </span>
+                            <p
+                              className={`text-sm ${light ? "text-stone-800" : "text-stone-300/95"}`}
+                            >
+                              <span className={light ? "text-stone-500" : "text-slate-500"}>
+                                Ship to{" "}
+                              </span>
                               {shipTo}
                             </p>
                           ) : null}
 
-                          <p className="mt-0.5 text-xs text-slate-500">
+                          <p
+                            className={`mt-0.5 text-xs ${light ? "text-stone-500" : "text-slate-500"}`}
+                          >
                             Placed {formatWhen(o.createdAt)}
                           </p>
 
                           <div>
-                            <p className="text-xs font-medium uppercase tracking-wider text-slate-500">
+                            <p
+                              className={`text-xs font-medium uppercase tracking-wider ${light ? "text-stone-600" : "text-slate-500"}`}
+                            >
                               Items ({lineCount} line{lineCount === 1 ? "" : "s"}{" "}
                               · {qty} unit{qty === 1 ? "" : "s"})
                             </p>
-                            <p className="mt-1 text-sm leading-snug text-stone-200">
+                            <p
+                              className={`mt-1 text-sm leading-snug ${light ? "text-stone-800" : "text-stone-200"}`}
+                            >
                               {preview.primary}
                               {preview.extra > 0 ? (
-                                <span className="text-slate-500">
+                                <span className={light ? "text-stone-500" : "text-slate-500"}>
                                   {" "}
                                   · +{preview.extra} more
                                 </span>
@@ -553,37 +578,53 @@ export default function OrdersListPage({
                             </p>
                           </div>
 
-                          <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
+                          <div
+                            className={`flex flex-wrap gap-x-4 gap-y-1 text-xs ${light ? "text-stone-600" : "text-slate-500"}`}
+                          >
                             {fulfill ? (
                               <span>
-                                <span className="text-slate-600">
+                                <span className={light ? "text-stone-500" : "text-slate-600"}>
                                   Fulfillment:{" "}
                                 </span>
-                                <span className="text-slate-400">{fulfill}</span>
+                                <span className={light ? "text-stone-700" : "text-slate-400"}>
+                                  {fulfill}
+                                </span>
                               </span>
                             ) : null}
                             {pay ? (
                               <span>
-                                <span className="text-slate-600">Payment: </span>
-                                <span className="text-slate-400">{pay}</span>
+                                <span className={light ? "text-stone-500" : "text-slate-600"}>
+                                  Payment:{" "}
+                                </span>
+                                <span className={light ? "text-stone-700" : "text-slate-400"}>
+                                  {pay}
+                                </span>
                               </span>
                             ) : null}
                             {o.phone ? (
                               <span>
-                                <span className="text-slate-600">Phone: </span>
-                                <span className="text-slate-400">{o.phone}</span>
+                                <span className={light ? "text-stone-500" : "text-slate-600"}>
+                                  Phone:{" "}
+                                </span>
+                                <span className={light ? "text-stone-700" : "text-slate-400"}>
+                                  {o.phone}
+                                </span>
                               </span>
                             ) : null}
                           </div>
 
-                          <div className="flex flex-wrap items-end justify-between gap-4 border-t border-slate-700/30 pt-4">
-                            <div className="text-xs tabular-nums text-slate-500">
+                          <div
+                            className={`flex flex-wrap items-end justify-between gap-4 border-t pt-4 ${light ? "border-stone-300/50" : "border-slate-700/30"}`}
+                          >
+                            <div
+                              className={`text-xs tabular-nums ${light ? "text-stone-600" : "text-slate-500"}`}
+                            >
                               <p>Subtotal {formatUsd(sub)}</p>
                               <p>Shipping {formatUsd(ship)}</p>
                             </div>
                             <Link
                               href={`${ordersBasePath}/${encodeURIComponent(o.id)}`}
-                              className="text-sm font-medium text-amber-200/90 transition hover:text-amber-100"
+                              className={`text-sm font-medium transition ${light ? "text-amber-900 hover:text-amber-950" : "text-amber-200/90 hover:text-amber-100"}`}
                             >
                               View full order →
                             </Link>
@@ -592,7 +633,9 @@ export default function OrdersListPage({
                       </div>
                     ) : null}
                   </div>
-                  <div className="flex shrink-0 flex-col gap-1 border-l border-slate-700/35 p-2 sm:p-3">
+                  <div
+                    className={`flex shrink-0 flex-col gap-1 border-l p-2 sm:p-3 ${light ? "border-stone-300/55" : "border-slate-700/35"}`}
+                  >
                     {isAdmin ? (
                       <button
                         type="button"
@@ -600,7 +643,7 @@ export default function OrdersListPage({
                         disabled={resendBusy}
                         title="Email HTML order details to the buyer (CC shop inbox)"
                         aria-label={`Email order ${o.id} details to buyer`}
-                        className="flex h-10 w-10 items-center justify-center rounded-xl text-amber-200/90 transition hover:bg-slate-800/90 hover:text-amber-100 disabled:cursor-not-allowed disabled:opacity-40"
+                        className={`${dash.ordersIconButton(light)} disabled:cursor-not-allowed disabled:opacity-40`}
                       >
                         <RiMailSendLine
                           className={`h-5 w-5 ${resendBusy ? "animate-pulse" : ""}`}
@@ -612,7 +655,7 @@ export default function OrdersListPage({
                       href={`${ordersBasePath}/${encodeURIComponent(o.id)}`}
                       title="View order details"
                       aria-label={`View order ${o.id}`}
-                      className="flex h-10 w-10 items-center justify-center rounded-xl text-amber-200/90 transition hover:bg-slate-800/90 hover:text-amber-100"
+                      className={dash.ordersIconButton(light)}
                     >
                       <RiFileList2Line className="h-5 w-5" aria-hidden />
                     </Link>
@@ -626,16 +669,22 @@ export default function OrdersListPage({
 
         {filteredOrders.length > 0 ? (
         <nav
-          className="mt-8 flex flex-col items-stretch gap-4 border-t border-slate-700/40 pt-6 sm:flex-row sm:items-center sm:justify-between"
+          className={`mt-8 flex flex-col items-stretch gap-4 border-t pt-6 sm:flex-row sm:items-center sm:justify-between ${light ? "border-stone-300/55" : "border-slate-700/40"}`}
           aria-label="Orders pagination"
         >
-          <p className="text-center text-sm text-slate-500 sm:text-left">
+          <p
+            className={`text-center text-sm sm:text-left ${light ? "text-stone-600" : "text-slate-500"}`}
+          >
             Showing{" "}
-            <span className="tabular-nums text-stone-400">
+            <span
+              className={`tabular-nums ${light ? "text-stone-800" : "text-stone-400"}`}
+            >
               {rangeStart}–{rangeEnd}
             </span>{" "}
             of{" "}
-            <span className="tabular-nums text-stone-400">
+            <span
+              className={`tabular-nums ${light ? "text-stone-800" : "text-stone-400"}`}
+            >
               {filteredOrders.length}
             </span>
           </p>
@@ -644,18 +693,20 @@ export default function OrdersListPage({
               type="button"
               disabled={page <= 1}
               onClick={() => setPage((p) => Math.max(1, p - 1))}
-              className="rounded-lg border border-slate-600/50 bg-slate-900/60 px-4 py-2 text-sm font-medium text-stone-200 transition hover:border-amber-400/35 hover:bg-slate-800/80 disabled:cursor-not-allowed disabled:opacity-40"
+              className={dash.ordersPaginationButton(light)}
             >
               Previous
             </button>
-            <span className="min-w-28 text-center text-sm text-stone-400">
+            <span
+              className={`min-w-28 text-center text-sm ${light ? "text-stone-700" : "text-stone-400"}`}
+            >
               Page {page} of {totalPages}
             </span>
             <button
               type="button"
               disabled={page >= totalPages}
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              className="rounded-lg border border-slate-600/50 bg-slate-900/60 px-4 py-2 text-sm font-medium text-stone-200 transition hover:border-amber-400/35 hover:bg-slate-800/80 disabled:cursor-not-allowed disabled:opacity-40"
+              className={dash.ordersPaginationButton(light)}
             >
               Next
             </button>

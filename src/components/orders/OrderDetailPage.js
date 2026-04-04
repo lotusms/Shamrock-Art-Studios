@@ -6,8 +6,12 @@ import { useEffect, useState } from "react";
 import { RiMailSendLine } from "react-icons/ri";
 import { useAuth } from "@/context/AuthContext";
 import { getFirebaseAuth } from "@firebase/client";
+import { useDocumentThemeId } from "@/hooks/useDocumentThemeId";
+import * as dash from "@/lib/dashboardChrome";
+import * as overlayChrome from "@/lib/overlayChrome";
 import { fetchOrderByIdForCurrentUser } from "@/lib/orders-queries";
 import { formatUsd } from "@/lib/money";
+import { isLightThemeId } from "@/theme";
 
 function formatWhen(iso) {
   if (!iso) return "—";
@@ -31,6 +35,8 @@ export default function OrderDetailPage({
 }) {
   const params = useParams();
   const orderId = params?.orderId ? decodeURIComponent(String(params.orderId)) : "";
+  const themeId = useDocumentThemeId();
+  const light = isLightThemeId(themeId);
   const { user, loading: authLoading, isAdmin } = useAuth();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -135,7 +141,7 @@ export default function OrderDetailPage({
   if (authLoading) {
     return (
       <div className="mx-auto max-w-3xl">
-        <p className="text-sm text-stone-400">Loading…</p>
+        <p className={`text-sm ${overlayChrome.pageMutedText(light)}`}>Loading…</p>
       </div>
     );
   }
@@ -149,13 +155,10 @@ export default function OrderDetailPage({
     <div className="mx-auto max-w-7xl">
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <Link
-            href={ordersBasePath}
-            className="text-sm font-medium text-amber-200/95 underline decoration-amber-400/35 underline-offset-4 transition hover:text-amber-100"
-          >
+          <Link href={ordersBasePath} className={dash.ordersLinkAccent(light)}>
             ← All orders
           </Link>
-          <h1 className="mt-4 font-serif text-4xl font-medium tracking-[-0.03em] text-stone-100 sm:text-5xl">
+          <h1 className={`mt-4 ${dash.dashboardPageTitle(light)}`}>
             Order details
           </h1>
         </div>
@@ -166,7 +169,7 @@ export default function OrderDetailPage({
             disabled={resendBusy}
             title="Email HTML order details to the buyer (CC shop inbox)"
             aria-label={`Email order ${order.id} details to buyer`}
-            className="flex h-11 w-11 shrink-0 items-center justify-center self-start rounded-xl border border-slate-600/50 bg-slate-900/60 text-amber-200/90 transition hover:border-amber-400/35 hover:bg-slate-800/80 hover:text-amber-100 disabled:cursor-not-allowed disabled:opacity-40 sm:mt-8"
+            className={`${dash.ordersResendIconButton(light)} disabled:cursor-not-allowed disabled:opacity-40`}
           >
             <RiMailSendLine
               className={`h-5 w-5 ${resendBusy ? "animate-pulse" : ""}`}
@@ -177,55 +180,66 @@ export default function OrderDetailPage({
       </div>
 
       {order && isAdmin && resendState.message ? (
-        <p
-          className="mb-4 rounded-xl border border-emerald-500/35 bg-emerald-950/30 px-4 py-3 text-sm text-emerald-100/95"
-          role="status"
-        >
+        <p className={`mb-4 ${dash.dashSuccessBanner(light)}`} role="status">
           {resendState.message}
         </p>
       ) : null}
       {order && isAdmin && resendState.error ? (
-        <p
-          className="mb-4 rounded-xl border border-rose-500/35 bg-rose-950/30 px-4 py-3 text-sm text-rose-100/95"
-          role="alert"
-        >
+        <p className={`mb-4 ${dash.dashErrorBanner(light)}`} role="alert">
           {resendState.error}
         </p>
       ) : null}
 
       {loading ? (
-        <p className="text-sm text-stone-400">Loading order…</p>
+        <p className={`text-sm ${overlayChrome.pageMutedText(light)}`}>
+          Loading order…
+        </p>
       ) : error ? (
-        <p className="text-sm text-red-400/90" role="alert">
+        <p
+          className={`text-sm ${light ? "text-red-700" : "text-red-400/90"}`}
+          role="alert"
+        >
           {error}
         </p>
       ) : order ? (
         <div className="space-y-8">
-          <div className="rounded-3xl border-2 border-slate-700/40 bg-slate-900/45 p-6 shadow-lg shadow-slate-950/30 backdrop-blur">
+          <div className={dash.ordersPanel(light)}>
             <dl className="grid gap-3 text-sm sm:grid-cols-2">
               <div>
-                <dt className="text-slate-500">Order ID</dt>
-                <dd className="font-mono text-amber-200/95">{order.id}</dd>
+                <dt className={dash.dashboardStatCaption(light)}>Order ID</dt>
+                <dd
+                  className={`font-mono ${light ? "text-amber-900" : "text-amber-200/95"}`}
+                >
+                  {order.id}
+                </dd>
               </div>
               <div>
-                <dt className="text-slate-500">Placed</dt>
-                <dd className="text-stone-200">{formatWhen(order.createdAt)}</dd>
+                <dt className={dash.dashboardStatCaption(light)}>Placed</dt>
+                <dd className={light ? "text-stone-800" : "text-stone-200"}>
+                  {formatWhen(order.createdAt)}
+                </dd>
               </div>
               <div>
-                <dt className="text-slate-500">Email</dt>
-                <dd className="text-stone-200">{order.email || "—"}</dd>
+                <dt className={dash.dashboardStatCaption(light)}>Email</dt>
+                <dd className={light ? "text-stone-800" : "text-stone-200"}>
+                  {order.email || "—"}
+                </dd>
               </div>
               <div>
-                <dt className="text-slate-500">Phone</dt>
-                <dd className="text-stone-200">{order.phone || "—"}</dd>
+                <dt className={dash.dashboardStatCaption(light)}>Phone</dt>
+                <dd className={light ? "text-stone-800" : "text-stone-200"}>
+                  {order.phone || "—"}
+                </dd>
               </div>
             </dl>
           </div>
 
           {order.shippingAddress ? (
-            <div className="rounded-3xl border-2 border-slate-700/40 bg-slate-900/45 p-6 shadow-lg shadow-slate-950/30 backdrop-blur">
-              <h2 className="text-sm font-medium text-slate-400">Shipping</h2>
-              <address className="mt-3 text-sm not-italic leading-relaxed text-stone-200">
+            <div className={dash.ordersPanel(light)}>
+              <h2 className={dash.dashboardActivityTitle(light)}>Shipping</h2>
+              <address
+                className={`mt-3 text-sm not-italic leading-relaxed ${light ? "text-stone-800" : "text-stone-200"}`}
+              >
                 {order.shippingAddress.fullName ? (
                   <p>{order.shippingAddress.fullName}</p>
                 ) : null}
@@ -247,35 +261,47 @@ export default function OrderDetailPage({
             </div>
           ) : null}
 
-          <div className="rounded-3xl border-2 border-slate-700/40 bg-slate-900/45 p-6 shadow-lg shadow-slate-950/30 backdrop-blur">
-            <h2 className="text-sm font-medium text-slate-400">Items</h2>
+          <div className={dash.ordersPanel(light)}>
+            <h2 className={dash.dashboardActivityTitle(light)}>Items</h2>
             <ul className="mt-4 space-y-4">
               {Array.isArray(order.lines)
                 ? order.lines.map((line, i) => (
                     <li
                       key={`${line.slug ?? line.variantId ?? i}-${i}`}
-                      className="flex gap-4 border-b border-slate-700/35 pb-4 last:border-0 last:pb-0"
+                      className={`flex gap-4 border-b pb-4 last:border-0 last:pb-0 ${light ? "border-stone-300/55" : "border-slate-700/35"}`}
                     >
                       {line.image ? (
                         <img
                           src={line.image}
                           alt=""
-                          className="h-16 w-16 shrink-0 rounded-lg border border-slate-600/40 object-cover"
+                          className={`h-16 w-16 shrink-0 rounded-lg object-cover ${light ? "border border-stone-300/80" : "border border-slate-600/40"}`}
                         />
                       ) : (
-                        <div className="h-16 w-16 shrink-0 rounded-lg bg-slate-900" />
+                        <div
+                          className={`h-16 w-16 shrink-0 rounded-lg ${light ? "bg-stone-200/80" : "bg-slate-900"}`}
+                        />
                       )}
                       <div className="min-w-0 flex-1">
-                        <p className="font-medium text-stone-100">{line.title}</p>
+                        <p
+                          className={`font-medium ${light ? "text-stone-900" : "text-stone-100"}`}
+                        >
+                          {line.title}
+                        </p>
                         {line.artist ? (
-                          <p className="text-xs text-slate-500">{line.artist}</p>
+                          <p className={dash.dashboardStatCaption(light)}>
+                            {line.artist}
+                          </p>
                         ) : null}
-                        <p className="mt-1 text-sm text-slate-400">
+                        <p
+                          className={`mt-1 text-sm ${light ? "text-stone-600" : "text-slate-400"}`}
+                        >
                           Qty {line.quantity ?? 0} · {formatUsd(line.priceUsd ?? 0)}{" "}
                           each
                         </p>
                       </div>
-                      <p className="shrink-0 text-sm tabular-nums text-stone-200">
+                      <p
+                        className={`shrink-0 text-sm tabular-nums ${light ? "text-stone-800" : "text-stone-200"}`}
+                      >
                         {formatUsd(
                           Number(line.priceUsd ?? 0) * Number(line.quantity ?? 0),
                         )}
@@ -283,24 +309,38 @@ export default function OrderDetailPage({
                     </li>
                   ))
                 : (
-                  <li className="text-slate-500">No line items.</li>
+                  <li className={dash.dashboardStatCaption(light)}>
+                    No line items.
+                  </li>
                 )}
             </ul>
 
-            <div className="mt-6 space-y-2 border-t border-slate-700/40 pt-4 text-sm">
-              <div className="flex justify-between text-slate-500">
+            <div
+              className={`mt-6 space-y-2 border-t pt-4 text-sm ${light ? "border-stone-300/55" : "border-slate-700/40"}`}
+            >
+              <div
+                className={`flex justify-between ${dash.dashboardStatCaption(light)}`}
+              >
                 <span>Subtotal</span>
-                <span className="tabular-nums text-stone-300">
+                <span
+                  className={`tabular-nums ${light ? "text-stone-800" : "text-stone-300"}`}
+                >
                   {formatUsd(order.subtotalUsd ?? 0)}
                 </span>
               </div>
-              <div className="flex justify-between text-slate-500">
+              <div
+                className={`flex justify-between ${dash.dashboardStatCaption(light)}`}
+              >
                 <span>Shipping</span>
-                <span className="tabular-nums text-stone-300">
+                <span
+                  className={`tabular-nums ${light ? "text-stone-800" : "text-stone-300"}`}
+                >
                   {formatUsd(order.shippingUsd ?? 0)}
                 </span>
               </div>
-              <div className="flex justify-between text-base font-semibold text-stone-100">
+              <div
+                className={`flex justify-between text-base font-semibold ${light ? "text-stone-900" : "text-stone-100"}`}
+              >
                 <span>Total</span>
                 <span className="tabular-nums">{formatUsd(order.totalUsd ?? 0)}</span>
               </div>
@@ -308,36 +348,42 @@ export default function OrderDetailPage({
           </div>
 
           {order.notes ? (
-            <div className="rounded-3xl border-2 border-slate-700/40 bg-slate-900/45 p-6 shadow-lg shadow-slate-950/30 backdrop-blur">
-              <h2 className="text-sm font-medium text-slate-400">Notes</h2>
-              <p className="mt-2 text-sm text-stone-300 whitespace-pre-wrap">
+            <div className={dash.ordersPanel(light)}>
+              <h2 className={dash.dashboardActivityTitle(light)}>Notes</h2>
+              <p
+                className={`mt-2 text-sm whitespace-pre-wrap ${light ? "text-stone-800" : "text-stone-300"}`}
+              >
                 {order.notes}
               </p>
             </div>
           ) : null}
 
           {order.fulfillment ? (
-            <div className="rounded-3xl border-2 border-slate-700/40 bg-slate-900/45 p-6 shadow-lg shadow-slate-950/30 backdrop-blur">
-              <h2 className="text-sm font-medium text-slate-400">Fulfillment</h2>
+            <div className={dash.ordersPanel(light)}>
+              <h2 className={dash.dashboardActivityTitle(light)}>Fulfillment</h2>
               <dl className="mt-3 space-y-2 text-sm">
                 <div className="flex justify-between gap-4">
-                  <dt className="text-slate-500">Provider</dt>
-                  <dd className="text-stone-200">
+                  <dt className={dash.dashboardStatCaption(light)}>Provider</dt>
+                  <dd className={light ? "text-stone-800" : "text-stone-200"}>
                     {String(order.fulfillment.provider ?? "—")}
                   </dd>
                 </div>
                 {order.fulfillment.providerOrderId ? (
                   <div className="flex justify-between gap-4">
-                    <dt className="text-slate-500">Provider order</dt>
-                    <dd className="font-mono text-xs text-stone-300">
+                    <dt className={dash.dashboardStatCaption(light)}>
+                      Provider order
+                    </dt>
+                    <dd
+                      className={`font-mono text-xs ${light ? "text-stone-700" : "text-stone-300"}`}
+                    >
                       {String(order.fulfillment.providerOrderId)}
                     </dd>
                   </div>
                 ) : null}
                 {order.fulfillment.providerStatus ? (
                   <div className="flex justify-between gap-4">
-                    <dt className="text-slate-500">Status</dt>
-                    <dd className="text-stone-200">
+                    <dt className={dash.dashboardStatCaption(light)}>Status</dt>
+                    <dd className={light ? "text-stone-800" : "text-stone-200"}>
                       {String(order.fulfillment.providerStatus)}
                     </dd>
                   </div>
@@ -347,9 +393,11 @@ export default function OrderDetailPage({
           ) : null}
 
           {order.payment ? (
-            <div className="rounded-3xl border-2 border-slate-700/40 bg-slate-900/45 p-6 shadow-lg shadow-slate-950/30 backdrop-blur">
-              <h2 className="text-sm font-medium text-slate-400">Payment</h2>
-              <pre className="mt-2 overflow-x-auto text-xs text-slate-400">
+            <div className={dash.ordersPanel(light)}>
+              <h2 className={dash.dashboardActivityTitle(light)}>Payment</h2>
+              <pre
+                className={`mt-2 overflow-x-auto text-xs ${light ? "text-stone-600" : "text-slate-400"}`}
+              >
                 {JSON.stringify(order.payment, null, 2)}
               </pre>
             </div>

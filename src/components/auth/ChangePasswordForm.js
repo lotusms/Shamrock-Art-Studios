@@ -10,11 +10,17 @@ import { useState } from "react";
 import { getFirebaseAuth } from "@firebase/client";
 import PasswordField from "@/components/ui/PasswordField";
 import PrimaryButton from "@/components/ui/PrimaryButton";
+import { useDocumentThemeId } from "@/hooks/useDocumentThemeId";
+import * as dash from "@/lib/dashboardChrome";
+import * as overlayChrome from "@/lib/overlayChrome";
+import { isLightThemeId } from "@/theme";
 
 /**
  * @param {{ backHref: string; backLabel: string }} props
  */
 export default function ChangePasswordForm({ backHref, backLabel }) {
+  const themeId = useDocumentThemeId();
+  const light = isLightThemeId(themeId);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -78,18 +84,15 @@ export default function ChangePasswordForm({ backHref, backLabel }) {
     <>
       <form
         onSubmit={handleSubmit}
-        className="mt-10 space-y-4 rounded-3xl border-2 border-slate-700/40 bg-slate-900/45 p-6 shadow-lg shadow-slate-950/30 sm:p-8"
+        className={dash.changePasswordFormShell(light)}
       >
         {success ? (
-          <p
-            className="rounded-xl border border-emerald-500/35 bg-emerald-950/30 px-4 py-3 text-sm text-emerald-100/95"
-            role="status"
-          >
+          <p className={dash.changePasswordSuccess(light)} role="status">
             Your password was updated. Use it next time you sign in.
           </p>
         ) : null}
         {error ? (
-          <p className="text-sm text-red-400/90" role="alert">
+          <p className={overlayChrome.authInlineError(light)} role="alert">
             {error}
           </p>
         ) : null}
@@ -102,6 +105,8 @@ export default function ChangePasswordForm({ backHref, backLabel }) {
           required
           value={currentPassword}
           onChange={(e) => setCurrentPassword(e.target.value)}
+          labelClassName={overlayChrome.formFieldLabel(light)}
+          inputClassName={overlayChrome.authPasswordInputOverride(light)}
         />
         <PasswordField
           id="new-password"
@@ -111,6 +116,8 @@ export default function ChangePasswordForm({ backHref, backLabel }) {
           required
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
+          labelClassName={overlayChrome.formFieldLabel(light)}
+          inputClassName={overlayChrome.authPasswordInputOverride(light)}
         />
         <PasswordField
           id="confirm-new-password"
@@ -120,6 +127,8 @@ export default function ChangePasswordForm({ backHref, backLabel }) {
           required
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
+          labelClassName={overlayChrome.formFieldLabel(light)}
+          inputClassName={overlayChrome.authPasswordInputOverride(light)}
         />
 
         <PrimaryButton
@@ -131,11 +140,8 @@ export default function ChangePasswordForm({ backHref, backLabel }) {
         </PrimaryButton>
       </form>
 
-      <p className="mt-8 text-center text-sm text-slate-600">
-        <Link
-          href={backHref}
-          className="font-medium text-amber-200/90 underline decoration-amber-400/30 underline-offset-4 transition hover:text-amber-100"
-        >
+      <p className={`mt-8 text-center text-sm ${overlayChrome.authFooterMuted(light)}`}>
+        <Link href={backHref} className={overlayChrome.authLinkAccent(light)}>
           ← {backLabel}
         </Link>
       </p>

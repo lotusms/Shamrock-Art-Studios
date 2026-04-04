@@ -6,8 +6,13 @@ import { useState } from "react";
 import { getFirebaseAuth } from "@firebase/client";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
+import { useDocumentThemeId } from "@/hooks/useDocumentThemeId";
+import * as overlayChrome from "@/lib/overlayChrome";
+import { isLightThemeId } from "@/theme";
 
 export default function ForgotPasswordPage() {
+  const themeId = useDocumentThemeId();
+  const light = isLightThemeId(themeId);
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
@@ -50,30 +55,28 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center bg-slate-950 px-6 py-16">
-      <div className="w-full max-w-md rounded-3xl border-2 border-slate-700/40 bg-slate-900/45 p-8 shadow-2xl shadow-slate-950/50 backdrop-blur-md ring-1 ring-slate-500/15">
-        <p className="font-serif text-3xl font-medium tracking-[-0.03em] text-stone-100">
-          Forgot password
-        </p>
-        <p className="mt-2 text-sm leading-relaxed text-stone-300/95">
+    <div className="flex min-h-dvh flex-col items-center justify-center px-6 py-16">
+      <div className={overlayChrome.authCardPanel(light)}>
+        <p className={overlayChrome.authTitle(light)}>Forgot password</p>
+        <p className={overlayChrome.authSubtitle(light)}>
           Enter the email for your account. We&apos;ll send a link to reset your
           password.
         </p>
 
         {done ? (
           <div className="mt-8 space-y-4">
-            <p className="rounded-xl border border-emerald-500/35 bg-emerald-950/30 px-4 py-3 text-sm text-emerald-100/95">
+            <p className={overlayChrome.forgotSuccessBanner(light)}>
               Check your inbox for a message from us. Follow the link to choose a
               new password, then return here to{" "}
-              <Link
-                href="/login"
-                className="font-medium text-amber-200/95 underline decoration-amber-400/40 underline-offset-4"
-              >
+              <Link href="/login" className={overlayChrome.forgotSuccessBannerLink(light)}>
                 sign in
               </Link>
               .
             </p>
-            <SecondaryButton href="/login" className="w-full justify-center py-3">
+            <SecondaryButton
+              href="/login"
+              className={`w-full justify-center py-3 ${overlayChrome.secondaryButtonLightOutline(light)}`.trim()}
+            >
               Back to sign in
             </SecondaryButton>
           </div>
@@ -82,7 +85,7 @@ export default function ForgotPasswordPage() {
             <div>
               <label
                 htmlFor="forgot-email"
-                className="block text-xs font-medium uppercase tracking-wider text-slate-500"
+                className={overlayChrome.authLabelUppercase(light)}
               >
                 Email
               </label>
@@ -94,12 +97,12 @@ export default function ForgotPasswordPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1.5 w-full rounded-lg border border-slate-600/40 bg-slate-950/80 px-3 py-2.5 text-stone-100 outline-none ring-amber-400/25 placeholder:text-slate-600 focus:border-amber-400/45 focus:ring-2"
+                className={overlayChrome.authEmailInput(light)}
                 placeholder="you@example.com"
               />
             </div>
             {error ? (
-              <p className="text-sm text-red-400/90" role="alert">
+              <p className={overlayChrome.authInlineError(light)} role="alert">
                 {error}
               </p>
             ) : null}
@@ -113,11 +116,10 @@ export default function ForgotPasswordPage() {
           </form>
         )}
 
-        <p className="mt-8 text-center text-sm text-stone-500">
-          <Link
-            href="/login"
-            className="font-medium text-amber-200/95 transition hover:text-amber-100"
-          >
+        <p
+          className={`mt-8 text-center text-sm ${overlayChrome.authFooterMuted(light)}`}
+        >
+          <Link href="/login" className={overlayChrome.authLinkAccent(light)}>
             ← Back to sign in
           </Link>
         </p>

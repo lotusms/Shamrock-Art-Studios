@@ -52,6 +52,13 @@ export default function RegisterAccountForm({
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
+  const { light } = useOverlayChrome();
+  const INPUT_BASE = overlayChrome.checkoutInputBase(light);
+
+  function fieldClass(invalid) {
+    return `${INPUT_BASE} ${invalid ? "!border-rose-600 focus:!border-rose-600 focus:!ring-rose-600/35" : ""}`;
+  }
+
   function handlePhoneChange(e) {
     const digits = digitsFromTelInput(e.target.value);
     setPhone(formatUsPhoneMask(digits));
@@ -77,10 +84,6 @@ export default function RegisterAccountForm({
     setState(nextState || state);
     setPostalCode(String(suggestion.postalCode ?? "").trim() || postalCode);
     setCountry(nextCountry);
-  }
-
-  function fieldClass(invalid) {
-    return `${INPUT_BASE} ${invalid ? "!border-rose-600 focus:!border-rose-600 focus:!ring-rose-600/35" : ""}`;
   }
 
   async function handleSubmit(e) {

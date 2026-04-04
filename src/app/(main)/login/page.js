@@ -7,8 +7,13 @@ import { useAuth } from "@/context/AuthContext";
 import PasswordField from "@/components/ui/PasswordField";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import { orgName } from "@/config";
+import { useDocumentThemeId } from "@/hooks/useDocumentThemeId";
+import * as overlayChrome from "@/lib/overlayChrome";
+import { isLightThemeId } from "@/theme";
 
 export default function LoginPage() {
+  const themeId = useDocumentThemeId();
+  const light = isLightThemeId(themeId);
   const { user, loading, accountLoading, isAdmin, signIn } = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -39,9 +44,11 @@ export default function LoginPage() {
     }
   }
 
+  const muted = overlayChrome.pageMutedText(light);
+
   if (loading) {
     return (
-      <div className="flex min-h-dvh items-center justify-center bg-slate-950 text-stone-400">
+      <div className={`flex min-h-dvh items-center justify-center ${muted}`}>
         <p className="text-sm">Loading…</p>
       </div>
     );
@@ -49,7 +56,9 @@ export default function LoginPage() {
 
   if (user && accountLoading) {
     return (
-      <div className="flex min-h-dvh flex-col items-center justify-center gap-4 bg-slate-950 px-6 text-center text-stone-400">
+      <div
+        className={`flex min-h-dvh flex-col items-center justify-center gap-4 px-6 text-center ${muted}`}
+      >
         <p className="text-sm tracking-wide">Loading your account…</p>
       </div>
     );
@@ -57,7 +66,9 @@ export default function LoginPage() {
 
   if (user) {
     return (
-      <div className="flex min-h-dvh flex-col items-center justify-center gap-6 bg-slate-950 px-6 text-center text-stone-400">
+      <div
+        className={`flex min-h-dvh flex-col items-center justify-center gap-6 px-6 text-center ${muted}`}
+      >
         <p className="text-sm tracking-wide">
           Opening {isAdmin ? "the portal" : "your account"}…
         </p>
@@ -67,11 +78,18 @@ export default function LoginPage() {
         <div className="flex flex-wrap items-center justify-center gap-4 text-sm">
           <Link
             href={isAdmin ? "/dashboard" : "/account"}
-            className="font-semibold text-amber-200/95 underline decoration-amber-400/40 underline-offset-4 transition hover:text-amber-100"
+            className={overlayChrome.authLinkAccent(light)}
           >
             {isAdmin ? "Go to portal" : "Go to My Account"}
           </Link>
-          <Link href="/" className="text-stone-500 transition hover:text-stone-300">
+          <Link
+            href="/"
+            className={
+              light
+                ? "text-stone-600 transition hover:text-stone-900"
+                : "text-stone-500 transition hover:text-stone-300"
+            }
+          >
             Back to site
           </Link>
         </div>
@@ -80,12 +98,10 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center bg-slate-950 px-6 py-16">
-      <div className="w-full max-w-md rounded-3xl border-2 border-slate-700/40 bg-slate-900/45 p-8 shadow-2xl shadow-slate-950/50 backdrop-blur-md ring-1 ring-slate-500/15">
-        <p className="font-serif text-3xl font-medium tracking-[-0.03em] text-stone-100">
-          Sign in
-        </p>
-        <p className="mt-2 text-sm leading-relaxed text-stone-300/95">
+    <div className="flex min-h-dvh flex-col items-center justify-center px-6 py-16">
+      <div className={overlayChrome.authCardPanel(light)}>
+        <p className={overlayChrome.authTitle(light)}>Sign in</p>
+        <p className={overlayChrome.authSubtitle(light)}>
           Use the email and password for your {orgName} account.
         </p>
 
@@ -93,7 +109,7 @@ export default function LoginPage() {
           <div>
             <label
               htmlFor="login-email"
-              className="block text-xs font-medium uppercase tracking-wider text-slate-500"
+              className={overlayChrome.authLabelUppercase(light)}
             >
               Email
             </label>
@@ -105,7 +121,7 @@ export default function LoginPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-1.5 w-full rounded-lg border border-slate-600/40 bg-slate-950/80 px-3 py-2.5 text-stone-100 outline-none ring-amber-400/25 placeholder:text-slate-600 focus:border-amber-400/45 focus:ring-2"
+              className={overlayChrome.authEmailInput(light)}
               placeholder="you@example.com"
             />
           </div>
@@ -117,10 +133,12 @@ export default function LoginPage() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            labelClassName={overlayChrome.authLabelUppercase(light)}
+            inputClassName={overlayChrome.authPasswordInputOverride(light)}
           />
 
           {error ? (
-            <p className="text-sm text-red-400/90" role="alert">
+            <p className={overlayChrome.authInlineError(light)} role="alert">
               {error}
             </p>
           ) : null}
@@ -134,29 +152,24 @@ export default function LoginPage() {
           </PrimaryButton>
         </form>
 
-        <div className="mt-6 flex flex-col gap-3 text-center text-sm text-stone-500">
-          <Link
-            href="/forgot-password"
-            className="font-medium text-amber-200/95 underline decoration-amber-400/35 underline-offset-4 transition hover:text-amber-100"
-          >
+        <div
+          className={`mt-6 flex flex-col gap-3 text-center text-sm ${overlayChrome.authFooterMuted(light)}`}
+        >
+          <Link href="/forgot-password" className={overlayChrome.authLinkAccent(light)}>
             Forgot password?
           </Link>
           <p>
             New here?{" "}
-            <Link
-              href="/register"
-              className="font-medium text-amber-200/95 underline decoration-amber-400/35 underline-offset-4 transition hover:text-amber-100"
-            >
+            <Link href="/register" className={overlayChrome.authLinkAccent(light)}>
               Create an account
             </Link>
           </p>
         </div>
 
-        <p className="mt-8 text-center text-sm text-stone-500">
-          <Link
-            href="/"
-            className="font-medium text-amber-200/95 transition hover:text-amber-100"
-          >
+        <p
+          className={`mt-8 text-center text-sm ${overlayChrome.authFooterMuted(light)}`}
+        >
+          <Link href="/" className={overlayChrome.authLinkAccent(light)}>
             ← Back to site
           </Link>
         </p>
