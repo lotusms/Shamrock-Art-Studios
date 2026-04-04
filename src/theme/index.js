@@ -43,7 +43,7 @@ export function isLightThemeId(id) {
 }
 
 /** @type {(typeof THEME_IDS)[number]} */
-const CHOSEN_THEME = "blush";
+const CHOSEN_THEME = "default";
 
 export const ACTIVE_THEME_ID = THEME_IDS.includes(CHOSEN_THEME)
   ? CHOSEN_THEME
