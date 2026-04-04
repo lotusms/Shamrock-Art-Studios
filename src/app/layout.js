@@ -3,7 +3,9 @@ import CartProvider from "@/components/CartProvider";
 import ScrollToTopOnLoad from "@/components/ScrollToTopOnLoad";
 import { AuthProvider } from "@/context/AuthContext";
 import { orgName } from "@/config";
+import { ACTIVE_THEME_ID } from "@/theme";
 import "./globals.css";
+import "@/theme/themes.css";
 
 /** Elegant serif for headings — softer, more feminine art-gallery feel */
 const cormorant = Cormorant_Garamond({
@@ -35,6 +37,7 @@ export default function RootLayout({ children }) {
   return (
     <html
       lang="en"
+      data-theme={ACTIVE_THEME_ID}
       className={`${cormorant.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
     >
       <body

@@ -31,36 +31,19 @@ html {
   scroll-behavior: auto;
 }
 
-/* Dark slate base + soft cool/warm light (Tailwind palette tokens only). */
+/* Page chrome — theme-specific backgrounds live in `src/theme/themes.css`. */
 body {
   margin: 0;
   overflow-x: hidden;
-  background-image:
-    radial-gradient(
-      circle at 15% 0%,
-      color-mix(in oklch, var(--color-slate-500) 18%, transparent),
-      transparent 40%
-    ),
-    radial-gradient(
-      circle at 90% 15%,
-      color-mix(in oklch, var(--color-slate-600) 14%, transparent),
-      transparent 34%
-    ),
-    radial-gradient(
-      circle at 70% 90%,
-      color-mix(in oklch, var(--color-amber-500) 8%, transparent),
-      transparent 38%
-    ),
-    radial-gradient(
-      circle at 0% 70%,
-      color-mix(in oklch, var(--color-slate-400) 9%, transparent),
-      transparent 42%
-    ),
-    linear-gradient(
-      180deg,
-      color-mix(in oklch, var(--color-slate-950) 94%, var(--color-slate-900)),
-      var(--color-slate-950)
-    );
+}
+
+/*
+ * Light `Card` surfaces: keep semantic `text-site-*` utilities readable on pale
+ * paper (inherits into card content).
+ */
+[data-card-surface="light"] {
+  --color-site-fg: var(--color-stone-900);
+  --site-fg: var(--color-site-fg);
 }
 
 @layer base {
@@ -153,12 +136,12 @@ body {
   .text-gradient-hero {
     background-image: linear-gradient(
       118deg,
-      var(--color-stone-100) 0%,
-      var(--color-amber-200) 22%,
+      var(--color-site-fg) 0%,
+      color-mix(in oklch, var(--color-site-primary) 50%, var(--color-stone-100)) 22%,
       var(--color-slate-200) 42%,
       var(--color-white) 58%,
-      var(--color-sky-200) 82%,
-      var(--color-amber-300) 100%
+      color-mix(in oklch, var(--color-site-tertiary) 55%, white) 82%,
+      color-mix(in oklch, var(--color-site-primary) 60%, white) 100%
     );
     background-size: 220% auto;
     -webkit-background-clip: text;
@@ -172,13 +155,57 @@ body {
       105deg,
       var(--color-slate-300) 0%,
       var(--color-stone-200) 40%,
-      var(--color-sky-100) 100%
+      color-mix(in oklch, var(--color-site-tertiary) 35%, var(--color-sky-100)) 100%
     );
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
     /* Italic + clip:text can trim overshoots; keep a hair of inline padding. */
     padding-inline-end: 0.06em;
+  }
+
+  /*
+   * Product image overlays — bottom fade for legible text on thumbnails.
+   * Light-theme variants: `src/theme/themes.css` (site-bg–based scrims).
+   */
+  .product-image-scrim-card {
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    opacity: 0.9;
+    background-image: linear-gradient(
+      to top,
+      color-mix(in oklch, var(--color-slate-950) 88%, transparent) 0%,
+      color-mix(in oklch, var(--color-slate-950) 25%, transparent) 42%,
+      transparent 100%
+    );
+  }
+
+  .product-image-scrim-inner {
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    background-image: linear-gradient(
+      to top,
+      color-mix(in oklch, var(--color-slate-950) 72%, transparent) 0%,
+      color-mix(in oklch, var(--color-slate-950) 15%, transparent) 52%,
+      transparent 100%
+    );
+  }
+
+  .product-image-scrim-hero {
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    background-image: linear-gradient(
+      to top,
+      #000 0%,
+      rgb(0 0 0 / 0.35) 50%,
+      transparent 100%
+    );
   }
 
   .mobile-nav-item {

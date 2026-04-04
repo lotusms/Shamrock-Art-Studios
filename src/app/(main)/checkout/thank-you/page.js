@@ -8,9 +8,14 @@ import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
 import { formatUsd } from "@/lib/money";
 import { ORDER_EMAIL_STATUS_KEY, ORDER_STORAGE_KEY } from "@/lib/checkout";
+import { useDocumentThemeId } from "@/hooks/useDocumentThemeId";
+import * as overlayChrome from "@/lib/overlayChrome";
+import { isLightThemeId } from "@/theme";
 
 function ThankYouContent() {
   const searchParams = useSearchParams();
+  const themeId = useDocumentThemeId();
+  const lightSurface = isLightThemeId(themeId);
   const ref = searchParams.get("ref");
   const [emailNotice, setEmailNotice] = useState(null);
 
@@ -104,13 +109,13 @@ function ThankYouContent() {
 
         <Card variant="inset" className="w-full" title="Order reference" titleTag="h4">
           <div className="flex flex-col mt-2">
-            <p className="font-mono text-stone-100/80">
+            <p className="font-mono text-site-fg/90">
               Order #: {order.id}
             </p>
-            <p className="font-mono text-stone-100/80">
+            <p className="font-mono text-site-fg/90">
               Order date: {new Date(order.createdAt).toLocaleString()}
             </p>            
-            <p className="font-mono text-stone-100/80">
+            <p className="font-mono text-site-fg/90">
               {order.fulfillment?.provider === "printful"
                 ? "Fulfillment provider"
                 : "Demo mode"}
@@ -119,7 +124,7 @@ function ThankYouContent() {
                 : ""}
             </p>
             {order.payment?.provider === "paypal" ? (
-              <p className="font-mono text-stone-100/80">
+              <p className="font-mono text-site-fg/90">
                 
                 {order.payment.paypalCaptureId
                   ? `Paid with PayPal: ${order.payment.paypalCaptureId}`
@@ -131,10 +136,10 @@ function ThankYouContent() {
 
         <Card variant="inset" className="w-full" title="Ship to" titleTag="h4">
           <div className="flex flex-col mt-2">
-            <p className="font-mono text-stone-100/80">
+            <p className="font-mono text-site-fg/90">
               {order.shippingAddress.fullName}
             </p>
-            <p className="font-mono text-stone-100/80">
+            <p className="font-mono text-site-fg/90">
               {order.shippingAddress.address1}
               {order.shippingAddress.address2 ? (
                 <>
@@ -147,8 +152,8 @@ function ThankYouContent() {
               {order.shippingAddress.postalCode} {" "}
               {order.shippingAddress.country}
             </p>
-            <p className="font-mono text-stone-100/80">
-              Email: <span className="text-amber-200/90">{order.email}</span>
+            <p className="font-mono text-site-fg/90">
+              Email: <span className="text-site-primary">{order.email}</span>
             </p>
           </div>
         </Card>
@@ -159,42 +164,63 @@ function ThankYouContent() {
           {order.lines.map((l) => (
             <li
               key={l.productId}
-              className="flex justify-between gap-4 border-b border-white/5 pb-3 last:border-0 last:pb-0"
+              className={`flex justify-between gap-4 border-b pb-3 last:border-0 last:pb-0 ${lightSurface ? "border-stone-300/45" : "border-site-fg/10"}`}
             >
-              <span className="text-stone-300">
+              <span
+                className={
+                  lightSurface ? "text-stone-800" : "text-site-fg/90"
+                }
+              >
                 {l.title}{" "}
-                <span className="text-slate-500">×{l.quantity}</span>
+                <span className={overlayChrome.checkoutOrderQty(lightSurface)}>
+                  ×{l.quantity}
+                </span>
               </span>
-              <span className="shrink-0 tabular-nums text-stone-200">
+              <span
+                className={`shrink-0 tabular-nums ${lightSurface ? "text-stone-900" : "text-site-fg"}`}
+              >
                 {formatUsd(l.priceUsd * l.quantity)}
               </span>
             </li>
           ))}
         </ul>
-        <dl className="mt-6 space-y-2 border-t border-white/10 pt-6 text-sm">
+        <dl
+          className={`mt-6 space-y-2 border-t pt-6 text-sm ${lightSurface ? "border-stone-300/55 text-stone-900" : "border-site-fg/15 text-site-fg"}`}
+        >
           <div className="flex justify-between">
-            <dt className="text-slate-400">Subtotal</dt>
+            <dt className={overlayChrome.checkoutSummaryMuted(lightSurface)}>
+              Subtotal
+            </dt>
             <dd className="tabular-nums">{formatUsd(order.subtotalUsd)}</dd>
           </div>
           <div className="flex justify-between">
-            <dt className="text-slate-400">Shipping</dt>
+            <dt className={overlayChrome.checkoutSummaryMuted(lightSurface)}>
+              Shipping
+            </dt>
             <dd className="tabular-nums">
               {order.shippingUsd === 0 ? (
-                <span className="text-emerald-400/90">Complimentary</span>
+                <span className={overlayChrome.cartShippingComplimentary(lightSurface)}>
+                  Complimentary
+                </span>
               ) : (
                 formatUsd(order.shippingUsd)
               )}
             </dd>
           </div>
-          <div className="flex justify-between text-base font-semibold text-amber-200">
-            <dt>Total</dt>
+          <div
+            className={`flex justify-between border-t pt-4 text-base font-semibold text-site-primary ${lightSurface ? "border-stone-300/60" : "border-site-fg/15"}`}
+          >
+            <dt className={lightSurface ? "text-stone-900" : undefined}>Total</dt>
             <dd className="tabular-nums">{formatUsd(order.totalUsd)}</dd>
           </div>
         </dl>
       </Card>
 
       <div className="flex flex-row justify-end gap-4">
-        <SecondaryButton href="/contact" className="px-2 py-3.5">
+        <SecondaryButton
+          href="/contact"
+          className={`px-2 py-3.5 ${overlayChrome.secondaryButtonLightOutline(lightSurface)}`.trim()}
+        >
           Questions? Contact
         </SecondaryButton>
         <PrimaryButton href="/shop" className="px-8">

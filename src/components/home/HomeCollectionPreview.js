@@ -6,7 +6,9 @@ import { pickRecentCatalogProducts } from "@/lib/catalogSort";
 import { orgName } from "@/config";
 import { formatUsd } from "@/lib/money";
 import CoverImageFrame from "@/components/ui/CoverImageFrame";
-import { linkButtonClasses } from "@/components/ui/LinkButton";
+import { linkButtonClasses, linkButtonClassesLight } from "@/components/ui/LinkButton";
+import { useDocumentThemeId } from "@/hooks/useDocumentThemeId";
+import { isLightThemeId } from "@/theme";
 
 const PREVIEW_LIMIT = 6;
 
@@ -46,6 +48,8 @@ function CollectionSkeletonCard({ delay = 0 }) {
 }
 
 function CollectionProductCard({ product }) {
+  const themeId = useDocumentThemeId();
+  const light = isLightThemeId(themeId);
   return (
     <Link
       href={`/shop/${product.slug}`}
@@ -58,19 +62,25 @@ function CollectionProductCard({ product }) {
           imageWidth={product.imageWidth}
           imageHeight={product.imageHeight}
           sizes="(max-width: 640px) 100vw, 50vw"
+          scrim="card"
         />
-        <div className="absolute right-4 top-4 rounded-full border border-amber-300/35 bg-slate-950/70 px-3 py-1.5 text-sm font-semibold tabular-nums text-amber-200 backdrop-blur-sm">
+        <div className="absolute right-4 top-4 z-20 rounded-full border border-amber-300/35 bg-slate-950/70 px-3 py-1.5 text-sm font-semibold tabular-nums text-stone-200! backdrop-blur-sm">
           {formatCardPrice(product)}
         </div>
-        <div className="absolute inset-0 bg-linear-to-t from-slate-950/88 via-slate-950/25 to-transparent opacity-90" />
-        <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-6">
+        <div className="absolute bottom-0 left-0 right-0 z-20 p-5 sm:p-6">
           <h3 className="font-serif text-xl font-medium tracking-[-0.02em] text-stone-100">
             {product.title}
           </h3>
           <div className="flex items-end justify-between gap-4">
-            <p className="text-sm text-slate-400">{product.medium} • {product.dimensions || "—"}</p>
-            {/* Span only: outer <Link> wraps the card; nested <a> is invalid HTML. */}
-            <span className={linkButtonClasses} aria-hidden="true">
+            <p
+              className={`text-sm ${light ? "text-slate-800" : "text-slate-400"}`}
+            >
+              {product.medium} • {product.dimensions || "—"}
+            </p>
+            <span
+              className={light ? linkButtonClassesLight : linkButtonClasses}
+              aria-hidden="true"
+            >
               View
             </span>
           </div>

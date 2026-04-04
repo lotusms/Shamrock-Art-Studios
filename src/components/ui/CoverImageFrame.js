@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import ArtworkImageScrim from "@/components/ui/ArtworkImageScrim";
 import { ARTWORK_MAT_INNER, ARTWORK_MAT_OUTER } from "@/components/ui/artworkMatClasses";
 
 function aspectStyle(imageWidth, imageHeight, fallbackAspectRatio) {
@@ -21,8 +22,13 @@ export default function CoverImageFrame({
   fallbackAspectRatio = "2 / 3",
   zoomClass = "scale-[1.14]",
   hoverZoomClass = "group-hover:scale-[1.2]",
-  frameClassName = "relative w-full overflow-hidden bg-slate-950",
+  frameClassName = "relative w-full overflow-hidden bg-site-bg",
   secondaryMat = true,
+  /**
+   * Scrim inside the image well only (never over mat rings).
+   * `inner` — subtle well-only fade; `card` — catalog tiles; `hero` — home hero rotator.
+   */
+  scrim = "none",
   matOuterClassName = "",
   matInnerClassName = "",
 }) {
@@ -42,7 +48,7 @@ export default function CoverImageFrame({
             sizes={sizes}
             className="object-cover object-center"
           />
-          <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-slate-950/70 via-slate-950/15 to-transparent" />
+          <ArtworkImageScrim variant={scrim} />
         </div>
       </div>
     </div>

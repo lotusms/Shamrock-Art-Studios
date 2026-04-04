@@ -8,6 +8,8 @@ import PasswordField from "@/components/ui/PasswordField";
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
 import SelectListbox from "@/components/ui/SelectListbox";
+import { useOverlayChrome } from "@/hooks/useOverlayChrome";
+import * as overlayChrome from "@/lib/overlayChrome";
 import { validateAccountRegistration } from "@/lib/account-registration";
 import {
   digitsFromTelInput,
@@ -21,9 +23,6 @@ import {
   normalizeStateCodeForPrintful,
   US_STATE_SELECT_OPTIONS,
 } from "@/lib/printful/address";
-
-const INPUT_BASE =
-  "mt-1.5 w-full rounded-xl border border-slate-600/60 bg-slate-950/60 px-4 py-3 text-sm text-stone-100 placeholder:text-slate-600 focus:border-amber-400/40 focus:outline-none focus:ring-1 focus:ring-amber-400/25";
 
 /**
  * @param {{
@@ -167,11 +166,11 @@ export default function RegisterAccountForm({
     <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-5 sm:px-6 lg:px-8 lg:py-6">
       <div className="grid gap-8 lg:grid-cols-2 lg:gap-x-10 lg:gap-y-0 xl:gap-x-14">
         <section className="min-w-0">
-          <h3 className="text-xs font-medium uppercase tracking-[0.2em] text-slate-500">
+          <h3 className={overlayChrome.formSectionHeading(light)}>
             Account
           </h3>
           <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <label className="block text-sm text-slate-400 sm:col-span-2">
+            <label className={`${overlayChrome.formFieldLabel(light)} sm:col-span-2`}>
               Email
               <input
                 type="email"
@@ -190,7 +189,8 @@ export default function RegisterAccountForm({
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                inputClassName="rounded-xl border-slate-600/60 bg-slate-950/60 px-4 py-3 text-sm"
+                labelClassName={overlayChrome.formFieldLabel(light)}
+                inputClassName={overlayChrome.checkoutPasswordInputClass(light)}
               />
             </div>
             <div className="min-w-0 sm:col-span-1">
@@ -201,10 +201,11 @@ export default function RegisterAccountForm({
                 required
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                inputClassName="rounded-xl border-slate-600/60 bg-slate-950/60 px-4 py-3 text-sm"
+                labelClassName={overlayChrome.formFieldLabel(light)}
+                inputClassName={overlayChrome.checkoutPasswordInputClass(light)}
               />
             </div>
-            <label className="block text-sm text-slate-400">
+            <label className={overlayChrome.formFieldLabel(light)}>
               First name
               <input
                 type="text"
@@ -215,7 +216,7 @@ export default function RegisterAccountForm({
                 className={fieldClass(false)}
               />
             </label>
-            <label className="block text-sm text-slate-400">
+            <label className={overlayChrome.formFieldLabel(light)}>
               Last name
               <input
                 type="text"
@@ -226,7 +227,7 @@ export default function RegisterAccountForm({
                 className={fieldClass(false)}
               />
             </label>
-            <label className="block text-sm text-slate-400 sm:col-span-2">
+            <label className={`${overlayChrome.formFieldLabel(light)} sm:col-span-2`}>
               Phone (optional)
               <input
                 type="tel"
@@ -242,8 +243,8 @@ export default function RegisterAccountForm({
           </div>
         </section>
 
-        <section className="min-w-0 lg:border-l lg:border-slate-800/80 lg:pl-8 xl:pl-10">
-          <h3 className="text-xs font-medium uppercase tracking-[0.2em] text-slate-500">
+        <section className={overlayChrome.formSectionColumnBorder(light)}>
+          <h3 className={overlayChrome.formSectionHeading(light)}>
             Shipping address
           </h3>
           <div className="mt-4 grid grid-cols-1 gap-4">
@@ -255,7 +256,7 @@ export default function RegisterAccountForm({
               inputClassName={fieldClass(false)}
               required
             />
-            <label className="block text-sm text-slate-400">
+            <label className={overlayChrome.formFieldLabel(light)}>
               Address line 2
               <input
                 type="text"
@@ -266,7 +267,7 @@ export default function RegisterAccountForm({
               />
             </label>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              <label className="block text-sm text-slate-400">
+              <label className={overlayChrome.formFieldLabel(light)}>
                 City
                 <input
                   type="text"
@@ -303,7 +304,7 @@ export default function RegisterAccountForm({
                     buttonClassName={fieldClass(false)}
                   />
                 ) : (
-                  <label className="block text-sm text-slate-400">
+                  <label className={overlayChrome.formFieldLabel(light)}>
                     State / region
                     <input
                       type="text"
@@ -316,7 +317,9 @@ export default function RegisterAccountForm({
                   </label>
                 )}
               </div>
-              <label className="block text-sm text-slate-400 sm:col-span-2 xl:col-span-1">
+              <label
+                className={`${overlayChrome.formFieldLabel(light)} sm:col-span-2 xl:col-span-1`}
+              >
                 {country === "US" ? "ZIP code" : "Postal code"}
                 <input
                   type="text"
@@ -342,7 +345,7 @@ export default function RegisterAccountForm({
         </section>
 
         {error ? (
-          <p className="text-sm text-rose-300 lg:col-span-2" role="alert">
+          <p className={overlayChrome.registerErrorText(light)} role="alert">
             {error}
           </p>
         ) : null}
@@ -351,13 +354,13 @@ export default function RegisterAccountForm({
   );
 
   const footer = (
-    <div className="shrink-0 border-t border-slate-700/40 bg-slate-950/95 px-4 py-4 sm:px-6 lg:px-8">
+    <div className={overlayChrome.registerFormFooter(light)}>
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end sm:gap-4">
         {variant === "drawer" && onCancel ? (
           <SecondaryButton
             type="button"
             onClick={onCancel}
-            className="w-full justify-center py-3 sm:w-auto sm:px-6 sm:py-2.5"
+            className={`w-full justify-center py-3 sm:w-auto sm:px-6 sm:py-2.5 ${overlayChrome.secondaryButtonLightOutline(light)}`.trim()}
           >
             Cancel
           </SecondaryButton>
@@ -366,7 +369,7 @@ export default function RegisterAccountForm({
           <SecondaryButton
             type="button"
             href="/login"
-            className="w-full justify-center py-3 sm:w-auto sm:px-6 sm:py-2.5"
+            className={`w-full justify-center py-3 sm:w-auto sm:px-6 sm:py-2.5 ${overlayChrome.secondaryButtonLightOutline(light)}`.trim()}
           >
             Back to sign in
           </SecondaryButton>

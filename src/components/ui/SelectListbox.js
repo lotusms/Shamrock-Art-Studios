@@ -10,18 +10,14 @@ import {
 import { CheckIcon } from "@heroicons/react/20/solid";
 import { ChevronUpDownIcon } from "@heroicons/react/16/solid";
 import { useEffect, useMemo, useRef } from "react";
+import { useOverlayChrome } from "@/hooks/useOverlayChrome";
+import * as overlayChrome from "@/lib/overlayChrome";
 
 const DEFAULT_ANCHOR = {
   to: "bottom start",
   gap: 4,
   padding: 8,
 };
-
-const FLOATING_PANEL_CLASS =
-  "z-50 max-h-60 w-[var(--button-width)] overflow-auto rounded-xl border border-slate-600/60 bg-slate-900 py-1 text-sm text-stone-100 shadow-lg outline-none data-closed:data-leave:opacity-0 data-leave:transition data-leave:duration-100 data-leave:ease-in";
-
-const IN_FLOW_PANEL_CLASS =
-  "absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-xl border border-slate-600/60 bg-slate-900 py-1 text-sm text-stone-100 shadow-lg outline-none data-closed:data-leave:opacity-0 data-leave:transition data-leave:duration-100 data-leave:ease-in";
 
 function optionKey(opt, valueKey) {
   return String(opt[valueKey]);
@@ -39,6 +35,10 @@ function SelectListboxPanel({
   selected,
   buttonClassName,
   optionsClassName,
+  optionClassName,
+  checkIconClassName,
+  labelClassName,
+  chevronClassName,
   invalid,
   ariaDescribedBy,
   disabled,
@@ -60,7 +60,7 @@ function SelectListboxPanel({
   return (
     <>
       {showLabel && label != null && label !== false ? (
-        <Label className="block text-sm text-slate-400">{label}</Label>
+        <Label className={labelClassName}>{label}</Label>
       ) : null}
       <div className="relative">
         <ListboxButton
@@ -79,7 +79,7 @@ function SelectListboxPanel({
           </span>
           <ChevronUpDownIcon
             aria-hidden="true"
-            className="col-start-1 row-start-1 size-5 self-center justify-self-end text-slate-500 sm:size-4"
+            className={chevronClassName}
           />
         </ListboxButton>
 
@@ -93,14 +93,14 @@ function SelectListboxPanel({
               key={optionKey(opt, valueKey)}
               value={opt}
               disabled={Boolean(opt.disabled)}
-              className="group relative cursor-default select-none py-2.5 pl-4 pr-10 text-stone-100 data-focus:bg-amber-400/15 data-focus:text-stone-100 data-focus:outline-none data-disabled:cursor-not-allowed data-disabled:opacity-40"
+              className={optionClassName}
             >
               <span className="block truncate font-normal group-data-selected:font-semibold">
                 {opt[labelKey]}
               </span>
               {showCheck ? (
-                <span className="absolute inset-y-0 right-0 flex items-center pr-4 text-amber-400/90 group-[:not([data-selected])]:hidden group-data-focus:text-amber-200">
-                  <CheckIcon aria-hidden="true" className="size-5" />
+                <span className={checkIconClassName}>
+                  <CheckIcon aria-hidden="true" className="size-5 shrink-0" />
                 </span>
               ) : null}
             </ListboxOption>
@@ -154,8 +154,18 @@ export default function SelectListbox({
       ? false
       : { ...DEFAULT_ANCHOR, ...(anchor && typeof anchor === "object" ? anchor : {}) };
 
+  const { light } = useOverlayChrome();
+
   const resolvedOptionsClassName =
-    optionsClassName ?? (useFloating ? FLOATING_PANEL_CLASS : IN_FLOW_PANEL_CLASS);
+    optionsClassName ??
+    (useFloating
+      ? overlayChrome.listboxFloatingPanel(light)
+      : overlayChrome.listboxInFlowPanel(light));
+
+  const resolvedLabelClassName = overlayChrome.formFieldLabel(light);
+  const resolvedChevronClassName = overlayChrome.selectChevron(light);
+  const resolvedOptionClassName = overlayChrome.listboxOption(light);
+  const resolvedCheckClassName = overlayChrome.listboxCheckIcon(light);
 
   return (
     <Listbox
@@ -178,6 +188,10 @@ export default function SelectListbox({
           selected={selected}
           buttonClassName={`grid w-full cursor-default grid-cols-1 text-left ${buttonClassName}`}
           optionsClassName={resolvedOptionsClassName}
+          labelClassName={resolvedLabelClassName}
+          chevronClassName={resolvedChevronClassName}
+          optionClassName={resolvedOptionClassName}
+          checkIconClassName={resolvedCheckClassName}
           invalid={invalid}
           ariaDescribedBy={ariaDescribedBy}
           disabled={disabled}

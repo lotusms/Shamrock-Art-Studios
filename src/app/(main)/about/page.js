@@ -1,5 +1,5 @@
+import AboutStudioCards from "@/components/about/AboutStudioCards";
 import PageLayout from "@/components/PageLayout";
-import Card from "@/components/ui/Card";
 import { orgName, sitePageTitle } from "@/config";
 
 export const metadata = {
@@ -40,37 +40,7 @@ export default function AboutPage() {
         This website serves as both an online gallery and an artist portfolio, making it easy to explore available work, discover new pieces, and support the artist’s journey. Every purchase helps fund future materials, new projects, and continued artistic development.
       </p>
 
-      <div className="grid gap-5 md:grid-cols-2">
-        <Card variant="inset" title="Online Art Studio">
-          <p className="mt-5 leading-7 text-stone-200/85">
-          {orgName} operates as an online-first gallery, offering original artwork, canvas prints, and special requests without the need for a physical storefront. This allows collectors to browse and buy art online while receiving work shipped directly to their home.
-          </p>
-        </Card>
-
-        <Card variant="inset" className="flex flex-col justify-between" title="In one line">
-          <div>
-            <p className="mt-4 font-serif text-xl font-medium italic leading-relaxed text-stone-100/95 sm:text-2xl">
-              “Original art, prints, and creative growth shared through a modern online gallery.”
-            </p>
-          </div>
-          <p className="flex justify-end text-xs uppercase tracking-[0.28em] text-slate-500">
-            — Jas Perez, Artist
-          </p>
-        </Card>
-      </div>
-
-      <div>
-        <p className="text-xs uppercase tracking-[0.32em] text-slate-400">
-          Principles
-        </p>
-        <div className="mt-6 grid gap-4 sm:grid-cols-3">
-          {principles.map((item) => (
-            <Card variant="amber" title={item.title} key={item.title}>
-              <p className="mt-3 text-sm leading-7 text-stone-200/90">{item.body}</p>
-            </Card>
-          ))}
-        </div>
-      </div>
+      <AboutStudioCards orgName={orgName} principles={principles} />
 
       <p className="border-l-2 border-amber-400/25 pl-6 text-sm leading-7 text-stone-300/90">
         {orgName} continues to grow as an online destination for original art, canvas prints, and emerging creative work, with new pieces added as the artist’s portfolio expands.

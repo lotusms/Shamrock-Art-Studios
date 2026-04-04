@@ -11,14 +11,14 @@ import { useEffect, useState } from "react";
 import { getFirebaseAuth } from "@firebase/client";
 import PasswordField from "@/components/ui/PasswordField";
 import PrimaryButton from "@/components/ui/PrimaryButton";
-
-const INPUT_BASE =
-  "mt-1.5 w-full rounded-xl border border-slate-600/60 bg-slate-950/60 px-4 py-3 text-sm text-stone-100 placeholder:text-slate-600 focus:border-amber-400/40 focus:outline-none focus:ring-1 focus:ring-amber-400/25";
+import { useOverlayChrome } from "@/hooks/useOverlayChrome";
+import * as overlayChrome from "@/lib/overlayChrome";
 
 /**
  * @param {{ open: boolean, onClose: () => void, onSignedIn?: () => void }} props
  */
 export default function CheckoutLoginDialog({ open, onClose, onSignedIn }) {
+  const { light } = useOverlayChrome();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -58,6 +58,8 @@ export default function CheckoutLoginDialog({ open, onClose, onSignedIn }) {
     }
   }
 
+  const inputBase = overlayChrome.checkoutInputBase(light);
+
   return (
     <Dialog open={open} onClose={onClose} className="relative z-[200]">
       <DialogBackdrop
@@ -67,12 +69,12 @@ export default function CheckoutLoginDialog({ open, onClose, onSignedIn }) {
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <DialogPanel
           transition
-          className="w-full max-w-md rounded-2xl border border-slate-700/50 bg-slate-950 p-6 shadow-2xl transition data-closed:scale-95 data-closed:opacity-0"
+          className={overlayChrome.checkoutDialogModalPanel(light)}
         >
-          <DialogTitle className="font-serif text-xl font-medium tracking-[-0.02em] text-stone-100">
+          <DialogTitle className={overlayChrome.dialogTitleModal(light)}>
             Sign in to checkout
           </DialogTitle>
-          <p className="mt-2 text-sm text-stone-400">
+          <p className={overlayChrome.dialogSubtitle(light)}>
             We&apos;ll fill in your saved details. You can still edit shipping before
             paying.
           </p>
@@ -81,7 +83,7 @@ export default function CheckoutLoginDialog({ open, onClose, onSignedIn }) {
             <div>
               <label
                 htmlFor="checkout-login-email"
-                className="block text-xs font-medium uppercase tracking-wider text-slate-500"
+                className={overlayChrome.checkoutLabelUppercase(light)}
               >
                 Email
               </label>
@@ -92,7 +94,7 @@ export default function CheckoutLoginDialog({ open, onClose, onSignedIn }) {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className={INPUT_BASE}
+                className={inputBase}
               />
             </div>
             <PasswordField
@@ -103,10 +105,14 @@ export default function CheckoutLoginDialog({ open, onClose, onSignedIn }) {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              inputClassName="rounded-xl border-slate-600/60 bg-slate-950/60 px-4 py-3 text-sm"
+              labelClassName={overlayChrome.checkoutLabelUppercase(light)}
+              inputClassName={overlayChrome.checkoutPasswordInputClass(light)}
             />
             {error ? (
-              <p className="text-sm text-rose-300" role="alert">
+              <p
+                className={light ? "text-sm text-rose-700" : "text-sm text-rose-300"}
+                role="alert"
+              >
                 {error}
               </p>
             ) : null}
@@ -121,7 +127,7 @@ export default function CheckoutLoginDialog({ open, onClose, onSignedIn }) {
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-full border border-slate-600/50 bg-transparent px-6 py-2.5 text-sm font-medium text-stone-300 transition hover:border-amber-400/35 hover:text-stone-100"
+                className={overlayChrome.checkoutCancelButton(light)}
               >
                 Cancel
               </button>

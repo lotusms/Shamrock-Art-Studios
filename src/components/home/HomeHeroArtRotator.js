@@ -2,10 +2,13 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import ArtworkImageScrim from "@/components/ui/ArtworkImageScrim";
 import { ARTWORK_MAT_INNER, ARTWORK_MAT_OUTER } from "@/components/ui/artworkMatClasses";
 import LinkButton from "@/components/ui/LinkButton";
 import { orgName } from "@/config";
+import { useDocumentThemeId } from "@/hooks/useDocumentThemeId";
 import { formatUsd } from "@/lib/money";
+import { isLightThemeId } from "@/theme";
 
 const ROTATE_MS = 8000;
 /** Crossfade between slides (opacity on overlapping layers). */
@@ -37,6 +40,8 @@ function heroSubtitle(product) {
 }
 
 export default function HomeHeroArtRotator({ products }) {
+  const themeId = useDocumentThemeId();
+  const light = isLightThemeId(themeId);
   const [index, setIndex] = useState(0);
   const n = products.length;
 
@@ -53,18 +58,18 @@ export default function HomeHeroArtRotator({ products }) {
 
   return (
     <div
-      className="relative overflow-hidden rounded-3xl border-2 border-slate-600/40 bg-slate-950 shadow-2xl shadow-slate-950/40 transition duration-500 hover:ring-amber-400/35 hover:shadow-slate-950/50"
+      className="relative overflow-hidden rounded-3xl border-2 border-slate-600/40 bg-site-bg shadow-2xl shadow-slate-950/40 transition duration-500 hover:ring-amber-400/35 hover:shadow-slate-950/50"
     >
       {/* Mat + inner aperture; fixed portrait; mockup PNG zoom fills aperture. */}
       <div className={ARTWORK_MAT_OUTER}>
         <div className={ARTWORK_MAT_INNER}>
-          <div className="relative aspect-2/3 w-full overflow-hidden bg-slate-950">
+          <div className="relative aspect-2/3 w-full overflow-hidden bg-site-bg">
             {products.map((p, idx) => (
               <div
                 key={p.id}
                 className={`absolute inset-0 overflow-hidden transition-opacity ease-in-out ${
                   idx === index
-                    ? "z-1 opacity-100"
+                    ? "z-10 opacity-100"
                     : "pointer-events-none z-0 opacity-0"
                 }`}
                 aria-hidden={idx !== index}
@@ -80,7 +85,7 @@ export default function HomeHeroArtRotator({ products }) {
                       sizes="(max-width: 1024px) 100vw, 45vw"
                       className="object-cover object-center"
                     />
-                    <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black via-black/35 to-transparent" />
+                    <ArtworkImageScrim variant="hero" />
                   </div>
                 ) : (
                   <div className="flex h-full items-center justify-center text-sm text-stone-500">
@@ -93,7 +98,7 @@ export default function HomeHeroArtRotator({ products }) {
         </div>
       </div>
 
-      <div className="absolute bottom-0 left-0 right-0 z-2 p-6 sm:p-8">
+      <div className="absolute bottom-0 left-0 right-0 z-20 p-6 sm:p-8">
         <p className="text-xs uppercase tracking-[0.32em] text-slate-400">
           Featured work
         </p>
@@ -101,7 +106,11 @@ export default function HomeHeroArtRotator({ products }) {
         
         
         <div className=" flex items-end justify-between gap-6">
-          <p className="mt-1 text-sm text-slate-400">{current.medium} • {current.dimensions || "—"}</p>
+          <p
+            className={`mt-1 text-sm ${light ? "text-slate-800" : "text-slate-400"}`}
+          >
+            {current.medium} • {current.dimensions || "—"}
+          </p>
           <LinkButton href={`/shop/${current.slug}`}>View</LinkButton>
         </div>
       </div>

@@ -1,0 +1,882 @@
+/*
+ * Theme overrides — loaded after `globals.css`. Each block sets semantic tokens on
+ * `html` so `bg-site-*`, `text-site-*`, and components using those utilities follow the theme.
+ *
+ * Dark: default, midnight, ember, noir-rose, velvet
+ * Light: dawn, porcelain, linen
+ * Light feminine: blush, petal, ballet
+ */
+
+/* -------------------------------------------------------------------------- */
+/* Default — matches @theme in globals.css; explicit body atmosphere            */
+/* -------------------------------------------------------------------------- */
+
+html[data-theme="default"] body {
+  background-image:
+    radial-gradient(
+      circle at 15% 0%,
+      color-mix(in oklch, var(--color-slate-500) 18%, transparent),
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 90% 15%,
+      color-mix(in oklch, var(--color-slate-600) 14%, transparent),
+      transparent 34%
+    ),
+    radial-gradient(
+      circle at 70% 90%,
+      color-mix(in oklch, var(--color-amber-500) 8%, transparent),
+      transparent 38%
+    ),
+    radial-gradient(
+      circle at 0% 70%,
+      color-mix(in oklch, var(--color-slate-400) 9%, transparent),
+      transparent 42%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in oklch, var(--color-slate-950) 94%, var(--color-slate-900)),
+      var(--color-slate-950)
+    );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Midnight — cool accent, blue-tinted atmosphere                             */
+/* -------------------------------------------------------------------------- */
+
+html[data-theme="midnight"] {
+  --color-site-primary: var(--color-sky-400);
+  --color-site-secondary: var(--color-slate-500);
+  --color-site-tertiary: var(--color-cyan-300);
+  --color-site-bg: var(--color-slate-950);
+  --color-site-fg: var(--color-slate-100);
+  --site-primary: var(--color-site-primary);
+  --site-secondary: var(--color-site-secondary);
+  --site-tertiary: var(--color-site-tertiary);
+  --site-bg: var(--color-site-bg);
+  --site-fg: var(--color-site-fg);
+}
+
+html[data-theme="midnight"] body {
+  background-image:
+    radial-gradient(
+      circle at 12% 5%,
+      color-mix(in oklch, var(--color-sky-600) 14%, transparent),
+      transparent 42%
+    ),
+    radial-gradient(
+      circle at 88% 12%,
+      color-mix(in oklch, var(--color-slate-600) 16%, transparent),
+      transparent 36%
+    ),
+    radial-gradient(
+      circle at 72% 88%,
+      color-mix(in oklch, var(--color-cyan-600) 10%, transparent),
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 0% 65%,
+      color-mix(in oklch, var(--color-slate-500) 10%, transparent),
+      transparent 44%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in oklch, var(--color-slate-950) 96%, var(--color-slate-900)),
+      var(--color-slate-950)
+    );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Ember — warm rose/orange accent                                            */
+/* -------------------------------------------------------------------------- */
+
+html[data-theme="ember"] {
+  --color-site-primary: var(--color-rose-400);
+  --color-site-secondary: var(--color-stone-500);
+  --color-site-tertiary: var(--color-orange-300);
+  --color-site-bg: var(--color-stone-950);
+  --color-site-fg: var(--color-stone-100);
+  --site-primary: var(--color-site-primary);
+  --site-secondary: var(--color-site-secondary);
+  --site-tertiary: var(--color-site-tertiary);
+  --site-bg: var(--color-site-bg);
+  --site-fg: var(--color-site-fg);
+}
+
+html[data-theme="ember"] body {
+  background-image:
+    radial-gradient(
+      circle at 18% 0%,
+      color-mix(in oklch, var(--color-rose-900) 22%, transparent),
+      transparent 38%
+    ),
+    radial-gradient(
+      circle at 92% 18%,
+      color-mix(in oklch, var(--color-stone-700) 12%, transparent),
+      transparent 36%
+    ),
+    radial-gradient(
+      circle at 68% 92%,
+      color-mix(in oklch, var(--color-orange-600) 9%, transparent),
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 5% 72%,
+      color-mix(in oklch, var(--color-stone-600) 8%, transparent),
+      transparent 42%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in oklch, var(--color-stone-950) 94%, var(--color-stone-900)),
+      var(--color-stone-950)
+    );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Noir rose — dark feminine, charcoal + soft rose highlights                 */
+/* -------------------------------------------------------------------------- */
+
+html[data-theme="noir-rose"] {
+  --color-site-primary: var(--color-rose-400);
+  --color-site-secondary: var(--color-rose-600);
+  --color-site-tertiary: var(--color-pink-300);
+  --color-site-bg: var(--color-stone-950);
+  --color-site-fg: var(--color-rose-50);
+  --site-primary: var(--color-site-primary);
+  --site-secondary: var(--color-site-secondary);
+  --site-tertiary: var(--color-site-tertiary);
+  --site-bg: var(--color-site-bg);
+  --site-fg: var(--color-site-fg);
+}
+
+html[data-theme="noir-rose"] body {
+  background-image:
+    radial-gradient(
+      circle at 20% 0%,
+      color-mix(in oklch, var(--color-rose-900) 35%, transparent),
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 85% 20%,
+      color-mix(in oklch, var(--color-pink-900) 18%, transparent),
+      transparent 38%
+    ),
+    radial-gradient(
+      circle at 70% 95%,
+      color-mix(in oklch, var(--color-rose-700) 12%, transparent),
+      transparent 42%
+    ),
+    radial-gradient(
+      circle at 0% 60%,
+      color-mix(in oklch, var(--color-stone-800) 12%, transparent),
+      transparent 44%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in oklch, var(--color-stone-950) 96%, var(--color-stone-900)),
+      var(--color-stone-950)
+    );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Velvet — dark feminine, plum & fuchsia glow                                */
+/* -------------------------------------------------------------------------- */
+
+html[data-theme="velvet"] {
+  --color-site-primary: var(--color-fuchsia-400);
+  --color-site-secondary: var(--color-purple-500);
+  --color-site-tertiary: var(--color-violet-300);
+  --color-site-bg: var(--color-slate-950);
+  --color-site-fg: var(--color-fuchsia-50);
+  --site-primary: var(--color-site-primary);
+  --site-secondary: var(--color-site-secondary);
+  --site-tertiary: var(--color-site-tertiary);
+  --site-bg: var(--color-site-bg);
+  --site-fg: var(--color-site-fg);
+}
+
+html[data-theme="velvet"] body {
+  background-image:
+    radial-gradient(
+      circle at 14% 8%,
+      color-mix(in oklch, var(--color-purple-900) 28%, transparent),
+      transparent 42%
+    ),
+    radial-gradient(
+      circle at 90% 10%,
+      color-mix(in oklch, var(--color-fuchsia-800) 22%, transparent),
+      transparent 36%
+    ),
+    radial-gradient(
+      circle at 72% 88%,
+      color-mix(in oklch, var(--color-violet-700) 14%, transparent),
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 5% 70%,
+      color-mix(in oklch, var(--color-slate-700) 10%, transparent),
+      transparent 44%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in oklch, var(--color-slate-950) 95%, var(--color-purple-950)),
+      var(--color-slate-950)
+    );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Dawn — airy light, cool sky & sun-warm accents                             */
+/* -------------------------------------------------------------------------- */
+
+html[data-theme="dawn"] {
+  color-scheme: light;
+  --color-site-primary: var(--color-sky-600);
+  --color-site-secondary: var(--color-slate-500);
+  --color-site-tertiary: var(--color-amber-400);
+  --color-site-bg: var(--color-stone-50);
+  --color-site-fg: var(--color-slate-900);
+  --site-primary: var(--color-site-primary);
+  --site-secondary: var(--color-site-secondary);
+  --site-tertiary: var(--color-site-tertiary);
+  --site-bg: var(--color-site-bg);
+  --site-fg: var(--color-site-fg);
+}
+
+html[data-theme="dawn"] body {
+  background-image:
+    radial-gradient(
+      circle at 18% 0%,
+      color-mix(in oklch, var(--color-sky-200) 45%, transparent),
+      transparent 45%
+    ),
+    radial-gradient(
+      circle at 92% 18%,
+      color-mix(in oklch, var(--color-amber-200) 35%, transparent),
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 70% 92%,
+      color-mix(in oklch, var(--color-sky-100) 55%, transparent),
+      transparent 42%
+    ),
+    radial-gradient(
+      circle at 0% 65%,
+      color-mix(in oklch, var(--color-stone-200) 30%, transparent),
+      transparent 48%
+    ),
+    linear-gradient(
+      180deg,
+      var(--color-stone-50),
+      color-mix(in oklch, var(--color-sky-50) 70%, white)
+    );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Porcelain — cool light, gallery white & steel blue                         */
+/* -------------------------------------------------------------------------- */
+
+html[data-theme="porcelain"] {
+  color-scheme: light;
+  --color-site-primary: var(--color-slate-600);
+  --color-site-secondary: var(--color-slate-500);
+  --color-site-tertiary: var(--color-sky-300);
+  --color-site-bg: var(--color-slate-50);
+  --color-site-fg: var(--color-slate-900);
+  --site-primary: var(--color-site-primary);
+  --site-secondary: var(--color-site-secondary);
+  --site-tertiary: var(--color-site-tertiary);
+  --site-bg: var(--color-site-bg);
+  --site-fg: var(--color-site-fg);
+}
+
+html[data-theme="porcelain"] body {
+  background-image:
+    radial-gradient(
+      circle at 12% 5%,
+      color-mix(in oklch, var(--color-sky-100) 70%, transparent),
+      transparent 48%
+    ),
+    radial-gradient(
+      circle at 88% 15%,
+      color-mix(in oklch, var(--color-slate-200) 40%, transparent),
+      transparent 42%
+    ),
+    radial-gradient(
+      circle at 75% 90%,
+      color-mix(in oklch, var(--color-sky-50) 80%, transparent),
+      transparent 44%
+    ),
+    linear-gradient(180deg, var(--color-slate-50), var(--color-white));
+}
+
+/* -------------------------------------------------------------------------- */
+/* Linen — warm light, paper & soft terracotta                                */
+/* -------------------------------------------------------------------------- */
+
+html[data-theme="linen"] {
+  color-scheme: light;
+  --color-site-primary: var(--color-orange-600);
+  --color-site-secondary: var(--color-stone-500);
+  --color-site-tertiary: var(--color-amber-300);
+  --color-site-bg: var(--color-stone-100);
+  --color-site-fg: var(--color-stone-900);
+  --site-primary: var(--color-site-primary);
+  --site-secondary: var(--color-site-secondary);
+  --site-tertiary: var(--color-site-tertiary);
+  --site-bg: var(--color-site-bg);
+  --site-fg: var(--color-site-fg);
+}
+
+html[data-theme="linen"] body {
+  background-image:
+    radial-gradient(
+      circle at 20% 0%,
+      color-mix(in oklch, var(--color-orange-100) 55%, transparent),
+      transparent 44%
+    ),
+    radial-gradient(
+      circle at 95% 25%,
+      color-mix(in oklch, var(--color-amber-100) 50%, transparent),
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 65% 95%,
+      color-mix(in oklch, var(--color-stone-200) 35%, transparent),
+      transparent 45%
+    ),
+    linear-gradient(
+      180deg,
+      var(--color-stone-100),
+      color-mix(in oklch, var(--color-orange-50) 60%, var(--color-stone-50))
+    );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Blush — light feminine, rose cream                                         */
+/* -------------------------------------------------------------------------- */
+
+html[data-theme="blush"] {
+  color-scheme: light;
+  --color-site-primary: var(--color-rose-500);
+  --color-site-secondary: var(--color-rose-400);
+  --color-site-tertiary: var(--color-pink-300);
+  --color-site-bg: var(--color-rose-50);
+  --color-site-fg: var(--color-stone-900);
+  --site-primary: var(--color-site-primary);
+  --site-secondary: var(--color-site-secondary);
+  --site-tertiary: var(--color-site-tertiary);
+  --site-bg: var(--color-site-bg);
+  --site-fg: var(--color-site-fg);
+}
+
+html[data-theme="blush"] body {
+  background-image:
+    radial-gradient(
+      circle at 15% 0%,
+      color-mix(in oklch, var(--color-pink-200) 50%, transparent),
+      transparent 46%
+    ),
+    radial-gradient(
+      circle at 92% 12%,
+      color-mix(in oklch, var(--color-rose-200) 45%, transparent),
+      transparent 42%
+    ),
+    radial-gradient(
+      circle at 72% 88%,
+      color-mix(in oklch, var(--color-fuchsia-100) 40%, transparent),
+      transparent 44%
+    ),
+    radial-gradient(
+      circle at 0% 70%,
+      color-mix(in oklch, var(--color-stone-200) 25%, transparent),
+      transparent 48%
+    ),
+    linear-gradient(180deg, var(--color-rose-50), var(--color-pink-50));
+}
+
+/* -------------------------------------------------------------------------- */
+/* Petal — light feminine, peach & pink                                       */
+/* -------------------------------------------------------------------------- */
+
+html[data-theme="petal"] {
+  color-scheme: light;
+  --color-site-primary: var(--color-fuchsia-500);
+  --color-site-secondary: var(--color-pink-400);
+  --color-site-tertiary: var(--color-rose-300);
+  --color-site-bg: var(--color-pink-50);
+  --color-site-fg: var(--color-stone-900);
+  --site-primary: var(--color-site-primary);
+  --site-secondary: var(--color-site-secondary);
+  --site-tertiary: var(--color-site-tertiary);
+  --site-bg: var(--color-site-bg);
+  --site-fg: var(--color-site-fg);
+}
+
+html[data-theme="petal"] body {
+  background-image:
+    radial-gradient(
+      circle at 18% 5%,
+      color-mix(in oklch, var(--color-pink-200) 55%, transparent),
+      transparent 44%
+    ),
+    radial-gradient(
+      circle at 90% 20%,
+      color-mix(in oklch, var(--color-orange-100) 45%, transparent),
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 68% 92%,
+      color-mix(in oklch, var(--color-fuchsia-100) 50%, transparent),
+      transparent 42%
+    ),
+    linear-gradient(
+      180deg,
+      var(--color-pink-50),
+      color-mix(in oklch, var(--color-orange-50) 50%, var(--color-pink-100))
+    );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Ballet — light feminine, lavender & soft orchid                            */
+/* -------------------------------------------------------------------------- */
+
+html[data-theme="ballet"] {
+  color-scheme: light;
+  --color-site-primary: var(--color-violet-500);
+  --color-site-secondary: var(--color-fuchsia-400);
+  --color-site-tertiary: var(--color-purple-300);
+  --color-site-bg: var(--color-violet-50);
+  --color-site-fg: var(--color-slate-900);
+  --site-primary: var(--color-site-primary);
+  --site-secondary: var(--color-site-secondary);
+  --site-tertiary: var(--color-site-tertiary);
+  --site-bg: var(--color-site-bg);
+  --site-fg: var(--color-site-fg);
+}
+
+html[data-theme="ballet"] body {
+  background-image:
+    radial-gradient(
+      circle at 12% 0%,
+      color-mix(in oklch, var(--color-violet-200) 48%, transparent),
+      transparent 46%
+    ),
+    radial-gradient(
+      circle at 88% 15%,
+      color-mix(in oklch, var(--color-fuchsia-100) 50%, transparent),
+      transparent 42%
+    ),
+    radial-gradient(
+      circle at 70% 90%,
+      color-mix(in oklch, var(--color-purple-100) 45%, transparent),
+      transparent 44%
+    ),
+    radial-gradient(
+      circle at 5% 75%,
+      color-mix(in oklch, var(--color-pink-100) 35%, transparent),
+      transparent 48%
+    ),
+    linear-gradient(180deg, var(--color-violet-50), var(--color-fuchsia-50));
+}
+
+/* -------------------------------------------------------------------------- */
+/* Light themes: header/footer use dark utilities — align with bright surfaces */
+/* -------------------------------------------------------------------------- */
+
+html[data-theme="dawn"] body header,
+html[data-theme="dawn"] body footer,
+html[data-theme="porcelain"] body header,
+html[data-theme="porcelain"] body footer,
+html[data-theme="linen"] body header,
+html[data-theme="linen"] body footer,
+html[data-theme="blush"] body header,
+html[data-theme="blush"] body footer,
+html[data-theme="petal"] body header,
+html[data-theme="petal"] body footer,
+html[data-theme="ballet"] body header,
+html[data-theme="ballet"] body footer {
+  background-color: color-mix(
+    in oklch,
+    var(--color-site-bg) 88%,
+    white
+  ) !important;
+  border-color: color-mix(
+    in oklch,
+    var(--color-site-primary) 22%,
+    var(--color-stone-300)
+  ) !important;
+  color: var(--color-site-fg);
+}
+
+html[data-theme="dawn"] body header nav a,
+html[data-theme="porcelain"] body header nav a,
+html[data-theme="linen"] body header nav a,
+html[data-theme="blush"] body header nav a,
+html[data-theme="petal"] body header nav a,
+html[data-theme="ballet"] body header nav a {
+  color: color-mix(in oklch, var(--color-site-fg) 70%, var(--color-site-secondary)) !important;
+}
+
+html[data-theme="dawn"] body header nav a:hover,
+html[data-theme="porcelain"] body header nav a:hover,
+html[data-theme="linen"] body header nav a:hover,
+html[data-theme="blush"] body header nav a:hover,
+html[data-theme="petal"] body header nav a:hover,
+html[data-theme="ballet"] body header nav a:hover {
+  color: var(--color-site-fg) !important;
+}
+
+html[data-theme="dawn"] body footer a,
+html[data-theme="porcelain"] body footer a,
+html[data-theme="linen"] body footer a,
+html[data-theme="blush"] body footer a,
+html[data-theme="petal"] body footer a,
+html[data-theme="ballet"] body footer a {
+  color: color-mix(in oklch, var(--color-site-fg) 65%, var(--color-site-secondary)) !important;
+}
+
+html[data-theme="dawn"] body footer a:hover,
+html[data-theme="porcelain"] body footer a:hover,
+html[data-theme="linen"] body footer a:hover,
+html[data-theme="blush"] body footer a:hover,
+html[data-theme="petal"] body footer a:hover,
+html[data-theme="ballet"] body footer a:hover {
+  color: var(--color-site-primary) !important;
+}
+
+/* Mobile full-screen nav sits outside <header> — soften base scrim on light themes */
+html[data-theme="dawn"] .mobile-nav-panel > div.absolute.inset-0,
+html[data-theme="porcelain"] .mobile-nav-panel > div.absolute.inset-0,
+html[data-theme="linen"] .mobile-nav-panel > div.absolute.inset-0,
+html[data-theme="blush"] .mobile-nav-panel > div.absolute.inset-0,
+html[data-theme="petal"] .mobile-nav-panel > div.absolute.inset-0,
+html[data-theme="ballet"] .mobile-nav-panel > div.absolute.inset-0 {
+  background-color: color-mix(
+    in oklch,
+    var(--color-site-bg) 92%,
+    var(--color-site-primary)
+  ) !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Light themes — global text: light-on-dark utilities → dark-on-light pages   */
+/* (dawn / porcelain / linen + blush / petal / ballet)                        */
+/* -------------------------------------------------------------------------- */
+
+html[data-theme="dawn"] .text-stone-50,
+html[data-theme="porcelain"] .text-stone-50,
+html[data-theme="linen"] .text-stone-50,
+html[data-theme="blush"] .text-stone-50,
+html[data-theme="petal"] .text-stone-50,
+html[data-theme="ballet"] .text-stone-50,
+html[data-theme="dawn"] .text-stone-100,
+html[data-theme="porcelain"] .text-stone-100,
+html[data-theme="linen"] .text-stone-100,
+html[data-theme="blush"] .text-stone-100,
+html[data-theme="petal"] .text-stone-100,
+html[data-theme="ballet"] .text-stone-100 {
+  color: var(--color-site-fg) !important;
+}
+
+html[data-theme="dawn"] .text-stone-200,
+html[data-theme="porcelain"] .text-stone-200,
+html[data-theme="linen"] .text-stone-200,
+html[data-theme="blush"] .text-stone-200,
+html[data-theme="petal"] .text-stone-200,
+html[data-theme="ballet"] .text-stone-200,
+html[data-theme="dawn"] .text-stone-300,
+html[data-theme="porcelain"] .text-stone-300,
+html[data-theme="linen"] .text-stone-300,
+html[data-theme="blush"] .text-stone-300,
+html[data-theme="petal"] .text-stone-300,
+html[data-theme="ballet"] .text-stone-300 {
+  color: var(--color-stone-800) !important;
+}
+
+html[data-theme="dawn"] .text-stone-400,
+html[data-theme="porcelain"] .text-stone-400,
+html[data-theme="linen"] .text-stone-400,
+html[data-theme="blush"] .text-stone-400,
+html[data-theme="petal"] .text-stone-400,
+html[data-theme="ballet"] .text-stone-400,
+html[data-theme="dawn"] .text-stone-500,
+html[data-theme="porcelain"] .text-stone-500,
+html[data-theme="linen"] .text-stone-500,
+html[data-theme="blush"] .text-stone-500,
+html[data-theme="petal"] .text-stone-500,
+html[data-theme="ballet"] .text-stone-500 {
+  color: var(--color-stone-600) !important;
+}
+
+html[data-theme="dawn"] .text-slate-400,
+html[data-theme="porcelain"] .text-slate-400,
+html[data-theme="linen"] .text-slate-400,
+html[data-theme="blush"] .text-slate-400,
+html[data-theme="petal"] .text-slate-400,
+html[data-theme="ballet"] .text-slate-400,
+html[data-theme="dawn"] .text-slate-500,
+html[data-theme="porcelain"] .text-slate-500,
+html[data-theme="linen"] .text-slate-500,
+html[data-theme="blush"] .text-slate-500,
+html[data-theme="petal"] .text-slate-500,
+html[data-theme="ballet"] .text-slate-500,
+html[data-theme="dawn"] .text-slate-600,
+html[data-theme="porcelain"] .text-slate-600,
+html[data-theme="linen"] .text-slate-600,
+html[data-theme="blush"] .text-slate-600,
+html[data-theme="petal"] .text-slate-600,
+html[data-theme="ballet"] .text-slate-600 {
+  color: var(--color-slate-600) !important;
+}
+
+/* Opacity-modified stone (common in prose) */
+html[data-theme="dawn"] .text-stone-200\/90,
+html[data-theme="porcelain"] .text-stone-200\/90,
+html[data-theme="linen"] .text-stone-200\/90,
+html[data-theme="blush"] .text-stone-200\/90,
+html[data-theme="petal"] .text-stone-200\/90,
+html[data-theme="ballet"] .text-stone-200\/90,
+html[data-theme="dawn"] .text-stone-200\/95,
+html[data-theme="porcelain"] .text-stone-200\/95,
+html[data-theme="linen"] .text-stone-200\/95,
+html[data-theme="blush"] .text-stone-200\/95,
+html[data-theme="petal"] .text-stone-200\/95,
+html[data-theme="ballet"] .text-stone-200\/95,
+html[data-theme="dawn"] .text-stone-200\/85,
+html[data-theme="porcelain"] .text-stone-200\/85,
+html[data-theme="linen"] .text-stone-200\/85,
+html[data-theme="blush"] .text-stone-200\/85,
+html[data-theme="petal"] .text-stone-200\/85,
+html[data-theme="ballet"] .text-stone-200\/85 {
+  color: color-mix(in oklch, var(--color-stone-800) 92%, transparent) !important;
+}
+
+html[data-theme="dawn"] .text-stone-100\/95,
+html[data-theme="porcelain"] .text-stone-100\/95,
+html[data-theme="linen"] .text-stone-100\/95,
+html[data-theme="blush"] .text-stone-100\/95,
+html[data-theme="petal"] .text-stone-100\/95,
+html[data-theme="ballet"] .text-stone-100\/95 {
+  color: color-mix(in oklch, var(--color-site-fg) 94%, transparent) !important;
+}
+
+html[data-theme="dawn"] .text-stone-300\/90,
+html[data-theme="porcelain"] .text-stone-300\/90,
+html[data-theme="linen"] .text-stone-300\/90,
+html[data-theme="blush"] .text-stone-300\/90,
+html[data-theme="petal"] .text-stone-300\/90,
+html[data-theme="ballet"] .text-stone-300\/90,
+html[data-theme="dawn"] .text-stone-300\/95,
+html[data-theme="porcelain"] .text-stone-300\/95,
+html[data-theme="linen"] .text-stone-300\/95,
+html[data-theme="blush"] .text-stone-300\/95,
+html[data-theme="petal"] .text-stone-300\/95,
+html[data-theme="ballet"] .text-stone-300\/95 {
+  color: color-mix(in oklch, var(--color-stone-700) 90%, transparent) !important;
+}
+
+/* Accent text → primary (already dark enough on these themes) */
+html[data-theme="dawn"] .text-amber-100,
+html[data-theme="porcelain"] .text-amber-100,
+html[data-theme="linen"] .text-amber-100,
+html[data-theme="blush"] .text-amber-100,
+html[data-theme="petal"] .text-amber-100,
+html[data-theme="ballet"] .text-amber-100,
+html[data-theme="dawn"] .text-amber-200,
+html[data-theme="porcelain"] .text-amber-200,
+html[data-theme="linen"] .text-amber-200,
+html[data-theme="blush"] .text-amber-200,
+html[data-theme="petal"] .text-amber-200,
+html[data-theme="ballet"] .text-amber-200,
+html[data-theme="dawn"] .text-amber-300,
+html[data-theme="porcelain"] .text-amber-300,
+html[data-theme="linen"] .text-amber-300,
+html[data-theme="blush"] .text-amber-300,
+html[data-theme="petal"] .text-amber-300,
+html[data-theme="ballet"] .text-amber-300 {
+  color: var(--color-site-primary) !important;
+}
+
+html[data-theme="dawn"] .text-amber-400,
+html[data-theme="porcelain"] .text-amber-400,
+html[data-theme="linen"] .text-amber-400,
+html[data-theme="blush"] .text-amber-400,
+html[data-theme="petal"] .text-amber-400,
+html[data-theme="ballet"] .text-amber-400 {
+  color: color-mix(in oklch, var(--color-site-primary) 88%, var(--color-stone-900)) !important;
+}
+
+html[data-theme="dawn"] .text-amber-200\/90,
+html[data-theme="porcelain"] .text-amber-200\/90,
+html[data-theme="linen"] .text-amber-200\/90,
+html[data-theme="blush"] .text-amber-200\/90,
+html[data-theme="petal"] .text-amber-200\/90,
+html[data-theme="ballet"] .text-amber-200\/90,
+html[data-theme="dawn"] .text-amber-200\/95,
+html[data-theme="porcelain"] .text-amber-200\/95,
+html[data-theme="linen"] .text-amber-200\/95,
+html[data-theme="blush"] .text-amber-200\/95,
+html[data-theme="petal"] .text-amber-200\/95,
+html[data-theme="ballet"] .text-amber-200\/95 {
+  color: color-mix(in oklch, var(--color-site-primary) 90%, transparent) !important;
+}
+
+html[data-theme="dawn"] .text-amber-300\/90,
+html[data-theme="porcelain"] .text-amber-300\/90,
+html[data-theme="linen"] .text-amber-300\/90,
+html[data-theme="blush"] .text-amber-300\/90,
+html[data-theme="petal"] .text-amber-300\/90,
+html[data-theme="ballet"] .text-amber-300\/90,
+html[data-theme="dawn"] .text-amber-400\/90,
+html[data-theme="porcelain"] .text-amber-400\/90,
+html[data-theme="linen"] .text-amber-400\/90,
+html[data-theme="blush"] .text-amber-400\/90,
+html[data-theme="petal"] .text-amber-400\/90,
+html[data-theme="ballet"] .text-amber-400\/90 {
+  color: color-mix(in oklch, var(--color-site-primary) 88%, transparent) !important;
+}
+
+html[data-theme="dawn"] .text-amber-300\/80,
+html[data-theme="porcelain"] .text-amber-300\/80,
+html[data-theme="linen"] .text-amber-300\/80,
+html[data-theme="blush"] .text-amber-300\/80,
+html[data-theme="petal"] .text-amber-300\/80,
+html[data-theme="ballet"] .text-amber-300\/80,
+html[data-theme="dawn"] .text-amber-400\/50,
+html[data-theme="porcelain"] .text-amber-400\/50,
+html[data-theme="linen"] .text-amber-400\/50,
+html[data-theme="blush"] .text-amber-400\/50,
+html[data-theme="petal"] .text-amber-400\/50,
+html[data-theme="ballet"] .text-amber-400\/50 {
+  color: color-mix(in oklch, var(--color-site-primary) 65%, transparent) !important;
+}
+
+html[data-theme="dawn"] .text-amber-400\/35,
+html[data-theme="porcelain"] .text-amber-400\/35,
+html[data-theme="linen"] .text-amber-400\/35,
+html[data-theme="blush"] .text-amber-400\/35,
+html[data-theme="petal"] .text-amber-400\/35,
+html[data-theme="ballet"] .text-amber-400\/35 {
+  color: color-mix(in oklch, var(--color-site-primary) 55%, transparent) !important;
+}
+
+/* Hovers (Tailwind escapes) */
+html[data-theme="dawn"] .hover\:text-amber-100:hover,
+html[data-theme="porcelain"] .hover\:text-amber-100:hover,
+html[data-theme="linen"] .hover\:text-amber-100:hover,
+html[data-theme="blush"] .hover\:text-amber-100:hover,
+html[data-theme="petal"] .hover\:text-amber-100:hover,
+html[data-theme="ballet"] .hover\:text-amber-100:hover,
+html[data-theme="dawn"] .hover\:text-stone-100:hover,
+html[data-theme="porcelain"] .hover\:text-stone-100:hover,
+html[data-theme="linen"] .hover\:text-stone-100:hover,
+html[data-theme="blush"] .hover\:text-stone-100:hover,
+html[data-theme="petal"] .hover\:text-stone-100:hover,
+html[data-theme="ballet"] .hover\:text-stone-100:hover,
+html[data-theme="dawn"] .hover\:text-stone-50:hover,
+html[data-theme="porcelain"] .hover\:text-stone-50:hover,
+html[data-theme="linen"] .hover\:text-stone-50:hover,
+html[data-theme="blush"] .hover\:text-stone-50:hover,
+html[data-theme="petal"] .hover\:text-stone-50:hover,
+html[data-theme="ballet"] .hover\:text-stone-50:hover {
+  color: var(--color-site-fg) !important;
+}
+
+html[data-theme="dawn"] .hover\:text-stone-200:hover,
+html[data-theme="porcelain"] .hover\:text-stone-200:hover,
+html[data-theme="linen"] .hover\:text-stone-200:hover,
+html[data-theme="blush"] .hover\:text-stone-200:hover,
+html[data-theme="petal"] .hover\:text-stone-200:hover,
+html[data-theme="ballet"] .hover\:text-stone-200:hover,
+html[data-theme="dawn"] .hover\:text-stone-300:hover,
+html[data-theme="porcelain"] .hover\:text-stone-300:hover,
+html[data-theme="linen"] .hover\:text-stone-300:hover,
+html[data-theme="blush"] .hover\:text-stone-300:hover,
+html[data-theme="petal"] .hover\:text-stone-300:hover,
+html[data-theme="ballet"] .hover\:text-stone-300:hover {
+  color: var(--color-stone-800) !important;
+}
+
+html[data-theme="dawn"] .hover\:text-amber-200:hover,
+html[data-theme="porcelain"] .hover\:text-amber-200:hover,
+html[data-theme="linen"] .hover\:text-amber-200:hover,
+html[data-theme="blush"] .hover\:text-amber-200:hover,
+html[data-theme="petal"] .hover\:text-amber-200:hover,
+html[data-theme="ballet"] .hover\:text-amber-200:hover {
+  color: var(--color-site-primary) !important;
+}
+
+html[data-theme="dawn"] .group:hover .group-hover\:text-amber-100,
+html[data-theme="porcelain"] .group:hover .group-hover\:text-amber-100,
+html[data-theme="linen"] .group:hover .group-hover\:text-amber-100,
+html[data-theme="blush"] .group:hover .group-hover\:text-amber-100,
+html[data-theme="petal"] .group:hover .group-hover\:text-amber-100,
+html[data-theme="ballet"] .group:hover .group-hover\:text-amber-100 {
+  color: var(--color-site-primary) !important;
+}
+
+html[data-theme="dawn"] .group:hover .group-hover\:text-amber-300\/80,
+html[data-theme="porcelain"] .group:hover .group-hover\:text-amber-300\/80,
+html[data-theme="linen"] .group:hover .group-hover\:text-amber-300\/80,
+html[data-theme="blush"] .group:hover .group-hover\:text-amber-300\/80,
+html[data-theme="petal"] .group:hover .group-hover\:text-amber-300\/80,
+html[data-theme="ballet"] .group:hover .group-hover\:text-amber-300\/80 {
+  color: color-mix(in oklch, var(--color-site-primary) 85%, transparent) !important;
+}
+
+html[data-theme="dawn"] .placeholder\:text-slate-600::placeholder,
+html[data-theme="porcelain"] .placeholder\:text-slate-600::placeholder,
+html[data-theme="linen"] .placeholder\:text-slate-600::placeholder,
+html[data-theme="blush"] .placeholder\:text-slate-600::placeholder,
+html[data-theme="petal"] .placeholder\:text-slate-600::placeholder,
+html[data-theme="ballet"] .placeholder\:text-slate-600::placeholder {
+  color: var(--color-slate-500) !important;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Light themes — product image scrims (hero + cards + CoverImageFrame)        */
+/* -------------------------------------------------------------------------- */
+
+/* Cards: keep the fade tight to the bottom — unlike hero, small tiles read “muddy” if the wash climbs high. */
+html[data-theme="dawn"] .product-image-scrim-card,
+html[data-theme="porcelain"] .product-image-scrim-card,
+html[data-theme="linen"] .product-image-scrim-card,
+html[data-theme="blush"] .product-image-scrim-card,
+html[data-theme="petal"] .product-image-scrim-card,
+html[data-theme="ballet"] .product-image-scrim-card {
+  opacity: 0.68;
+  background-image: linear-gradient(
+    to top,
+    color-mix(in oklch, var(--color-site-bg) 86%, var(--color-stone-200)) 0%,
+    color-mix(in oklch, var(--color-site-bg) 28%, transparent) 22%,
+    transparent 42%
+  );
+}
+
+html[data-theme="dawn"] .product-image-scrim-inner,
+html[data-theme="porcelain"] .product-image-scrim-inner,
+html[data-theme="linen"] .product-image-scrim-inner,
+html[data-theme="blush"] .product-image-scrim-inner,
+html[data-theme="petal"] .product-image-scrim-inner,
+html[data-theme="ballet"] .product-image-scrim-inner {
+  background-image: linear-gradient(
+    to top,
+    color-mix(in oklch, var(--color-site-bg) 88%, white) 0%,
+    color-mix(in oklch, var(--color-site-bg) 32%, transparent) 38%,
+    transparent 58%
+  );
+}
+
+html[data-theme="dawn"] .product-image-scrim-hero,
+html[data-theme="porcelain"] .product-image-scrim-hero,
+html[data-theme="linen"] .product-image-scrim-hero,
+html[data-theme="blush"] .product-image-scrim-hero,
+html[data-theme="petal"] .product-image-scrim-hero,
+html[data-theme="ballet"] .product-image-scrim-hero {
+  background-image: linear-gradient(
+    to top,
+    color-mix(in oklch, var(--color-site-bg) 82%, var(--color-stone-300)) 0%,
+    color-mix(in oklch, var(--color-site-bg) 45%, transparent) 48%,
+    transparent 100%
+  );
+}

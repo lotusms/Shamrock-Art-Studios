@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useOverlayChrome } from "@/hooks/useOverlayChrome";
+import * as overlayChrome from "@/lib/overlayChrome";
 
 /**
  * Address line 1 with debounced `/api/address/autocomplete` suggestions (checkout parity).
@@ -27,6 +29,7 @@ export default function AddressLine1Autocomplete({
   errorId,
   ...divProps
 }) {
+  const { light } = useOverlayChrome();
   const [addressSuggestions, setAddressSuggestions] = useState([]);
   const [addressSuggestLoading, setAddressSuggestLoading] = useState(false);
   const [showAddressSuggestions, setShowAddressSuggestions] = useState(false);
@@ -77,7 +80,7 @@ export default function AddressLine1Autocomplete({
 
   return (
     <div className={className} {...divProps}>
-      <label className="block text-sm text-slate-400">
+      <label className={overlayChrome.formFieldLabel(light)}>
         {label}
         <input
           required={required}
@@ -96,13 +99,13 @@ export default function AddressLine1Autocomplete({
         />
       </label>
       {showAddressSuggestions && String(value || "").trim().length >= 4 ? (
-        <div className="mt-2 rounded-xl border border-slate-700/70 bg-slate-950/95 p-2">
+        <div className={overlayChrome.addressSuggestPanel(light)}>
           {addressSuggestLoading ? (
-            <p className="px-3 py-2 text-xs text-slate-400">
+            <p className={overlayChrome.addressSuggestMuted(light)}>
               Searching addresses...
             </p>
           ) : addressSuggestions.length === 0 ? (
-            <p className="px-3 py-2 text-xs text-slate-500">
+            <p className={overlayChrome.addressSuggestEmpty(light)}>
               No address suggestions.
             </p>
           ) : (
@@ -111,7 +114,7 @@ export default function AddressLine1Autocomplete({
                 <li key={item.id}>
                   <button
                     type="button"
-                    className="w-full rounded-lg px-3 py-2 text-left text-xs text-stone-200 transition hover:bg-slate-800/80"
+                    className={overlayChrome.addressSuggestItem(light)}
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => handlePick(item)}
                   >
@@ -126,7 +129,7 @@ export default function AddressLine1Autocomplete({
       {errorMessage ? (
         <p
           id={errorId}
-          className="mt-1.5 text-xs text-rose-300"
+          className={`mt-1.5 text-xs ${light ? "text-rose-700" : "text-rose-300"}`}
           role="alert"
         >
           {errorMessage}

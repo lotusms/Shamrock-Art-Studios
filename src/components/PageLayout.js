@@ -43,7 +43,7 @@ export default function PageLayout({
             {subtitle}
           </p>
         ) : null}
-        <div className="mt-4 space-y-6 text-base leading-8 text-stone-200/90 sm:space-y-8 sm:text-[1.05rem] sm:leading-9">
+        <div className="mt-4 space-y-6 text-base leading-8 text-site-fg/90 sm:space-y-8 sm:text-[1.05rem] sm:leading-9">
           {children}
         </div>
       </div>

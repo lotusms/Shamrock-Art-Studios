@@ -6,6 +6,8 @@ import { useEffect, useId, useState } from "react";
 import HeaderAuth from "@/components/HeaderAuth";
 import { useCart } from "@/context/CartContext";
 import { mainNav, orgName } from "@/config";
+import { useOverlayChrome } from "@/hooks/useOverlayChrome";
+import * as overlayChrome from "@/lib/overlayChrome";
 import { formatUsd } from "@/lib/money";
 
 const GRAIN_BG = `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`;
@@ -40,6 +42,7 @@ function NavLink({ href, label, prefix, onNavigate, className = "" }) {
 }
 
 function CartNavLink({ onNavigate }) {
+  const { light } = useOverlayChrome();
   const { itemCount, lines, subtotalUsd } = useCart();
   const previewLines = lines.slice(0, 3);
   const remainingCount = Math.max(0, lines.length - previewLines.length);
@@ -77,26 +80,28 @@ function CartNavLink({ onNavigate }) {
       </Link>
 
       <div className="pointer-events-none invisible absolute right-0 top-full z-130 h-3 w-80 group-hover:pointer-events-auto group-hover:visible" />
-      <div className="pointer-events-none invisible absolute right-0 top-full z-130 mt-2 w-80 translate-y-1 rounded-2xl border border-white/10 bg-slate-950/95 p-4 opacity-0 shadow-2xl shadow-slate-950/60 ring-1 ring-white/5 backdrop-blur-md transition-all duration-200 group-hover:pointer-events-auto group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
-        <p className="text-xs uppercase tracking-[0.25em] text-amber-400">
+      <div
+        className={overlayChrome.cartPreviewPanel(light)}
+      >
+        <p className={overlayChrome.cartPreviewTitle(light)}>
           Cart preview
         </p>
 
         {itemCount === 0 ? (
-          <p className="mt-3 text-sm text-slate-400">Your cart is empty.</p>
+          <p className={overlayChrome.cartPreviewEmptyText(light)}>Your cart is empty.</p>
         ) : (
           <>
             <ul className="mt-3 space-y-2">
               {previewLines.map((line) => (
                 <li
                   key={line.lineKey}
-                  className="flex items-start justify-between gap-3 rounded-xl border border-white/5 bg-white/2 px-3 py-2"
+                  className={overlayChrome.cartPreviewLineRow(light)}
                 >
                   <div className="min-w-0">
-                    <p className="truncate text-sm text-stone-200">{line.title}</p>
-                    <p className="text-xs text-slate-500">Qty {line.quantity}</p>
+                    <p className={overlayChrome.cartPreviewLineTitle(light)}>{line.title}</p>
+                    <p className={overlayChrome.cartPreviewLineQty(light)}>Qty {line.quantity}</p>
                   </div>
-                  <span className="shrink-0 text-sm tabular-nums text-stone-300">
+                  <span className={overlayChrome.cartPreviewLinePrice(light)}>
                     {formatUsd(line.priceUsd * line.quantity)}
                   </span>
                 </li>
@@ -104,14 +109,16 @@ function CartNavLink({ onNavigate }) {
             </ul>
 
             {remainingCount > 0 ? (
-              <p className="mt-2 text-xs text-slate-500">
+              <p className={overlayChrome.cartPreviewMoreItems(light)}>
                 +{remainingCount} more item{remainingCount > 1 ? "s" : ""}
               </p>
             ) : null}
 
-            <div className="mt-4 flex items-center justify-between border-t border-white/10 pt-3">
-              <span className="text-sm text-slate-400">Subtotal</span>
-              <span className="text-sm font-semibold tabular-nums text-amber-200">
+            <div
+              className={`mt-4 flex items-center justify-between border-t pt-3 ${light ? "border-stone-200/90" : "border-white/10"}`}
+            >
+              <span className={overlayChrome.cartPreviewSubtotalLabel(light)}>Subtotal</span>
+              <span className={overlayChrome.cartPreviewSubtotalValue(light)}>
                 {formatUsd(subtotalUsd)}
               </span>
             </div>

@@ -26,12 +26,15 @@ import {
 import { saveOrderToFirestore } from "@/lib/orders-store";
 import { makeOrderId } from "@/lib/make-order-id";
 import Card from "@/components/ui/Card";
+import { useDocumentThemeId } from "@/hooks/useDocumentThemeId";
 import {
   fetchUserAccountDoc,
   profileToCheckoutFormPatch,
 } from "@/lib/checkout-auth";
 import { CHECKOUT_COUNTRY_OPTIONS } from "@/lib/checkout-countries";
 import { useAuth } from "@/context/AuthContext";
+import * as overlayChrome from "@/lib/overlayChrome";
+import { isLightThemeId } from "@/theme";
 
 function digitsFromTelInput(value) {
   let d = String(value).replace(/\D/g, "");
@@ -332,6 +335,27 @@ export default function CheckoutPage() {
     [form, validationCtx],
   );
 
+  const themeId = useDocumentThemeId();
+  const checkoutLightSurface = isLightThemeId(themeId);
+  const fieldLabelClass = overlayChrome.formFieldLabel(checkoutLightSurface);
+
+  const inputClass = useMemo(
+    () =>
+      checkoutLightSurface
+        ? "mt-1.5 w-full rounded-xl border border-stone-300/70 bg-white/95 px-4 py-3 text-sm text-stone-900 placeholder:text-slate-500 focus:border-amber-500/45 focus:outline-none focus:ring-1 focus:ring-amber-400/30"
+        : "mt-1.5 w-full rounded-xl border border-slate-600/60 bg-slate-950/60 px-4 py-3 text-sm text-stone-100 placeholder:text-slate-600 focus:border-amber-400/40 focus:outline-none focus:ring-1 focus:ring-amber-400/25",
+    [checkoutLightSurface],
+  );
+
+  function fieldClass(fieldKey) {
+    const invalid = Boolean(fieldErrors[fieldKey]);
+    return `${inputClass} ${
+      invalid
+        ? "!border-rose-600 focus:!border-rose-600 focus:!ring-1 focus:!ring-rose-600/35"
+        : ""
+    }`;
+  }
+
   const paypalClientId =
     typeof process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID === "string"
       ? process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID.trim()
@@ -340,7 +364,9 @@ export default function CheckoutPage() {
   if (!ready) {
     return (
       <PageLayout eyebrow="Checkout" title="Checkout" width="wide">
-        <p className="text-stone-400">Loading…</p>
+        <p className={overlayChrome.pageMutedText(checkoutLightSurface)}>
+          Loading…
+        </p>
       </PageLayout>
     );
   }
@@ -354,7 +380,9 @@ export default function CheckoutPage() {
           subtitle="Taking you to your confirmation…"
           width="wide"
         >
-          <p className="text-sm text-stone-400">One moment.</p>
+          <p className={`text-sm ${overlayChrome.pageMutedText(checkoutLightSurface)}`}>
+            One moment.
+          </p>
         </PageLayout>
       );
     }
@@ -367,7 +395,7 @@ export default function CheckoutPage() {
       >
         <Link
           href="/shop"
-          className="inline-flex w-fit rounded-full border-2 border-slate-500/50 bg-slate-900/55 px-8 py-3.5 text-sm font-semibold text-stone-100 transition hover:border-amber-400/45"
+          className={overlayChrome.emptyStateCtaLink(checkoutLightSurface)}
         >
           Browse shop
         </Link>
@@ -621,18 +649,6 @@ export default function CheckoutPage() {
     );
   }
 
-  const inputClass =
-    "mt-1.5 w-full rounded-xl border border-slate-600/60 bg-slate-950/60 px-4 py-3 text-sm text-stone-100 placeholder:text-slate-600 focus:border-amber-400/40 focus:outline-none focus:ring-1 focus:ring-amber-400/25";
-
-  function fieldClass(fieldKey) {
-    const invalid = Boolean(fieldErrors[fieldKey]);
-    return `${inputClass} ${
-      invalid
-        ? "!border-rose-600 focus:!border-rose-600 focus:!ring-1 focus:!ring-rose-600/35"
-        : ""
-    }`;
-  }
-
   const payDisabled = submitting || !checkoutValid;
 
   const checkoutBody = (
@@ -652,7 +668,7 @@ export default function CheckoutPage() {
           <CheckoutAuthSection onApplyPrefill={applyCheckoutPrefill} />
           <Card variant="inset" className="w-full" title="Contact" titleTag="h4"> 
             <div className="mt-6" data-checkout-field="email">
-              <label className="block text-sm text-slate-400">
+              <label className={fieldLabelClass}>
                 Email
                 <input
                   required
@@ -671,7 +687,7 @@ export default function CheckoutPage() {
               {fieldErrors.email ? (
                 <p
                   id="checkout-email-error"
-                  className="mt-1.5 text-xs text-rose-300"
+                  className={overlayChrome.checkoutInlineError(checkoutLightSurface)}
                   role="alert"
                 >
                   {fieldErrors.email}
@@ -679,7 +695,7 @@ export default function CheckoutPage() {
               ) : null}
             </div>
             <div className="mt-4" data-checkout-field="phone">
-              <label className="block text-sm text-slate-400">
+              <label className={fieldLabelClass}>
                 Phone (for carrier updates, optional)
                 <input
                   type="tel"
@@ -700,7 +716,7 @@ export default function CheckoutPage() {
               {fieldErrors.phone ? (
                 <p
                   id="checkout-phone-error"
-                  className="mt-1.5 text-xs text-rose-300"
+                  className={overlayChrome.checkoutInlineError(checkoutLightSurface)}
                   role="alert"
                 >
                   {fieldErrors.phone}
@@ -711,12 +727,12 @@ export default function CheckoutPage() {
 
           <Card variant="inset" className="w-full" title="Shipping" titleTag="h4" data-checkout-field="shipping">
             {fieldErrors.shipping ? (
-              <p className="mt-4 rounded-xl border border-rose-400/25 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+              <p className={overlayChrome.checkoutBannerError(checkoutLightSurface)}>
                 {fieldErrors.shipping}
               </p>
             ) : null}
             <div className="mt-6" data-checkout-field="fullName">
-              <label className="block text-sm text-slate-400">
+              <label className={fieldLabelClass}>
                 Full name
                 <input
                   required
@@ -737,7 +753,7 @@ export default function CheckoutPage() {
               {fieldErrors.fullName ? (
                 <p
                   id="checkout-fullName-error"
-                  className="mt-1.5 text-xs text-rose-300"
+                  className={overlayChrome.checkoutInlineError(checkoutLightSurface)}
                   role="alert"
                 >
                   {fieldErrors.fullName}
@@ -764,7 +780,7 @@ export default function CheckoutPage() {
               errorMessage={fieldErrors.address1}
               errorId="checkout-address1-error"
             />
-            <label className="mt-4 block text-sm text-slate-400">
+            <label className={`mt-4 ${fieldLabelClass}`}>
               Address line 2
               <input
                 type="text"
@@ -777,7 +793,7 @@ export default function CheckoutPage() {
             </label>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <div data-checkout-field="city">
-                <label className="block text-sm text-slate-400">
+                <label className={fieldLabelClass}>
                   City
                   <input
                     required
@@ -798,7 +814,7 @@ export default function CheckoutPage() {
                 {fieldErrors.city ? (
                   <p
                     id="checkout-city-error"
-                    className="mt-1.5 text-xs text-rose-300"
+                    className={overlayChrome.checkoutInlineError(checkoutLightSurface)}
                     role="alert"
                   >
                     {fieldErrors.city}
@@ -845,7 +861,7 @@ export default function CheckoutPage() {
                     buttonClassName={fieldClass("state")}
                   />
                 ) : (
-                  <label className="block text-sm text-slate-400">
+                  <label className={fieldLabelClass}>
                     State / region
                     <input
                       required
@@ -867,7 +883,7 @@ export default function CheckoutPage() {
                 {fieldErrors.state ? (
                   <p
                     id="checkout-state-error"
-                    className="mt-1.5 text-xs text-rose-300"
+                    className={overlayChrome.checkoutInlineError(checkoutLightSurface)}
                     role="alert"
                   >
                     {fieldErrors.state}
@@ -877,7 +893,7 @@ export default function CheckoutPage() {
             </div>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <div data-checkout-field="postalCode">
-                <label className="block text-sm text-slate-400">
+                <label className={fieldLabelClass}>
                   {form.country === "US" ? "ZIP code" : "Postal code"}
                   <input
                     required
@@ -903,7 +919,7 @@ export default function CheckoutPage() {
                 {fieldErrors.postalCode ? (
                   <p
                     id="checkout-postalCode-error"
-                    className="mt-1.5 text-xs text-rose-300"
+                    className={overlayChrome.checkoutInlineError(checkoutLightSurface)}
                     role="alert"
                   >
                     {fieldErrors.postalCode}
@@ -943,51 +959,77 @@ export default function CheckoutPage() {
               {lines.map((l) => (
                 <li
                   key={l.lineKey}
-                  className="flex justify-between gap-3 text-stone-300"
+                  className={overlayChrome.checkoutOrderLine(checkoutLightSurface)}
                 >
                   <span className="min-w-0 truncate">
                     {l.title}{" "}
-                    <span className="text-slate-500">×{l.quantity}</span>
+                    <span className={overlayChrome.checkoutOrderQty(checkoutLightSurface)}>
+                      ×{l.quantity}
+                    </span>
                   </span>
-                  <span className="shrink-0 tabular-nums text-stone-200">
+                  <span
+                    className={`shrink-0 tabular-nums ${checkoutLightSurface ? "text-stone-900" : "text-site-fg"}`}
+                  >
                     {formatUsd(l.priceUsd * l.quantity)}
                   </span>
                 </li>
               ))}
             </ul>
-            <dl className="mt-6 space-y-2 border-t border-white/5 pt-6 text-sm">
+            <dl
+              className={`mt-6 space-y-2 pt-6 text-sm ${overlayChrome.checkoutSummaryBorder(checkoutLightSurface)}`}
+            >
               <div className="flex justify-between">
-                <dt className="text-slate-400">Subtotal</dt>
-                <dd className="tabular-nums">{formatUsd(subtotalUsd)}</dd>
+                <dt className={overlayChrome.checkoutSummaryMuted(checkoutLightSurface)}>
+                  Subtotal
+                </dt>
+                <dd
+                  className={`tabular-nums ${checkoutLightSurface ? "text-stone-900" : "text-site-fg"}`}
+                >
+                  {formatUsd(subtotalUsd)}
+                </dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-slate-400">Shipping</dt>
-                <dd className="tabular-nums">
+                <dt className={overlayChrome.checkoutSummaryMuted(checkoutLightSurface)}>
+                  Shipping
+                </dt>
+                <dd
+                  className={`tabular-nums ${checkoutLightSurface ? "text-stone-900" : "text-site-fg"}`}
+                >
                   {shippingIncluded ? (
-                    <span className="text-emerald-400/90">Complimentary</span>
+                    <span className={overlayChrome.cartShippingComplimentary(checkoutLightSurface)}>
+                      Complimentary
+                    </span>
                   ) : shippingLoading ? (
-                    <span className="text-slate-400">Calculating…</span>
+                    <span className={overlayChrome.checkoutSummaryMuted(checkoutLightSurface)}>
+                      Calculating…
+                    </span>
                   ) : shippingQuoteUsd === null ? (
-                    <span className="text-slate-400">Enter address to calculate</span>
+                    <span className={overlayChrome.checkoutSummaryMuted(checkoutLightSurface)}>
+                      Enter address to calculate
+                    </span>
                   ) : (
                     formatUsd(shipping)
                   )}
                 </dd>
               </div>
               {shippingIncluded && (
-                <p className="text-xs text-slate-500">
+                <p className={`text-xs ${overlayChrome.checkoutSummaryMuted(checkoutLightSurface)}`}>
                   Shipping is included in product pricing.
                 </p>
               )}
-              <div className="flex justify-between border-t border-white/10 pt-4 text-lg font-semibold">
-                <dt className="text-stone-100">Total</dt>
-                <dd className="tabular-nums text-amber-200">
+              <div
+                className={`flex justify-between pt-4 text-lg font-semibold ${overlayChrome.checkoutSummaryTotalBorder(checkoutLightSurface)} ${checkoutLightSurface ? "text-stone-900" : "text-site-fg"}`}
+              >
+                <dt>Total</dt>
+                <dd className="tabular-nums text-site-primary">
                   {formatUsd(total)}
                 </dd>
               </div>
             </dl>
             {payDisabled && !submitting && !checkoutValid ? (
-              <p className="mt-4 text-center text-xs leading-relaxed text-slate-500">
+              <p
+                className={`mt-4 text-center text-xs leading-relaxed ${overlayChrome.checkoutSummaryMuted(checkoutLightSurface)}`}
+              >
                 Complete the form with a valid email and full shipping address.
                 {!shippingIncluded &&
                 (shippingLoading || shippingQuoteUsd === null)
@@ -1014,11 +1056,13 @@ export default function CheckoutPage() {
               </PrimaryButton>
             ) : null}
             {submitError ? (
-              <p className="mt-3 rounded-xl border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-xs leading-relaxed text-rose-200">
+              <p className={overlayChrome.checkoutSubmitError(checkoutLightSurface)}>
                 {submitError}
               </p>
             ) : null}
-            <p className="mt-4 text-center text-xs leading-relaxed text-slate-500">
+            <p
+              className={`mt-4 text-center text-xs leading-relaxed ${overlayChrome.checkoutSummaryMuted(checkoutLightSurface)}`}
+            >
               By completing checkout you agree to inspection, crating, and final
               shipping terms where applicable.
             </p>

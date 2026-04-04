@@ -17,19 +17,19 @@ function formatProductPrice(product) {
 function ProductCard({ product }) {
   return (
     <Link href={`/shop/${product.slug}`} className="group block w-full">
-      <div className="relative bg-slate-950/45 shadow-lg shadow-slate-950/35 transition duration-500 hover:-translate-y-1 hover:shadow-2xl hover:shadow-slate-950/45">
+      <div className="relative rounded-4xl shadow-lg shadow-slate-950/35 transition duration-500 hover:-translate-y-1 hover:shadow-2xl hover:shadow-slate-950/45">
         <CoverImageFrame
           src={product.image}
           alt={`${product.title} by ${product.artist}`}
           imageWidth={product.imageWidth}
           imageHeight={product.imageHeight}
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          scrim="card"
         />
-        <div className="absolute right-4 top-4 rounded-full border border-amber-300/35 bg-slate-950/70 px-3 py-1.5 text-sm font-semibold tabular-nums text-amber-200 backdrop-blur-sm">
+        <div className="absolute right-4 top-4 z-20 rounded-full border border-amber-300/35 bg-slate-950/70 px-3 py-1.5 text-sm font-semibold tabular-nums text-stone-200! backdrop-blur-sm">
           {formatProductPrice(product)}
         </div>
-        <div className="absolute inset-0 bg-linear-to-t from-slate-950/88 via-slate-950/25 to-transparent opacity-90" />
-        <div className="absolute bottom-0 left-0 right-0 p-5">
+        <div className="absolute bottom-0 left-0 right-0 z-20 p-5">
           <p className="text-xs uppercase tracking-[0.28em] text-slate-300">
             {product.medium}
           </p>
