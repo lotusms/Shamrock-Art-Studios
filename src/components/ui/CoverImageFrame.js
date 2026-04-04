@@ -42,6 +42,7 @@ export default function CoverImageFrame({
             sizes={sizes}
             className="object-cover object-center"
           />
+          <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-slate-950/70 via-slate-950/15 to-transparent" />
         </div>
       </div>
     </div>

@@ -3,7 +3,7 @@
 import Link from "next/link";
 
 const BASE_CLASSES =
-  "inline-flex items-center justify-center gap-2 text-sm text-slate-500 underline decoration-slate-600 underline-offset-4 transition hover:text-stone-300 disabled:cursor-not-allowed disabled:opacity-60 min-w-fit";
+  "inline-flex min-w-fit items-center justify-center gap-2 rounded-full border-2 border-slate-600/60 bg-slate-900/60 px-6 py-3.5 text-sm font-semibold text-stone-200 shadow-md shadow-slate-950/45 ring-1 ring-white/5 backdrop-blur-sm transition duration-300 ease-out hover:-translate-y-0.5 hover:border-amber-400/40 hover:bg-slate-800/80 hover:text-stone-100 hover:shadow-xl hover:shadow-slate-950/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/45 active:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60";
 
 export default function SecondaryButton({
   href,

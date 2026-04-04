@@ -17,7 +17,7 @@ function formatProductPrice(product) {
 function ProductCard({ product }) {
   return (
     <Link href={`/shop/${product.slug}`} className="group block w-full">
-      <div className="relative border-2 border-slate-700/35 hover:border-amber-400/30 bg-slate-950/45 shadow-lg shadow-slate-950/35 transition duration-500 hover:-translate-y-1 hover:shadow-2xl hover:shadow-slate-950/45">
+      <div className="relative bg-slate-950/45 shadow-lg shadow-slate-950/35 transition duration-500 hover:-translate-y-1 hover:shadow-2xl hover:shadow-slate-950/45">
         <CoverImageFrame
           src={product.image}
           alt={`${product.title} by ${product.artist}`}

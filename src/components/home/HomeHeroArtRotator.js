@@ -36,13 +36,13 @@ export default function HomeHeroArtRotator({ products }) {
       {/* Mat + inner aperture; fixed portrait; mockup PNG zoom fills aperture. */}
       <div className={ARTWORK_MAT_OUTER}>
         <div className={ARTWORK_MAT_INNER}>
-          <div className="relative aspect-[2/3] w-full overflow-hidden bg-slate-950">
+          <div className="relative aspect-2/3 w-full overflow-hidden bg-slate-950">
             {products.map((p, idx) => (
               <div
                 key={p.id}
                 className={`absolute inset-0 overflow-hidden transition-opacity ease-in-out ${
                   idx === index
-                    ? "z-[1] opacity-100"
+                    ? "z-1 opacity-100"
                     : "pointer-events-none z-0 opacity-0"
                 }`}
                 aria-hidden={idx !== index}
@@ -58,6 +58,7 @@ export default function HomeHeroArtRotator({ products }) {
                       sizes="(max-width: 1024px) 100vw, 45vw"
                       className="object-cover object-center"
                     />
+                    <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-black via-black/35 to-transparent" />
                   </div>
                 ) : (
                   <div className="flex h-full items-center justify-center text-sm text-stone-500">
@@ -70,28 +71,7 @@ export default function HomeHeroArtRotator({ products }) {
         </div>
       </div>
 
-      <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-slate-950 via-slate-950/35 to-transparent" />
-
-      {n > 1 ? (
-        <div className="pointer-events-auto absolute bottom-3 left-1/2 z-[3] flex -translate-x-1/2 justify-center gap-2">
-          {products.map((p, idx) => (
-            <button
-              key={p.id}
-              type="button"
-              onClick={() => setIndex(idx)}
-              className={`h-2 w-2 rounded-full transition focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/60 ${
-                idx === index
-                  ? "bg-amber-300 shadow-[0_0_12px_rgba(251,191,36,0.45)]"
-                  : "bg-slate-500/70 hover:bg-slate-400/80"
-              }`}
-              aria-label={`Show artwork ${idx + 1} of ${n}`}
-              aria-current={idx === index}
-            />
-          ))}
-        </div>
-      ) : null}
-
-      <div className="absolute bottom-0 left-0 right-0 z-[2] p-6 sm:p-8">
+      <div className="absolute bottom-0 left-0 right-0 z-2 p-6 sm:p-8">
         <p className="text-xs uppercase tracking-[0.32em] text-slate-400">
           Featured work
         </p>

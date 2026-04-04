@@ -32,9 +32,7 @@ export default function HomeHero({ heroProducts = [] }) {
 
           <div className="mt-8 flex flex-col gap-2 sm:flex-row justify-around">
             <PrimaryButton href="/shop">Explore collection</PrimaryButton>
-            <SecondaryButton href="/about" className="px-2 py-3.5">
-              View studio notes
-            </SecondaryButton>
+            <SecondaryButton href="/about">About the artist</SecondaryButton>
           </div>
         </div>
 
@@ -47,7 +45,7 @@ export default function HomeHero({ heroProducts = [] }) {
             />
           ) : (
             <div className="rounded-4xl border-2 border-slate-600/40 bg-linear-to-br from-slate-900/55 to-slate-950/50 p-3 shadow-2xl shadow-slate-950/40 ring-2 ring-slate-500/25 backdrop-blur transition duration-500 hover:ring-amber-400/30 hover:shadow-slate-950/50">
-              <div className="flex min-h-[min(70vw,28rem)] flex-col items-center justify-center gap-6 rounded-3xl border-2 border-dashed border-slate-600/50 bg-slate-950/35 px-8 py-14 text-center sm:min-h-[28rem]">
+              <div className="flex min-h-[min(70vw,28rem)] flex-col items-center justify-center gap-6 rounded-3xl border-2 border-dashed border-slate-600/50 bg-slate-950/35 px-8 py-14 text-center sm:min-h-112">
                 <p className="max-w-sm text-sm leading-7 text-stone-300/90">
                   Connect Printful for rotating hero art, or open the shop.
                 </p>
@@ -55,26 +53,6 @@ export default function HomeHero({ heroProducts = [] }) {
               </div>
             </div>
           )}
-
-          <div className="mt-5 grid gap-4 sm:grid-cols-2">
-            <div className="rounded-3xl border-2 border-slate-700/35 bg-slate-900/50 p-4 backdrop-blur-sm sm:p-5">
-              <p className="text-xs uppercase tracking-[0.28em] text-amber-300/90">
-                Positioning
-              </p>
-              <p className="mt-2 text-sm leading-snug text-stone-200/90">
-                Gallery presentation, retail pace.
-              </p>
-            </div>
-            <div className="rounded-3xl border-2 border-slate-700/35 bg-slate-900/50 p-4 backdrop-blur-sm sm:p-5">
-              <p className="text-xs uppercase tracking-[0.28em] text-amber-300/90">
-                Artwork source
-              </p>
-              <p className="mt-2 text-sm leading-snug text-stone-200/90">
-                Up to three newest portrait pieces from Printful, on rotation.
-                Otherwise the newest listings.
-              </p>
-            </div>
-          </div>
         </div>
       </div>
     </section>
