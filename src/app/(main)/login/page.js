@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import PasswordField from "@/components/ui/PasswordField";
 import PrimaryButton from "@/components/ui/PrimaryButton";
+import { orgName } from "@/config";
 
 export default function LoginPage() {
   const { user, loading, accountLoading, isAdmin, signIn } = useAuth();
@@ -85,7 +86,7 @@ export default function LoginPage() {
           Sign in
         </p>
         <p className="mt-2 text-sm leading-relaxed text-stone-300/95">
-          Use the email and password for your Shamrock Art Studio account.
+          Use the email and password for your {orgName} account.
         </p>
 
         <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-4">

@@ -4,6 +4,23 @@
   --font-sans: var(--font-geist-sans);
   --font-serif: var(--font-display), ui-serif, Georgia, "Times New Roman", serif;
   --font-mono: var(--font-geist-mono);
+
+  /*
+   * Semantic site colors — alias Tailwind’s default palette so you get
+   * hover:/focus:/opacity modifiers (e.g. bg-site-primary, hover:text-site-primary/90).
+   */
+  --color-site-primary: var(--color-amber-400);
+  --color-site-secondary: var(--color-slate-400);
+  --color-site-tertiary: var(--color-sky-300);
+  --color-site-bg: var(--color-slate-950);
+  --color-site-fg: var(--color-stone-100);
+
+  /* Optional: same tokens for inline style / email fallbacks (mirrors site-*). */
+  --site-primary: var(--color-site-primary);
+  --site-secondary: var(--color-site-secondary);
+  --site-tertiary: var(--color-site-tertiary);
+  --site-bg: var(--color-site-bg);
+  --site-fg: var(--color-site-fg);
 }
 
 * {

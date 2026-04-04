@@ -2,6 +2,7 @@ import { Cormorant_Garamond, Geist, Geist_Mono } from "next/font/google";
 import CartProvider from "@/components/CartProvider";
 import ScrollToTopOnLoad from "@/components/ScrollToTopOnLoad";
 import { AuthProvider } from "@/context/AuthContext";
+import { orgName } from "@/config";
 import "./globals.css";
 
 /** Elegant serif for headings — softer, more feminine art-gallery feel */
@@ -26,7 +27,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Shamrock Art Studio",
+  title: orgName,
   description: "Next.js starter with Tailwind CSS and Firebase support.",
 };
 
@@ -37,7 +38,7 @@ export default function RootLayout({ children }) {
       className={`${cormorant.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
     >
       <body
-        className="flex min-h-dvh flex-col overflow-x-clip bg-slate-950 font-sans text-stone-100"
+        className="flex min-h-dvh flex-col overflow-x-clip bg-site-bg font-sans text-site-fg"
         suppressHydrationWarning
       >
         <AuthProvider>

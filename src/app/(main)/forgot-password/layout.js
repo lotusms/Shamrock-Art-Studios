@@ -1,5 +1,7 @@
+import { sitePageTitle } from "@/config";
+
 export const metadata = {
-  title: "Forgot password | Shamrock Art Studio",
+  title: sitePageTitle("Forgot password"),
   robots: { index: false, follow: false },
 };
 

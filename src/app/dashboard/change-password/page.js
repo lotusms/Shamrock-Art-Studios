@@ -1,6 +1,7 @@
 "use client";
 
 import ChangePasswordForm from "@/components/auth/ChangePasswordForm";
+import { orgName } from "@/config";
 
 export default function DashboardChangePasswordPage() {
   return (
@@ -13,7 +14,7 @@ export default function DashboardChangePasswordPage() {
       </h1>
       <p className="mt-4 text-sm leading-relaxed text-stone-400">
         Enter your current password, then choose a new one. This updates your
-        sign-in for Shamrock Art Studio only.
+        sign-in for {orgName} only.
       </p>
 
       <ChangePasswordForm backHref="/dashboard" backLabel="Back to Dashboard" />

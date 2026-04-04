@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { ARTWORK_MAT_INNER, ARTWORK_MAT_OUTER } from "@/components/ui/artworkMatClasses";
 import LinkButton from "@/components/ui/LinkButton";
+import { orgName } from "@/config";
 import { formatUsd } from "@/lib/money";
 
 const ROTATE_MS = 8000;
@@ -27,7 +28,7 @@ function heroImageAlt(product) {
   const size = String(product?.dimensions || "").trim() || "See listing for sizes";
   const artist = String(product?.artist || "Jas Perez").trim();
   const price = heroPriceLabel(product);
-  return `Wall art product: ${title}. Category wall art. ${medium}. Size ${size}. From ${price}. By ${artist}. Shamrock Art Studio.`;
+  return `Wall art product: ${title}. Category wall art. ${medium}. Size ${size}. From ${price}. By ${artist}. ${orgName}.`;
 }
 
 function heroSubtitle(product) {

@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import { orgName } from "../../config/config.js";
 
 const usdFmt = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -299,7 +300,7 @@ function buildCustomerReceiptHtml({
     <table role="presentation" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 8px 32px rgba(26,46,38,0.08),0 2px 8px rgba(0,0,0,0.04);border:1px solid #e0d9ce;">
       <tr>
         <td style="padding:28px 28px 20px;background:linear-gradient(165deg,#1a2e26 0%,#2d4a3e 55%,#1a2e26 100%);">
-          <p style="margin:0 0 4px;font-size:10px;letter-spacing:0.28em;text-transform:uppercase;color:#c4b896;font-family:system-ui,-apple-system,sans-serif;">Shamrock Art Studio</p>
+          <p style="margin:0 0 4px;font-size:10px;letter-spacing:0.28em;text-transform:uppercase;color:#c4b896;font-family:system-ui,-apple-system,sans-serif;">${orgName}</p>
           <h1 style="margin:0;font-size:24px;font-weight:400;color:#faf6f0;letter-spacing:-0.02em;line-height:1.25">${escapeHtml(header)}</h1>
         </td>
       </tr>
@@ -483,7 +484,7 @@ export async function sendOrderConfirmationEmails({ order, payment, fulfillment 
         from,
         replyTo: seller,
         bcc: bccShopOnReceipt,
-        subject: `Order confirmation #${orderId} — Shamrock Art Studio`,
+        subject: `Order confirmation #${orderId} — ${orgName}`,
         text: buyerBodies.text,
         html: buyerBodies.html,
       });
@@ -506,7 +507,7 @@ export async function sendOrderConfirmationEmails({ order, payment, fulfillment 
         to: buyer,
         ...(bccShopOnReceipt ? { bcc: bccShopOnReceipt } : {}),
         replyTo: seller,
-        subject: `Order confirmation #${orderId} — Shamrock Art Studio`,
+        subject: `Order confirmation #${orderId} — ${orgName}`,
         text: buyerBodies.text,
         html: buyerBodies.html,
       });
@@ -556,7 +557,7 @@ ${buyerBodies.html}`,
       from,
       to: seller,
       replyTo: seller,
-      subject: `New order #${orderId} — Shamrock Art Studio`,
+      subject: `New order #${orderId} — ${orgName}`,
       text: sellerBodies.text,
       html: sellerBodies.html,
     });
@@ -631,7 +632,7 @@ export async function sendOrderDetailsEmailBuyerWithCc({ order, payment, fulfill
         from,
         replyTo: replyToAddr,
         cc: ccAddr ? [ccAddr] : undefined,
-        subject: `Order #${orderId} — Shamrock Art Studio`,
+        subject: `Order #${orderId} — ${orgName}`,
         text: bodies.text,
         html: bodies.html,
       });
@@ -651,7 +652,7 @@ export async function sendOrderDetailsEmailBuyerWithCc({ order, payment, fulfill
       to: buyer,
       cc: ccAddr,
       replyTo: replyToAddr,
-      subject: `Order #${orderId} — Shamrock Art Studio`,
+      subject: `Order #${orderId} — ${orgName}`,
       text: bodies.text,
       html: bodies.html,
     });

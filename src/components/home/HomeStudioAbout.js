@@ -1,3 +1,5 @@
+import { orgName } from "@/config";
+
 export default function HomeStudioAbout({ notes }) {
   return (
     <section
@@ -12,7 +14,7 @@ export default function HomeStudioAbout({ notes }) {
           An Online Art Studio for Collectors, Gift Buyers, and Art Lovers Worldwide
         </h2>
         <p className="mt-5 max-w-xl text-sm leading-8 text-stone-200/90">
-          Shamrock Art Studio is an independent online art studio created to share and sell original work directly from the artist. From expressive abstract pieces to realistic paintings and detailed pencil work, the studio offers a growing portfolio for collectors, home decorators, and anyone looking to buy unique art online.
+          {orgName} is an independent online art studio created to share and sell original work directly from the artist. From expressive abstract pieces to realistic paintings and detailed pencil work, the studio offers a growing portfolio for collectors, home decorators, and anyone looking to buy unique art online.
         </p>
       </div>
 

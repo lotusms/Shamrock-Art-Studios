@@ -1,10 +1,10 @@
 import PageLayout from "@/components/PageLayout";
 import Card from "@/components/ui/Card";
+import { orgName, sitePageTitle } from "@/config";
 
 export const metadata = {
-  title: "About | Shamrock Art Studio",
-  description:
-    "Shamrock Art Studio is a digital-first gallery: immersive presentation, restrained copy, and clear paths for inquiry.",
+  title: sitePageTitle("About"),
+  description: `${orgName} is a digital-first gallery: immersive presentation, restrained copy, and clear paths for inquiry.`,
 };
 
 const principles = [
@@ -29,12 +29,12 @@ export default function AboutPage() {
   return (
     <PageLayout
       eyebrow="Studio"
-      title="About Shamrock Art Studio"
+      title={`About ${orgName}`}
       subtitle=""
       width="full"
     >
       <p className="leading-relaxed text-stone-200/95 sm:leading-8">
-        Shamrock Art Studio is an online art studio and gallery created to share original artwork, canvas prints, and a growing creative portfolio with collectors and art lovers everywhere. Founded as a home-based studio, Shamrock Art Studio is the creative space of a young emerging artist developing her voice across a wide range of subjects, mediums, and styles. From expressive abstract paintings to detailed realistic artwork, the studio reflects a passion for experimentation, growth, and meaningful visual storytelling.
+        {orgName} is an online art studio and gallery created to share original artwork, canvas prints, and a growing creative portfolio with collectors and art lovers everywhere. Founded as a home-based studio, {orgName} is the creative space of a young emerging artist developing her voice across a wide range of subjects, mediums, and styles. From expressive abstract paintings to detailed realistic artwork, the studio reflects a passion for experimentation, growth, and meaningful visual storytelling.
         <br />
         <br />
         This website serves as both an online gallery and an artist portfolio, making it easy to explore available work, discover new pieces, and support the artist’s journey. Every purchase helps fund future materials, new projects, and continued artistic development.
@@ -43,7 +43,7 @@ export default function AboutPage() {
       <div className="grid gap-5 md:grid-cols-2">
         <Card variant="inset" title="Online Art Studio">
           <p className="mt-5 leading-7 text-stone-200/85">
-          Shamrock Art Studio operates as an online-first gallery, offering original artwork, canvas prints, and special requests without the need for a physical storefront. This allows collectors to browse and buy art online while receiving work shipped directly to their home.
+          {orgName} operates as an online-first gallery, offering original artwork, canvas prints, and special requests without the need for a physical storefront. This allows collectors to browse and buy art online while receiving work shipped directly to their home.
           </p>
         </Card>
 
@@ -73,7 +73,7 @@ export default function AboutPage() {
       </div>
 
       <p className="border-l-2 border-amber-400/25 pl-6 text-sm leading-7 text-stone-300/90">
-        Shamrock Art Studio continues to grow as an online destination for original art, canvas prints, and emerging creative work, with new pieces added as the artist’s portfolio expands.
+        {orgName} continues to grow as an online destination for original art, canvas prints, and emerging creative work, with new pieces added as the artist’s portfolio expands.
       </p>
     </PageLayout>
   );

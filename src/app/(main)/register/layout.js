@@ -1,5 +1,7 @@
+import { sitePageTitle } from "@/config";
+
 export const metadata = {
-  title: "Create account | Shamrock Art Studio",
+  title: sitePageTitle("Create account"),
   robots: { index: true, follow: true },
 };
 

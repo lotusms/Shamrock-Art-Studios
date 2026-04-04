@@ -1,6 +1,7 @@
 import PrimaryButton from "@/components/ui/PrimaryButton";
 import SecondaryButton from "@/components/ui/SecondaryButton";
 import HomeHeroArtRotator from "@/components/home/HomeHeroArtRotator";
+import { orgName } from "@/config";
 
 export default function HomeHero({ heroProducts = [] }) {
   const hasSlides = Array.isArray(heroProducts) && heroProducts.length > 0;
@@ -14,15 +15,15 @@ export default function HomeHero({ heroProducts = [] }) {
               aria-hidden
               className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-400 shadow-[0_0_14px_5px] shadow-amber-400/50"
             />
-            Shamrock Art Studio
+            {orgName}
           </p>
           <h1 className="font-serif mt-6 max-w-5xl text-5xl font-medium leading-[1.08] tracking-[-0.02em] text-stone-100 sm:text-7xl lg:text-[5.5rem]">
             <span>Original Art and Canvas Prints</span>
             <span className="italic"> by </span>
-            <span className="text-gradient-hero">Shamrock Art Studio</span>
+            <span className="text-gradient-hero">{orgName}</span>
           </h1>
           <p className="mt-6 max-w-2xl text-base leading-8 text-stone-200/90 sm:text-lg">
-            Discover original artwork and canvas prints from Shamrock Art Studio, an online gallery featuring abstract and realistic pieces in watercolor, oil, and pencil. Browse the collection, explore the artist’s growing portfolio, and shop artwork shipped directly to your door.
+            Discover original artwork and canvas prints from {orgName}, an online gallery featuring abstract and realistic pieces in watercolor, oil, and pencil. Browse the collection, explore the artist’s growing portfolio, and shop artwork shipped directly to your door.
           </p>
 
           <div className="mt-8 flex flex-col gap-2 sm:flex-row justify-around">

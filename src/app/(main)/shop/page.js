@@ -1,8 +1,9 @@
 import PageLayout from "@/components/PageLayout";
 import ShopCatalogClient from "@/components/shop/ShopCatalogClient";
+import { orgName, sitePageTitle } from "@/config";
 
 export const metadata = {
-  title: "Shop | Shamrock Art Studio",
+  title: sitePageTitle("Shop"),
   description:
     "Original works available for acquisition—priced transparently, shipped with care.",
 };
@@ -14,7 +15,7 @@ export default function ShopPage() {
     <PageLayout
       eyebrow="Collection"
       title="Shop"
-      subtitle="Shop modern wall art and creative accessories by Shamrock Art Studio, including prints, posters, bags, keychains, and limited-edition studio pieces."
+      subtitle={`Shop modern wall art and creative accessories by ${orgName}, including prints, posters, bags, keychains, and limited-edition studio pieces.`}
       width="full"
     >
       <ShopCatalogClient />

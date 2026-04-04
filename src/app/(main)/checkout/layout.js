@@ -1,6 +1,8 @@
+import { orgName, sitePageTitle } from "@/config";
+
 export const metadata = {
-  title: "Checkout | Shamrock Art Studio",
-  description: "Shipping and payment details for your Shamrock Art Studio order.",
+  title: sitePageTitle("Checkout"),
+  description: `Shipping and payment details for your ${orgName} order.`,
 };
 
 export default function CheckoutLayout({ children }) {

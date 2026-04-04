@@ -1,8 +1,9 @@
 import DashboardAuthGate from "@/components/dashboard/DashboardAuthGate";
 import DashboardShell from "@/components/dashboard/DashboardShell";
+import { sitePageTitle } from "@/config";
 
 export const metadata = {
-  title: "Dashboard | Shamrock Art Studio",
+  title: sitePageTitle("Dashboard"),
   robots: { index: false, follow: false },
 };
 

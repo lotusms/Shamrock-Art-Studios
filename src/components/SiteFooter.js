@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { orgName } from "@/config";
 
 const footerLinks = [
   { href: "/privacy-policy", label: "Privacy Policy" },
@@ -16,10 +17,11 @@ export default function SiteFooter() {
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-10 px-6 sm:flex-row sm:items-end sm:justify-between sm:px-10 lg:px-12">
         <div>
           <p className="font-serif text-lg font-medium tracking-[-0.02em] text-stone-100">
-            Shamrock Art Studio
+            {orgName}
           </p>
           <p className="mt-2 max-w-sm text-sm leading-relaxed text-slate-500">
-            Original artwork, canvas prints, and portfolio pieces from the artist behind Shamrock Art Studio.
+            Original artwork, canvas prints, and portfolio pieces from the artist behind{" "}
+            {orgName}.
           </p>
         </div>
         <nav aria-label="Footer" className="flex flex-wrap gap-x-8 gap-y-3">
@@ -45,7 +47,7 @@ export default function SiteFooter() {
         </nav>
       </div>
       <p className="mx-auto mt-10 max-w-7xl px-6 text-center text-[0.65rem] uppercase tracking-[0.35em] text-slate-600 sm:px-10 lg:px-12">
-        © {new Date().getFullYear()} Shamrock Art Studio
+        © {new Date().getFullYear()} {orgName}
       </p>
     </footer>
   );

@@ -1,10 +1,10 @@
 import Link from "next/link";
 import PageLayout from "@/components/PageLayout";
+import { orgName, sitePageTitle } from "@/config";
 
 export const metadata = {
-  title: "Work | Shamrock Art Studio",
-  description:
-    "How Shamrock Art Studio presents work online: series, drops, and a living catalog built for collectors.",
+  title: sitePageTitle("Work"),
+  description: `How ${orgName} presents work online: series, drops, and a living catalog built for collectors.`,
 };
 
 const pillars = [

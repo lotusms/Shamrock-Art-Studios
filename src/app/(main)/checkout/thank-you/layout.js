@@ -1,6 +1,8 @@
+import { orgName, sitePageTitle } from "@/config";
+
 export const metadata = {
-  title: "Thank you | Shamrock Art Studio",
-  description: "Your order confirmation from Shamrock Art Studio.",
+  title: sitePageTitle("Thank you"),
+  description: `Your order confirmation from ${orgName}.`,
 };
 
 export default function ThankYouLayout({ children }) {

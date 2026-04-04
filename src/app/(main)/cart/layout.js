@@ -1,5 +1,7 @@
+import { sitePageTitle } from "@/config";
+
 export const metadata = {
-  title: "Cart | Shamrock Art Studio",
+  title: sitePageTitle("Cart"),
   description: "Review your selected works before checkout.",
 };
 

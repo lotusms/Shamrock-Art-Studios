@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useId, useState } from "react";
 import HeaderAuth from "@/components/HeaderAuth";
 import { useCart } from "@/context/CartContext";
-import { mainNav } from "@/config/nav";
+import { mainNav, orgName } from "@/config";
 import { formatUsd } from "@/lib/money";
 
 const GRAIN_BG = `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`;
@@ -70,14 +70,14 @@ function CartNavLink({ onNavigate }) {
           />
         </svg>
         {itemCount > 0 ? (
-          <span className="min-w-[1.25rem] animate-pulse rounded-full bg-amber-400/90 px-1.5 text-center text-[0.65rem] font-bold tabular-nums text-slate-950 shadow-[0_0_0_0.35rem_rgba(251,191,36,0.18)]">
+          <span className="min-w-5 animate-pulse rounded-full bg-amber-400/90 px-1.5 text-center text-[0.65rem] font-bold tabular-nums text-slate-950 shadow-[0_0_0_0.35rem_color-mix(in_oklch,var(--color-amber-400)_18%,transparent)]">
             {itemCount > 99 ? "99+" : itemCount}
           </span>
         ) : null}
       </Link>
 
-      <div className="pointer-events-none invisible absolute right-0 top-full z-[130] h-3 w-80 group-hover:pointer-events-auto group-hover:visible" />
-      <div className="pointer-events-none invisible absolute right-0 top-full z-[130] mt-2 w-80 translate-y-1 rounded-2xl border border-white/10 bg-slate-950/95 p-4 opacity-0 shadow-2xl shadow-slate-950/60 ring-1 ring-white/5 backdrop-blur-md transition-all duration-200 group-hover:pointer-events-auto group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
+      <div className="pointer-events-none invisible absolute right-0 top-full z-130 h-3 w-80 group-hover:pointer-events-auto group-hover:visible" />
+      <div className="pointer-events-none invisible absolute right-0 top-full z-130 mt-2 w-80 translate-y-1 rounded-2xl border border-white/10 bg-slate-950/95 p-4 opacity-0 shadow-2xl shadow-slate-950/60 ring-1 ring-white/5 backdrop-blur-md transition-all duration-200 group-hover:pointer-events-auto group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
         <p className="text-xs uppercase tracking-[0.25em] text-amber-400">
           Cart preview
         </p>
@@ -90,7 +90,7 @@ function CartNavLink({ onNavigate }) {
               {previewLines.map((line) => (
                 <li
                   key={line.lineKey}
-                  className="flex items-start justify-between gap-3 rounded-xl border border-white/5 bg-white/[0.02] px-3 py-2"
+                  className="flex items-start justify-between gap-3 rounded-xl border border-white/5 bg-white/2 px-3 py-2"
                 >
                   <div className="min-w-0">
                     <p className="truncate text-sm text-stone-200">{line.title}</p>
@@ -171,7 +171,7 @@ export default function SiteHeader() {
             className="min-w-0 font-serif text-base font-medium tracking-[-0.03em] text-stone-100 transition hover:text-amber-100 sm:text-xl"
             onClick={close}
           >
-            <span className="block truncate">Shamrock Art Studio</span>
+            <span className="block truncate">{orgName}</span>
           </Link>
 
           <nav
@@ -336,7 +336,7 @@ export default function SiteHeader() {
               <span className="text-amber-200/90">View bag →</span>
             </Link>
             <p className="text-center text-[0.65rem] uppercase tracking-[0.35em] text-slate-600">
-              Shamrock Art Studio
+              {orgName}
             </p>
           </div>
         </div>

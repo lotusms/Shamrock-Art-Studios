@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { pickRecentCatalogProducts } from "@/lib/catalogSort";
+import { orgName } from "@/config";
 import { formatUsd } from "@/lib/money";
 import CoverImageFrame from "@/components/ui/CoverImageFrame";
 import { linkButtonClasses } from "@/components/ui/LinkButton";
@@ -148,7 +149,8 @@ export default function HomeCollectionPreview({ initialProducts = [] }) {
           </h2>
         </div>
         <p className="text-sm leading-7 text-stone-200/85">
-          Browse a curated selection of original paintings, drawings, and canvas prints from Shamrock Art Studio. The collection includes abstract art, realistic paintings, and mixed-medium work in watercolor, oil, and pencil, with new pieces added regularly.
+          Browse a curated selection of original paintings, drawings, and canvas prints from{" "}
+          {orgName}. The collection includes abstract art, realistic paintings, and mixed-medium work in watercolor, oil, and pencil, with new pieces added regularly.
         </p>
       </div>
     </>

@@ -1,6 +1,7 @@
 "use client";
 
 import ChangePasswordForm from "@/components/auth/ChangePasswordForm";
+import { orgName } from "@/config";
 
 export default function ChangePasswordPage() {
   return (
@@ -13,7 +14,7 @@ export default function ChangePasswordPage() {
       </h1>
       <p className="mt-4 text-sm leading-relaxed text-stone-400">
         Enter your current password, then choose a new one. This updates your
-        sign-in for Shamrock Art Studio only.
+        sign-in for {orgName} only.
       </p>
 
       <ChangePasswordForm backHref="/account" backLabel="Back to My Account" />

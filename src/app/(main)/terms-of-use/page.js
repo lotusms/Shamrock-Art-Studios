@@ -1,10 +1,9 @@
 import PageLayout from "@/components/PageLayout";
-
-const companyName = "Shamrock Art Studio";
+import { orgName, sitePageTitle } from "@/config";
 
 export const metadata = {
-  title: "Terms of Use | Shamrock Art Studio",
-  description: `Terms of Use for ${companyName}.`,
+  title: sitePageTitle("Terms of Use"),
+  description: `Terms of Use for ${orgName}.`,
 };
 
 export default function TermsOfUsePage() {
@@ -18,7 +17,7 @@ export default function TermsOfUsePage() {
         <p>
           By continuing to browse and use this website you are agreeing to
           comply with and be bound by the terms and conditions described below,
-          which governs {companyName}&apos;s relationship with you in
+          which governs {orgName}&apos;s relationship with you in
           relation to this website.
         </p>
 
@@ -36,7 +35,7 @@ export default function TermsOfUsePage() {
             License to Use This Website
           </h2>
           <p className="mt-3">
-            Unless otherwise stated, {companyName} and/or its
+            Unless otherwise stated, {orgName} and/or its
             licensors own the intellectual property rights in the website and
             material on the website. Subject to the license below, all these
             intellectual property rights are reserved.
@@ -72,7 +71,7 @@ export default function TermsOfUsePage() {
             Limitations Of Liabilities
           </h2>
           <p className="mt-3">
-            {companyName} will not be liable to you in relation to
+            {orgName} will not be liable to you in relation to
             the contents of, or use of, or otherwise in connection with this
             website, to the maximum extent permitted by law.
           </p>

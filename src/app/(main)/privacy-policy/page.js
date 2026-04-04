@@ -1,10 +1,9 @@
 import PageLayout from "@/components/PageLayout";
-
-const companyName = "Shamrock Art Studio";
+import { orgName, sitePageTitle } from "@/config";
 
 export const metadata = {
-  title: "Privacy Policy | Shamrock Art Studio",
-  description: `Privacy Policy for ${companyName}.`,
+  title: sitePageTitle("Privacy Policy"),
+  description: `Privacy Policy for ${orgName}.`,
 };
 
 export default function PrivacyPolicyPage() {
@@ -16,7 +15,7 @@ export default function PrivacyPolicyPage() {
     >
       <div className="space-y-7">
         <p>
-          At {companyName}, we are committed to protecting your
+          At {orgName}, we are committed to protecting your
           privacy. This privacy policy explains how we collect, use, and
           safeguard your information when you visit our website or use our
           services. By using our site, you consent to the practices outlined in

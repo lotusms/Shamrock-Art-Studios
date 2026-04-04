@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import PageLayout from "@/components/PageLayout";
 import ProductPurchasePanel from "@/components/shop/ProductPurchasePanel";
 import { getCatalogProductBySlug } from "@/lib/printful/catalog";
+import { sitePageTitle } from "@/config";
 
 export const dynamic = "force-dynamic";
 
@@ -48,7 +49,7 @@ export async function generateMetadata({ params }) {
   const product = await getCatalogProductBySlug(slug);
   if (!product) return { title: "Work not found" };
   return {
-    title: `${product.title} | Shop | Shamrock Art Studio`,
+    title: sitePageTitle(`${product.title} | Shop`),
     description: product.description.slice(0, 160),
   };
 }
