@@ -8,7 +8,7 @@ export default function HomeHero({ heroProducts = [] }) {
   return (
     <section className="relative z-10 mx-auto flex min-h-screen w-full max-w-7xl items-center px-6 py-14 sm:px-10 lg:px-12">
       <div className="grid w-full gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12">
-        <div className="flex flex-col justify-start">
+        <div className="flex min-w-0 flex-col justify-start overflow-visible lg:pr-6">
           <p className="inline-flex w-fit items-center gap-2 rounded-full border-2 border-slate-600/50 bg-linear-to-r from-slate-700/35 via-amber-400/12 to-slate-700/35 px-4 py-2 text-xs uppercase tracking-[0.32em] text-stone-100 shadow-lg shadow-slate-950/40 ring-2 ring-slate-500/25 backdrop-blur-md">
             <span
               aria-hidden
@@ -16,10 +16,10 @@ export default function HomeHero({ heroProducts = [] }) {
             />
             Shamrock Art Studio
           </p>
-          <h1 className="font-serif mt-6 max-w-5xl text-5xl font-medium leading-[1.05] tracking-[-0.02em] text-stone-100 sm:text-7xl lg:text-[6.5rem]">
+          <h1 className="font-serif mt-6 max-w-5xl text-5xl font-medium leading-[1.08] tracking-[-0.02em] text-stone-100 sm:text-7xl lg:text-[6.5rem]">
             <span className="text-gradient-hero">Wall art</span>
             {" "}and canvas prints{" "}
-            <span className="text-gradient-hero-subtle italic">
+            <span className="italic">
               ready for any space.
             </span>
           </h1>
@@ -37,7 +37,6 @@ export default function HomeHero({ heroProducts = [] }) {
         </div>
 
         <div className="relative">
-          <div className="absolute -left-6 top-12 hidden h-24 w-24 rounded-full border-2 border-slate-600/35 bg-amber-500/8 blur-sm lg:block" />
           {hasSlides ? (
             <HomeHeroArtRotator
               key={heroProducts.map((p) => p.id).join("-")}

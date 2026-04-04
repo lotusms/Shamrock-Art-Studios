@@ -31,7 +31,7 @@ export default function HomeHeroArtRotator({ products }) {
 
   return (
     <div
-      className="relative overflow-hidden rounded-3xl border-2 border-slate-600/40 bg-slate-950 shadow-2xl shadow-slate-950/40 ring-2 ring-slate-500/25 transition duration-500 hover:ring-amber-400/35 hover:shadow-slate-950/50"
+      className="relative overflow-hidden rounded-3xl border-2 border-slate-600/40 bg-slate-950 shadow-2xl shadow-slate-950/40 transition duration-500 hover:ring-amber-400/35 hover:shadow-slate-950/50"
     >
       {/* Mat + inner aperture; fixed portrait; mockup PNG zoom fills aperture. */}
       <div className={ARTWORK_MAT_OUTER}>
