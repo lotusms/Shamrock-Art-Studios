@@ -1,16 +1,37 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ARTWORK_MAT_INNER, ARTWORK_MAT_OUTER } from "@/components/ui/artworkMatClasses";
+import LinkButton from "@/components/ui/LinkButton";
+import { formatUsd } from "@/lib/money";
 
 const ROTATE_MS = 8000;
 /** Crossfade between slides (opacity on overlapping layers). */
 const SLIDE_FADE_MS = 2500;
 
+/** Display price: range when available, else single price. */
+function heroPriceLabel(product) {
+  const min = Number(product?.minPriceUsd);
+  const max = Number(product?.maxPriceUsd);
+  if (Number.isFinite(min) && Number.isFinite(max) && min > 0 && max > min) {
+    return `${formatUsd(min)}–${formatUsd(max)}`;
+  }
+  return formatUsd(product?.priceUsd ?? 0);
+}
+
+/** Rich alt for hero mockups: title, category, medium, size, price, artist, brand. */
+function heroImageAlt(product) {
+  const title = String(product?.title || "Artwork").trim();
+  const medium = String(product?.medium || "Print").trim();
+  const size = String(product?.dimensions || "").trim() || "See listing for sizes";
+  const artist = String(product?.artist || "Jas Perez").trim();
+  const price = heroPriceLabel(product);
+  return `Wall art product: ${title}. Category wall art. ${medium}. Size ${size}. From ${price}. By ${artist}. Shamrock Art Studio.`;
+}
+
 function heroSubtitle(product) {
-  const tail = product.dimensions || product.year;
+  const tail = product.year;
   return tail ? `${product.artist} • ${tail}` : product.artist;
 }
 
@@ -52,7 +73,7 @@ export default function HomeHeroArtRotator({ products }) {
                   <div className="relative h-full w-full origin-center scale-[1.14]">
                     <Image
                       src={p.image}
-                      alt={`${p.title} by ${p.artist}`}
+                      alt={heroImageAlt(p)}
                       fill
                       priority={idx === 0}
                       sizes="(max-width: 1024px) 100vw, 45vw"
@@ -75,21 +96,12 @@ export default function HomeHeroArtRotator({ products }) {
         <p className="text-xs uppercase tracking-[0.32em] text-slate-400">
           Featured work
         </p>
-        <div className="mt-3 flex items-end justify-between gap-6">
-          <div className="min-w-0">
-            <h2 className="font-serif text-2xl font-medium tracking-[-0.02em] text-stone-100 sm:text-3xl">
-              {current.title}
-            </h2>
-            <p className="mt-2 text-sm text-stone-200/85">
-              {heroSubtitle(current)}
-            </p>
-          </div>
-          <Link
-            href={`/shop/${current.slug}`}
-            className="hidden shrink-0 text-xs font-semibold uppercase tracking-[0.2em] text-amber-300/90 underline-offset-4 transition hover:text-amber-200 sm:inline"
-          >
-            View
-          </Link>
+        <h2 className="font-serif mt-3 text-2xl font-medium tracking-[-0.02em] text-stone-100 sm:text-3xl"> {current.title} </h2>
+        
+        
+        <div className=" flex items-end justify-between gap-6">
+          <p className="mt-1 text-sm text-slate-400">{current.medium} • {current.dimensions || "—"}</p>
+          <LinkButton href={`/shop/${current.slug}`}>View</LinkButton>
         </div>
       </div>
     </div>

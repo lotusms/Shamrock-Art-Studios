@@ -12,14 +12,14 @@ const footerLinks = [
 
 export default function SiteFooter() {
   return (
-    <footer className="relative z-10 mt-auto w-full border-t border-white/[0.06] bg-slate-950/80 py-12 backdrop-blur-md supports-[backdrop-filter]:bg-slate-950/70">
+    <footer className="relative z-10 mt-auto w-full border-t border-white/10 bg-slate-950/80 py-12 backdrop-blur-md supports-backdrop-filter:bg-slate-950/70">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-10 px-6 sm:flex-row sm:items-end sm:justify-between sm:px-10 lg:px-12">
         <div>
           <p className="font-serif text-lg font-medium tracking-[-0.02em] text-stone-100">
             Shamrock Art Studio
           </p>
           <p className="mt-2 max-w-sm text-sm leading-relaxed text-slate-500">
-            Contemporary wall art and studio goods—online-first, collector-ready.
+            Original artwork, canvas prints, and portfolio pieces from the artist behind Shamrock Art Studio.
           </p>
         </div>
         <nav aria-label="Footer" className="flex flex-wrap gap-x-8 gap-y-3">

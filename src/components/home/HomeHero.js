@@ -16,23 +16,18 @@ export default function HomeHero({ heroProducts = [] }) {
             />
             Shamrock Art Studio
           </p>
-          <h1 className="font-serif mt-6 max-w-5xl text-5xl font-medium leading-[1.08] tracking-[-0.02em] text-stone-100 sm:text-7xl lg:text-[6.5rem]">
-            <span className="text-gradient-hero">Wall art</span>
-            {" "}and canvas prints{" "}
-            <span className="italic">
-              ready for any space.
-            </span>
+          <h1 className="font-serif mt-6 max-w-5xl text-5xl font-medium leading-[1.08] tracking-[-0.02em] text-stone-100 sm:text-7xl lg:text-[5.5rem]">
+            <span>Original Art and Canvas Prints</span>
+            <span className="italic"> by </span>
+            <span className="text-gradient-hero">Shamrock Art Studio</span>
           </h1>
           <p className="mt-6 max-w-2xl text-base leading-8 text-stone-200/90 sm:text-lg">
-            Shop wall art and canvas prints from Shamrock Art Studio, with sizes
-            and finishes for living rooms, bedrooms, and offices. Browse the
-            collection to compare pieces and order on demand with transparent
-            shipping.
+            Discover original artwork and canvas prints from Shamrock Art Studio, an online gallery featuring abstract and realistic pieces in watercolor, oil, and pencil. Browse the collection, explore the artist’s growing portfolio, and shop artwork shipped directly to your door.
           </p>
 
           <div className="mt-8 flex flex-col gap-2 sm:flex-row justify-around">
-            <PrimaryButton href="/shop">Explore collection</PrimaryButton>
-            <SecondaryButton href="/about">About the artist</SecondaryButton>
+            <PrimaryButton href="/shop">Shop the Collection</PrimaryButton>
+            <SecondaryButton href="/about">Meet the Artist</SecondaryButton>
           </div>
         </div>
 

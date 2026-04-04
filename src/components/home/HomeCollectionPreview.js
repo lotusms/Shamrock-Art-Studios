@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { pickRecentCatalogProducts } from "@/lib/catalogSort";
 import { formatUsd } from "@/lib/money";
 import CoverImageFrame from "@/components/ui/CoverImageFrame";
+import { linkButtonClasses } from "@/components/ui/LinkButton";
 
 const PREVIEW_LIMIT = 6;
 
@@ -62,21 +63,15 @@ function CollectionProductCard({ product }) {
         </div>
         <div className="absolute inset-0 bg-linear-to-t from-slate-950/88 via-slate-950/25 to-transparent opacity-90" />
         <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-6">
-          <p className="text-xs uppercase tracking-[0.3em] text-slate-300">
-            {product.medium}
-          </p>
-          <div className="mt-3 flex items-end justify-between gap-4">
-            <div>
-              <h3 className="font-serif text-xl font-medium tracking-[-0.02em] text-stone-100">
-                {product.title}
-              </h3>
-              <p className="mt-1 text-sm text-stone-200/85">{product.artist}</p>
-            </div>
-            {product.dimensions ? (
-              <p className="max-w-[42%] shrink-0 text-right text-xs leading-snug text-amber-300/80 sm:text-sm">
-                {product.dimensions}
-              </p>
-            ) : null}
+          <h3 className="font-serif text-xl font-medium tracking-[-0.02em] text-stone-100">
+            {product.title}
+          </h3>
+          <div className="flex items-end justify-between gap-4">
+            <p className="text-sm text-slate-400">{product.medium} • {product.dimensions || "—"}</p>
+            {/* Span only: outer <Link> wraps the card; nested <a> is invalid HTML. */}
+            <span className={linkButtonClasses} aria-hidden="true">
+              View
+            </span>
           </div>
         </div>
       </div>
@@ -143,22 +138,17 @@ export default function HomeCollectionPreview({ initialProducts = [] }) {
 
   const headerBlock = (
     <>
-      <div className="mb-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+      <div className="mb-10 flex flex-col gap-6">
         <div>
           <p className="text-xs uppercase tracking-[0.32em] text-slate-400">
             Collection preview
           </p>
-          <h2 className="font-serif mt-4 max-w-3xl text-3xl font-medium tracking-[-0.02em] text-stone-100 sm:text-5xl">
-            A modular gallery grid with{" "}
-            <span className="text-gradient-hero-subtle not-italic">
-              cinematic
-            </span>{" "}
-            cropping and editorial spacing.
+          <h2 className="font-serif mt-4 max-w-3xl text-3xl font-medium tracking-[-0.02em] text-stone-100 sm:text-5xl leading-[1.1]">
+            Shop Original Artwork and Canvas Prints from Our Online Gallery
           </h2>
         </div>
-        <p className="max-w-xl text-sm leading-7 text-stone-200/85">
-          The six most recently updated pieces from your Printful sync—the same
-          inventory as the shop.
+        <p className="text-sm leading-7 text-stone-200/85">
+          Browse a curated selection of original paintings, drawings, and canvas prints from Shamrock Art Studio. The collection includes abstract art, realistic paintings, and mixed-medium work in watercolor, oil, and pencil, with new pieces added regularly.
         </p>
       </div>
     </>

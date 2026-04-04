@@ -9,19 +9,19 @@ export const metadata = {
 
 const principles = [
   {
-    title: "Digital-native",
+    title: "Original Artwork and Prints",
     body:
-      "The website is the primary exhibition—not a brochure for a room elsewhere. Every layout decision assumes screens first.",
+      "Explore original paintings, drawings, and canvas prints created in watercolor, oil, and pencil across both abstract and realistic styles.",
   },
   {
-    title: "Restraint as luxury",
+    title: "Online Gallery Experience",
     body:
-      "Typography stays sharp, copy stays quiet, and artwork holds the frame. Silence reads expensive.",
+      "Browse the collection from anywhere through a clean, immersive online gallery designed to highlight the artwork and make discovery easy.",
   },
   {
-    title: "Frictionless inquiry",
+    title: "Shipping and Special Requests",
     body:
-      "Collectors shouldn’t hunt for a contact path. Acquisition, commissions, and previews sit one calm gesture away.",
+      "Artwork is shipped directly to buyers, and special requests may be available for collectors looking for something personal and one of a kind. Please contact us for more information.",
   },
 ];
 
@@ -29,41 +29,32 @@ export default function AboutPage() {
   return (
     <PageLayout
       eyebrow="Studio"
-      title="About"
-      subtitle="A gallery without a street address—built for collectors who live in inboxes, mood boards, and full-screen tabs."
+      title="About Shamrock Art Studio"
+      subtitle=""
       width="full"
     >
-      <p className="max-w-3xl text-lg leading-relaxed text-stone-200/95 sm:text-xl sm:leading-8">
-        Shamrock Art Studio exists at the intersection of{" "}
-        <span className="text-gradient-hero-subtle not-italic">
-          exhibition design
-        </span>{" "}
-        and product craft. We treat the browser like a light-controlled room:
-        contrast, pacing, and negative space are part of the work—not decoration
-        around it.
+      <p className="leading-relaxed text-stone-200/95 sm:leading-8">
+        Shamrock Art Studio is an online art studio and gallery created to share original artwork, canvas prints, and a growing creative portfolio with collectors and art lovers everywhere. Founded as a home-based studio, Shamrock Art Studio is the creative space of a young emerging artist developing her voice across a wide range of subjects, mediums, and styles. From expressive abstract paintings to detailed realistic artwork, the studio reflects a passion for experimentation, growth, and meaningful visual storytelling.
+        <br />
+        <br />
+        This website serves as both an online gallery and an artist portfolio, making it easy to explore available work, discover new pieces, and support the artist’s journey. Every purchase helps fund future materials, new projects, and continued artistic development.
       </p>
 
       <div className="grid gap-5 md:grid-cols-2">
-        <Card variant="inset" title="Operating model">
-          <p className="mt-4 font-serif text-2xl font-medium leading-snug tracking-[-0.02em] text-stone-100 sm:text-3xl">
-            Online-first drops, private previews, and commissions—without
-            pretending the internet is a substitute for craft.
-          </p>
-          <p className="mt-5 text-sm leading-7 text-stone-200/85">
-            The studio is designed for a split audience: curators who need
-            clarity, collectors who want atmosphere, and interiors teams who
-            need files, dimensions, and confidence—fast.
+        <Card variant="inset" title="Online Art Studio">
+          <p className="mt-5 leading-7 text-stone-200/85">
+          Shamrock Art Studio operates as an online-first gallery, offering original artwork, canvas prints, and special requests without the need for a physical storefront. This allows collectors to browse and buy art online while receiving work shipped directly to their home.
           </p>
         </Card>
+
         <Card variant="inset" className="flex flex-col justify-between" title="In one line">
           <div>
             <p className="mt-4 font-serif text-xl font-medium italic leading-relaxed text-stone-100/95 sm:text-2xl">
-              “Make the site feel like a private viewing—open to the world, but
-              never loud.”
+              “Original art, prints, and creative growth shared through a modern online gallery.”
             </p>
           </div>
-          <p className="mt-8 text-xs uppercase tracking-[0.28em] text-slate-500">
-            — studio brief, Shamrock
+          <p className="flex justify-end text-xs uppercase tracking-[0.28em] text-slate-500">
+            — Jas Perez, Artist
           </p>
         </Card>
       </div>
@@ -81,10 +72,8 @@ export default function AboutPage() {
         </div>
       </div>
 
-      <p className="max-w-2xl border-l-2 border-amber-400/25 pl-6 text-sm leading-7 text-stone-300/90">
-        This site ships as a cinematic shell—swap in your statement, press, and
-        biography as the work matures. The architecture is already tuned for a
-        premium launch: minimal noise, maximum signal.
+      <p className="border-l-2 border-amber-400/25 pl-6 text-sm leading-7 text-stone-300/90">
+        Shamrock Art Studio continues to grow as an online destination for original art, canvas prints, and emerging creative work, with new pieces added as the artist’s portfolio expands.
       </p>
     </PageLayout>
   );

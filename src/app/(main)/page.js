@@ -9,9 +9,18 @@ import {
 import { getCatalogProducts } from "@/lib/printful/catalog";
 
 const studioNotes = [
-  "Digital-first exhibitions with no physical storefront.",
-  "Private collector previews, commissions, and drops online.",
-  "A clean, cinematic presentation built to make the work feel premium.",
+  {
+    title: ["Online", "Gallery"],
+    content: "Browse original artwork and canvas prints from anywhere.",
+  },
+  {
+    title: ["Multiple", "Mediums"],
+    content: "Discover watercolor, oil, and pencil art across a wide range of styles.",
+  },
+  {
+    title: ["Direct", "Shipping"],
+    content: "Order artwork online and have it shipped directly to the buyer.",
+  },
 ];
 
 export default async function Home() {
@@ -27,6 +36,9 @@ export default async function Home() {
       <div className="mx-auto mb-10 h-0.5 max-w-5xl bg-slate-200/20" />
 
       <HomeCollectionPreview initialProducts={collectionPreviewProducts} />
+
+      <div className="mx-auto h-0.5 max-w-5xl bg-slate-200/20" />
+
       <HomeStudioAbout notes={studioNotes} />
     </main>
   );
